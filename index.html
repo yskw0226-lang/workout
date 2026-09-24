@@ -66,9 +66,11 @@ button.row:active,.row.tap:active{background:var(--s2)}
 .bar.over i{background:var(--warn)}
 .bar.thin{height:4px;margin-top:8px}
 .sub{font-size:13px;color:var(--t2);margin-top:8px}
-.pfc{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
-.pfc .v{font-size:22px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
-.pfc .v small{font-size:13px;color:var(--t2);font-weight:500}
+.pfc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
+.pfc .pc{min-width:0}
+.pfc .v{font-size:22px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.pfc .v small{font-size:13px;color:var(--t2);font-weight:500;margin-left:2px}
+.pfc .tg{font-size:13px;color:var(--t2);margin-top:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .kc{color:var(--t2);font-variant-numeric:tabular-nums;font-size:15px;white-space:nowrap}
 .plus{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none}
 .plus svg{width:16px;height:16px;stroke-width:2.5}
@@ -239,8 +241,10 @@ nav.tb button.on{color:var(--accent)}
 .setup{width:100%;max-width:380px;text-align:left;margin-top:24px}
 .share-btn{display:flex;align-items:center;gap:4px;color:var(--accent);font-size:15px;font-weight:500}
 .share-btn svg{width:17px;height:17px}
-.bal3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-.bal3 .v{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums}
+.bal3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.bal3>div{min-width:0}
+.bal3 .u{font-size:13px;color:var(--t2);margin-top:2px}
+.bal3 .v{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums}
 .cmp{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:13px;color:var(--t2)}
 .cmp .bar{flex:1;margin:0}
 .chips.wrap{flex-wrap:wrap;overflow:visible;padding-top:4px}
@@ -280,7 +284,7 @@ details.bd .sub{margin-top:4px}
 .info p{font-size:15px;color:var(--t2);line-height:1.6;margin:8px 4px 0}
 .info ul{margin:8px 4px 0 24px;font-size:13px;line-height:1.6}
 .info li{margin-bottom:8px}
-.goalline{font-size:15px;color:var(--t2);margin-top:8px}
+.goalline{font-size:15px;color:var(--t2);margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .goalline b{color:var(--t1);font-weight:600}
 .goalline b.accent{color:var(--accent);font-size:17px}.goalline b.warn{color:var(--warn);font-size:17px}
 .scale{margin-top:16px}
@@ -311,6 +315,11 @@ details.bd .sub{margin-top:4px}
 .added-h b{color:var(--t1);font-size:15px}
 .added-r{display:flex;align-items:center;gap:8px;min-height:32px}
 .added-r .t{font-size:15px}
+.budget>div,.legend3>div,.refs>*,.tiles>*,.grid3>*{min-width:0}
+.budget .v,.legend3 b,.ref .v,.maintbox .v,.pcard .w,.kc,.tile .v,.big,.hero{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.budget{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr)}
+.legend3{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr)}
+.refs{grid-template-columns:repeat(3,minmax(0,1fr))}
 .hidden{display:none!important}
 </style>
 </head>
@@ -755,16 +764,20 @@ function render() { ({ home: renderHome, plan: renderPlan, log: renderLog, cal: 
 const mealsToday = () => S.meals[today()] || (S.meals[today()] = []);
 const sumOf = arr => arr.reduce((a, m) => ({ kcal: a.kcal + m.kcal, p: a.p + m.p, f: a.f + m.f, c: a.c + m.c }), { kcal: 0, p: 0, f: 0, c: 0 });
 
+/* PFCセル：ラベル／値／目標／バー の4段固定。桁が増えても列の高さと位置がそろう */
+function pfcCells(v, T) {
+  return [['p', 'タンパク質'], ['f', '脂質'], ['c', '炭水化物']].map(([k, n]) => {
+    const x = v[k], tg = T ? T[k] : 0, w = tg ? Math.min(100, x / tg * 100) : 0, over = T && x > tg && k !== 'p';
+    return `<div class="pc"><div class="lbl">${n}</div><div class="v num">${Math.round(x).toLocaleString()}<small>g</small></div>${T ? `<div class="tg num">目標 ${Math.round(tg)}g</div><div class="bar thin ${over ? 'over' : ''}"><i style="width:${w}%"></i></div>` : ''}</div>`;
+  }).join('');
+}
 function renderHome() {
   const T = S.targets, meals = (S.meals[today()] || []).slice().sort((a, b) => a.t < b.t ? -1 : 1), sum = sumOf(meals);
-  const pfc = [['p', 'タンパク質'], ['f', '脂質'], ['c', '炭水化物']].map(([k, n]) => {
-    const v = r1(sum[k]), tg = T[k], w = tg ? Math.min(100, v / tg * 100) : 0, over = v > tg && k !== 'p';
-    return `<div><div class="lbl">${n}</div><div class="v">${fmtN(v)}<small> / ${tg}g</small></div><div class="bar thin ${over ? 'over' : ''}"><i style="width:${w}%"></i></div></div>`;
-  }).join('');
+  const pfc = pfcCells(sum, T);
   const slots = SLOTS.map(([k, n]) => {
     const ms = meals.filter(m => m.slot === k), kc = Math.round(sumOf(ms).kcal);
     return `<div class="sec"><b>${n}</b><span class="num">${kc ? kc.toLocaleString() + ' kcal' : ''}</span></div><div class="group">
-      ${ms.map(m => `<button class="row" data-act="editMeal" data-id="${m.id}"><span class="tm num">${m.t}</span><div class="grow"><div class="t">${esc(m.name)}</div><div class="s num">P ${fmtN(r1(m.p))} · F ${fmtN(r1(m.f))} · C ${fmtN(r1(m.c))}</div></div><span class="kc">${Math.round(m.kcal)} kcal</span></button>`).join('')}
+      ${ms.map(m => `<button class="row" data-act="editMeal" data-id="${m.id}"><span class="tm num">${m.t}</span><div class="grow"><div class="t">${esc(m.name)}</div><div class="s num">P ${fmtN(r1(m.p))} · F ${fmtN(r1(m.f))} · C ${fmtN(r1(m.c))}</div></div><span class="kc">${Math.round(m.kcal).toLocaleString()} kcal</span></button>`).join('')}
       <button class="row" data-act="food" data-slot="${k}"><span class="plus sm">${I.plus}</span><span class="grow accent" style="font-size:17px">追加</span></button></div>`;
   }).join('');
   const since = sinceLastMeal();
@@ -792,8 +805,8 @@ function balanceHero(sum, pfc) {
     <div class="card-top"><span class="lbl">今日のカロリー収支</span><button class="share-btn" data-act="share" data-v="balance">${I.share}シェア</button></div>
     <div class="hero" style="margin-top:4px">${signed(bal)}<small>kcal</small></div>
     <div class="goalline ${room >= 0 ? '' : 'over'}">${room >= 0
-      ? `目標 <b>${signed(goal)}</b> まで：あと <b class="accent">${room.toLocaleString()}</b> kcal 食べられる`
-      : `目標 <b>${signed(goal)}</b> を <b class="warn">${(-room).toLocaleString()}</b> kcal オーバー`}</div>
+      ? `あと <b class="accent">${room.toLocaleString()}</b> kcal 食べられる`
+      : `目標より <b class="warn">${(-room).toLocaleString()}</b> kcal オーバー`}</div>
     <div class="scale">
       <div class="track"><i class="${room >= 0 ? '' : 'over'}" style="width:${pc(intake)}%"></i>
         <span class="tick tk-goal" style="left:${pc(eatTo)}%"></span><span class="tick tk-zero" style="left:${pc(b.total)}%"></span></div>
@@ -820,9 +833,9 @@ function exerciseGroup() {
   const td = today(), logs = S.logs.filter(l => l.date === td), cs = S.cardio.filter(c => c.date === td);
   const byEx = {}; logs.forEach(l => (byEx[l.ex] = byEx[l.ex] || []).push(l));
   const rows = Object.entries(byEx).map(([ex, ls]) => `<div class="row"><div class="grow"><div class="t">${esc(ex)}</div><div class="s num">${ls.map(l => `${l.w}kg×${l.r}×${l.sets}`).join(' / ')}</div></div><span class="kc">${ls.reduce((a, l) => a + strengthKcal(l), 0)} kcal</span></div>`).join('')
-    + cs.map(c => `<div class="row"><div class="grow"><div class="t">${esc(c.name)}</div><div class="s num">有酸素 · ${LVL[c.lvl]} · ${c.min}分</div></div><span class="kc">${c.kcal} kcal</span></div>`).join('');
+    + cs.map(c => `<div class="row"><div class="grow"><div class="t">${esc(c.name)}</div><div class="s num">有酸素 · ${LVL[c.lvl]} · ${c.min}分</div></div><span class="kc">${c.kcal.toLocaleString()} kcal</span></div>`).join('');
   const b = burnOf(td);
-  return `<div class="sec"><span>今日の記録</span><span class="num">${b.strength + b.cardio} kcal</span></div><div class="group">${rows}
+  return `<div class="sec"><span>今日の記録</span><span class="num">${(b.strength + b.cardio).toLocaleString()} kcal</span></div><div class="group">${rows}
     <button class="row" data-act="goLog"><span class="plus sm">${I.plus}</span><span class="grow accent" style="font-size:17px">筋トレ・有酸素を記録</span>${I.chev}</button></div>`;
 }
 
@@ -833,7 +846,7 @@ function updCardio() {
   $('#cdc').innerHTML = CARDIO.map((c, i) => `<button class="${i === cdo.i ? 'on' : ''}" data-act="cdPick" data-i="${i}">${c[0]}</button>`).join('');
   const c = CARDIO[cdo.i], met = c[1][cdo.lvl];
   $('#cdesc').textContent = `${c[2][cdo.lvl]}（${met} METs）`;
-  $('#ckc').innerHTML = `${metKcal(met, num($('#cmin').value))}<small>kcal</small>`;
+  $('#ckc').innerHTML = `${metKcal(met, num($('#cmin').value)).toLocaleString()}<small>kcal</small>`;
 }
 
 function trainCards() {
@@ -841,9 +854,11 @@ function trainCards() {
   if (!S.plans.length) return `<div class="card empty"><div class="muted">MAX更新のプランを作ると、<br>今日やるメニューがここに出ます</div><button class="btn" data-act="goPlan">プランを作る</button></div>`;
   const items = S.plans.flatMap(P => P.sessions.filter(s => s.date === td).map(s => ({ P, s })));
   if (!items.length) {
-    const nx = S.plans.flatMap(P => P.sessions.filter(s => s.date > td && !s.done).map(s => ({ P, s }))).sort((a, b) => a.s.date < b.s.date ? -1 : 1)[0];
-    return `<div class="card"><div class="big" style="font-size:28px;margin-top:0">今日は休み</div>
-      ${nx ? `<div class="sub num">次回 ${fmtD(nx.s.date)} · ${esc(nx.P.ex)} ${nx.s.w}kg × ${nx.s.r}</div>` : ''}</div>`;
+    // プランの種目は今日は予定なし（他の部位のトレは自由）。プランごとの次回だけ小さく出す
+    const nexts = S.plans.filter(P => !isFinished(P)).map(P => ({ P, s: P.sessions.find(s => s.date > td && !s.done) })).filter(x => x.s).sort((a, b) => a.s.date < b.s.date ? -1 : 1);
+    if (!nexts.length) return '';
+    return `<div class="lbl" style="margin:0 4px 8px">プランの次回</div><div class="group">${nexts.map(({ P, s }) => `<button class="row" data-act="openPlanFromHome" data-id="${P.id}">
+      <span class="d">${fmtD(s.date)}</span><div class="grow"><div class="t">${esc(P.ex)}</div><div class="s num">${s.max ? `MAX ${s.w}kg` : `${s.w}kg × ${s.r}回 × ${s.sets}`} · ${kindLabel(s)}</div></div>${I.chev}</button>`).join('')}</div>`;
   }
   return items.map(({ P, s }) => {
     const left = diffDays(td, P.targetDate), cd = left > 0 ? `MAXまで ${left}日` : left === 0 ? 'MAX当日' : '';
@@ -911,7 +926,7 @@ function addKeep(item) {                        // シートを閉じずに追�
   renderAdded(); renderFood(); $('#panel').scrollTop = 0;
   toast(`${SLOTN[m.slot]}に追加 +${m.kcal} kcal`);
 }
-const foodRow = (it, act, i, quick) => `<button class="row" data-act="${act}" data-i="${i}"><div class="grow"><div class="t">${esc(it.name)}</div><div class="s num">${it.unit ? esc(it.unit) + ' · ' : ''}P ${fmtN(r1(it.p))} F ${fmtN(r1(it.f))} C ${fmtN(r1(it.c))}</div></div><span class="kc">${Math.round(it.kcal)} kcal</span>${quick ? `<span class="plus sm">${I.plus}</span>` : I.chev}</button>`;
+const foodRow = (it, act, i, quick) => `<button class="row" data-act="${act}" data-i="${i}"><div class="grow"><div class="t">${esc(it.name)}</div><div class="s num">${it.unit ? esc(it.unit) + ' · ' : ''}P ${fmtN(r1(it.p))} F ${fmtN(r1(it.f))} C ${fmtN(r1(it.c))}</div></div><span class="kc">${Math.round(it.kcal).toLocaleString()} kcal</span>${quick ? `<span class="plus sm">${I.plus}</span>` : I.chev}</button>`;
 function renderFood() {
   const el = $('#fbody');
   if (fs.item) { renderFoodDetail(); return; }
@@ -952,8 +967,8 @@ function foodScaled() {
 }
 function updFood() {
   const s = foodScaled();
-  $('#fk').innerHTML = `${Math.round(s.kcal)}<small>kcal</small>`;
-  $('#fpfc').innerHTML = [['p', 'P'], ['f', 'F'], ['c', 'C']].map(([k, l]) => `<div><div class="lbl">${l}</div><div class="v">${fmtN(r1(s[k]))}<small>g</small></div></div>`).join('');
+  $('#fk').innerHTML = `${Math.round(s.kcal).toLocaleString()}<small>kcal</small>`;
+  $('#fpfc').innerHTML = pfcCells(s);
   const b = document.querySelector('[data-act="fAdd"]'); if (b) b.textContent = `${SLOTN[fs.slot]} ${fs.t} に追加`;
 }
 
@@ -980,7 +995,7 @@ const calcK = () => ($('#ckin') && num($('#ckin').value)) || (num($('#cp').value
 function editMealSheet(id) {
   const m = mealsToday().find(x => x.id === id); if (!m) return;
   openSheet(`<div class="sh-h"><button data-act="close">閉じる</button><h3>食べたもの</h3><span style="min-width:64px"></span></div>
-    <div class="card"><div class="t" style="font-weight:600;white-space:normal">${esc(m.name)}</div><div class="hero m" style="margin-top:8px">${Math.round(m.kcal)}<small>kcal</small></div>
+    <div class="card"><div class="t" style="font-weight:600;white-space:normal">${esc(m.name)}</div><div class="hero m" style="margin-top:8px">${Math.round(m.kcal).toLocaleString()}<small>kcal</small></div>
     <div class="sub num">P ${fmtN(r1(m.p))} · F ${fmtN(r1(m.f))} · C ${fmtN(r1(m.c))}</div></div>
     <div class="slbl">いつ食べた？</div>${seg('mslot', SLOTS, m.slot)}
     <div class="group" style="margin-top:12px">${timeRow('mtime', m.t)}</div>
@@ -1282,9 +1297,9 @@ function renderLog() {
       </div>
       <div class="sec"><b>直近7日</b></div>
       <div class="card"><div class="bal3" style="margin-top:0">
-        <div><div class="lbl">回数</div><div class="v">${wk.length}</div></div>
-        <div><div class="lbl">合計時間</div><div class="v">${wk.reduce((a, c) => a + c.min, 0)}<small class="muted" style="font-size:13px"> 分</small></div></div>
-        <div><div class="lbl">消費</div><div class="v">${wk.reduce((a, c) => a + c.kcal, 0).toLocaleString()}<small class="muted" style="font-size:13px"> kcal</small></div></div>
+        <div><div class="lbl">回数</div><div class="v">${wk.length}</div><div class="u">回</div></div>
+        <div><div class="lbl">合計時間</div><div class="v">${wk.reduce((a, c) => a + c.min, 0).toLocaleString()}</div><div class="u">分</div></div>
+        <div><div class="lbl">消費</div><div class="v">${wk.reduce((a, c) => a + c.kcal, 0).toLocaleString()}</div><div class="u">kcal</div></div>
       </div></div>
       <div class="sec"><b>履歴</b></div><div id="hist"></div>`;
     $('#cmin').addEventListener('input', updCardio); updCardio(); renderHist(); return;
@@ -1340,7 +1355,7 @@ function renderHist() {
   const pbIcon = I.share.replace('class="i"', 'class="i" style="width:12px;height:12px;vertical-align:-1px"');
   el.innerHTML = Object.entries(byDate).map(([d, ls]) => `<div class="lbl" style="margin:16px 4px 8px">${fmtD(d)}</div><div class="group">
     ${ls.map(l => l.k === 'c'
-      ? `<div class="row"><div class="grow"><div class="t">${esc(l.name)}</div><div class="s num">有酸素 · ${LVL[l.lvl]} · ${l.min}分 · ${l.kcal}kcal</div></div><button class="x" data-act="delCardio" data-id="${l.id}" aria-label="削除">${I.x}</button></div>`
+      ? `<div class="row"><div class="grow"><div class="t">${esc(l.name)}</div><div class="s num">有酸素 · ${LVL[l.lvl]} · ${l.min}分 · ${l.kcal.toLocaleString()}kcal</div></div><button class="x" data-act="delCardio" data-id="${l.id}" aria-label="削除">${I.x}</button></div>`
       : `<div class="row"><div class="grow"><div class="t">${histAll ? esc(l.ex) : `<span class="num">${l.w}kg × ${l.r} × ${l.sets}</span>`}</div>
       <div class="s num">${histAll ? `${l.w}kg × ${l.r} × ${l.sets} · ` : ''}1RM ${l.e1}kg</div></div>
       ${pb.has(l.id) ? `<button class="pill a" data-act="sharePB" data-id="${l.id}">PB ${pbIcon}</button>` : ''}<button class="x" data-act="delLog" data-id="${l.id}" aria-label="削除">${I.x}</button></div>`).join('')}
@@ -1473,7 +1488,7 @@ function settingsSheet() {
     <div class="group">${r('sk', 'カロリー', T.kcal, 'kcal')}${r('sp', 'タンパク質', T.p, 'g')}${r('sf', '脂質', T.f, 'g')}${r('sc', '炭水化物', T.c, 'g')}</div>
     <div class="sub" style="margin:8px 4px 0">筋トレ・有酸素で消費した分は、その日の「あと食べられる」に自動で足されます。</div>
     <button class="link" style="margin-left:4px" data-act="calcInfo">計算式と出典を見る ›</button>
-    ${S.presets.length ? `<div class="slbl">マイメニュー</div><div class="group">${S.presets.map((p, i) => `<div class="row"><span class="grow t">${esc(p.name)}</span><span class="kc">${Math.round(p.kcal)}</span><button class="x" data-act="delPreset" data-i="${i}">${I.x}</button></div>`).join('')}</div>` : ''}
+    ${S.presets.length ? `<div class="slbl">マイメニュー</div><div class="group">${S.presets.map((p, i) => `<div class="row"><span class="grow t">${esc(p.name)}</span><span class="kc">${Math.round(p.kcal).toLocaleString()}</span><button class="x" data-act="delPreset" data-i="${i}">${I.x}</button></div>`).join('')}</div>` : ''}
     <div class="slbl">食事リマインダー</div>
     <div class="group">
       <label class="row"><span class="grow">前の食事から空いたら通知</span><span class="switch"><input type="checkbox" id="rmOn" ${S.remind.on ? 'checked' : ''}><span></span></span></label>
@@ -1595,6 +1610,27 @@ function chrome(x, W) {
 const Y_STATS = H => H - 136;          // 下段の数値のベースライン（8の倍数）
 const PART_EN = { '胸': 'CHEST', '背中': 'BACK', '肩': 'SHOULDERS', '腕': 'ARMS', '脚': 'LEGS', '腹': 'ABS', '有酸素': 'CARDIO', 'その他': 'OTHER' };
 
+/* 行数に応じた組み方（2行組 大 → 2行組 小 → 1行組） */
+const trainLayout = n => n <= 3 ? { two: true, nm: IMG.body, dt: IMG.title, h: 144, nb: 44, db: 112 }
+  : n <= 5 ? { two: true, nm: 28, dt: IMG.sub, h: 112, nb: 40, db: 88 }
+  : { two: false, nm: IMG.body, dt: IMG.body, h: 72, nb: 48, db: 48 };
+/* 見出し（部位）：1行で入れば96px、入らなければ72pxで「·」区切りのまま折り返す */
+function titleSpec(x, rows, maxW) {
+  const words = [...new Set(rows.map(r => r.part))].map(p => PART_EN[p] || p);
+  if (!words.length) return { z: IMG.display, lines: ['REST DAY'] };
+  const one = words.join(' · ');
+  x.font = `800 ${IMG.display}px ${DISP}`; if (x.measureText(one).width <= maxW) return { z: IMG.display, lines: [one] };
+  const z = 72; x.font = `800 ${z}px ${DISP}`;
+  const lines = []; let curL = '';
+  words.forEach(w => { const t = curL ? curL + ' · ' + w : w; if (curL && x.measureText(t).width > maxW) { lines.push(curL + ' ·'); curL = w; } else curL = t; });
+  lines.push(curL); return { z, lines };
+}
+const titleH = t => t.z * .74 + (t.lines.length - 1) * Math.round(t.z * 1.05);
+function trainNeedH(W) {                               // 全行を入れるのに必要な高さ
+  const { rows } = trainRows();
+  const t = titleSpec(document.createElement('canvas').getContext('2d'), rows, W - M * 2);
+  return 552 + rows.length * trainLayout(rows.length).h + titleH(t);
+}
 /* 今日のメニュー：何を・どれだけ やったかを主役に */
 function trainRows() {
   const td = today(), logs = S.logs.filter(l => l.date === td), cs = S.cardio.filter(v => v.date === td);
@@ -1617,11 +1653,8 @@ function sceneTrain(x, W, H) {
   stats(x, W, [{ l: 'EXERCISES', v: String(rows.length) }, { l: planned ? 'STATUS' : 'SETS', v: planned ? 'PLAN' : String(sets) }, { l: 'BURN', v: planned ? '—' : fmtK(b.strength + b.cardio), u: planned ? '' : 'KCAL' }], yB);
   const ruleY = yB - 104; rule(x, W, ruleY);
   // 行数に応じて段階を切り替え（2行組 大 → 2行組 小 → 1行組）
-  const maxRows = H > 1500 ? 12 : 8, shown = rows.slice(0, rows.length > maxRows ? maxRows - 1 : maxRows), more = rows.length - shown.length;
-  const n = shown.length + (more ? 1 : 0);
-  const L = n <= 3 ? { two: true, nm: IMG.body, dt: IMG.title, h: 144, nb: 44, db: 112 }
-    : n <= 5 ? { two: true, nm: 28, dt: IMG.sub, h: 112, nb: 40, db: 88 }
-    : { two: false, nm: IMG.body, dt: IMG.body, h: 72, nb: 48, db: 48 };
+  const shown = rows, more = 0, n = rows.length;   // 省略しない（必要なら画像を縦に伸ばす）
+  const L = trainLayout(n);
   const listH = n * L.h, top = ruleY - 24 - listH;
   shown.forEach((r, i) => {
     const y0 = top + i * L.h;
@@ -1638,11 +1671,10 @@ function sceneTrain(x, W, H) {
   });
   if (more) T(x, `ほか ${more} 種目`, M, top + shown.length * L.h + L.nb, IMG.cap + 2, { w: 600, c: C.dim });
   // 見出し：今日の部位
-  const parts = [...new Set(rows.map(r => r.part))];
-  const title = parts.length ? parts.map(p => PART_EN[p] || p).join(' · ') : 'REST DAY';
-  const tz = fitSize(x, title, IMG.display, CW, 800, 48);
-  const tY = top - 40; T(x, title, M - 4, tY, tz, { w: 800, ls: -tz * .02 });
-  const lY = tY - tz * .74 - 40; label(x, planned ? "TODAY'S PLAN" : "TODAY'S SESSION", lY);
+  const ts = titleSpec(x, rows, CW), lh = Math.round(ts.z * 1.05);
+  const tY = top - 40;
+  ts.lines.forEach((ln, i) => T(x, ln, M - 4, tY - (ts.lines.length - 1 - i) * lh, ts.z, { w: 800, ls: -ts.z * .02 }));
+  const lY = tY - titleH(ts) - 40; label(x, planned ? "TODAY'S PLAN" : "TODAY'S SESSION", lY);
   return lY - 32;
 }
 function sceneBalance(x, W, H) {
@@ -1674,7 +1706,8 @@ function scenePR(x, W, H, pr) {
 }
 
 function renderShot() {
-  const W = 1080, H = sh.ratio === 'story' ? 1920 : 1350;
+  const W = 1080, H0 = sh.ratio === 'story' ? 1920 : 1350;
+  const H = sh.kind === 'train' ? Math.max(H0, Math.ceil((trainNeedH(W) + (sh.style === 'black' ? 64 : 0)) / 8) * 8) : H0;
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const x = c.getContext('2d');
   paintBg(x, W, H);
@@ -1892,6 +1925,7 @@ document.addEventListener('click', e => {
     /* 有酸素 */
     case 'goLog': go('log'); break;
     case 'planInfo': planInfo(); break;
+    case 'openPlanFromHome': pv = d.id; go('plan'); break;
     case 'calcInfo': calcInfo(); break;
     case 'cdPick': cdo.i = +d.i; updCardio(); break;
     case 'saveCardio': {
