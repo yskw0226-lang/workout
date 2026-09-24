@@ -13,6 +13,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
+  /* Type scale (pt): 11 caption · 13 footnote · 15 subhead · 17 body · 22 title2 · 28 title1 · 34 large title · 48 display
+     Spacing: 8pt grid → 4 · 8 · 12 · 16 · 24 · 32 */
   --bg:#000;--s1:#1c1c1e;--s2:#2c2c2e;--s3:#3a3a3c;--sep:rgba(84,84,88,.5);
   --t1:#fff;--t2:rgba(235,235,245,.6);--t3:rgba(235,235,245,.3);
   --accent:#0A84FF;--warn:#FF9F0A;
@@ -32,20 +34,20 @@ main{max-width:560px;margin:0 auto;padding:0 16px}
 .tab{display:none}.tab.on{display:block;animation:fade .2s ease}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 
-.lt{display:flex;justify-content:space-between;align-items:flex-end;padding:calc(18px + env(safe-area-inset-top)) 0 14px}
+.lt{display:flex;justify-content:space-between;align-items:flex-end;padding:calc(16px + env(safe-area-inset-top)) 0 16px}
 .lt .date{font-size:13px;color:var(--t2);font-weight:600;letter-spacing:.02em}
 .lt h1{font-size:34px;font-weight:700;letter-spacing:-.025em;line-height:1.15}
-.back{color:var(--accent);font-size:17px;display:flex;align-items:center;gap:2px;margin-bottom:4px}
+.back{color:var(--accent);font-size:17px;display:flex;align-items:center;gap:4px;margin-bottom:4px}
 .back svg{width:20px;height:20px;stroke-width:2.5}
 .icon-btn{width:36px;height:36px;border-radius:50%;background:var(--s1);display:grid;place-items:center;color:var(--t2)}
 svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
-.card{background:var(--s1);border-radius:16px;padding:18px}
+.card{background:var(--s1);border-radius:16px;padding:16px}
 .card+.card{margin-top:12px}
-.sec{font-size:13px;color:var(--t2);margin:26px 4px 8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sec{font-size:13px;color:var(--t2);margin:24px 4px 8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .sec b{color:var(--t1);font-weight:600;font-size:15px}
-.group{background:var(--s1);border-radius:14px;overflow:hidden}
-.row{display:flex;align-items:center;gap:12px;width:100%;min-height:50px;padding:10px 16px;text-align:left;position:relative}
+.group{background:var(--s1);border-radius:16px;overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:12px 16px;text-align:left;position:relative}
 .row+.row::before{content:"";position:absolute;top:0;left:16px;right:0;height:1px;transform:scaleY(.5);background:var(--sep)}
 button.row:active,.row.tap:active{background:var(--s2)}
 .grow{flex:1;min-width:0}
@@ -56,16 +58,16 @@ button.row:active,.row.tap:active{background:var(--s2)}
 .accent{color:var(--accent)}.warn{color:var(--warn)}.muted{color:var(--t2)}
 .num{font-variant-numeric:tabular-nums}
 .lbl{font-size:13px;color:var(--t2);font-weight:500}
-.hero{font-size:56px;font-weight:700;letter-spacing:-.035em;line-height:1.05;font-variant-numeric:tabular-nums}
-.hero small{font-size:17px;font-weight:500;color:var(--t2);letter-spacing:0;margin-left:6px}
-.hero.m{font-size:40px}
+.hero{font-size:48px;font-weight:700;letter-spacing:-.035em;line-height:1.05;font-variant-numeric:tabular-nums}
+.hero small{font-size:17px;font-weight:500;color:var(--t2);letter-spacing:0;margin-left:8px}
+.hero.m{font-size:34px}
 .bar{height:6px;border-radius:3px;background:var(--s2);overflow:hidden;margin-top:12px}
 .bar i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
 .bar.over i{background:var(--warn)}
 .bar.thin{height:4px;margin-top:8px}
 .sub{font-size:13px;color:var(--t2);margin-top:8px}
-.pfc{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
-.pfc .v{font-size:22px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.pfc{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.pfc .v{font-size:22px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
 .pfc .v small{font-size:13px;color:var(--t2);font-weight:500}
 .kc{color:var(--t2);font-variant-numeric:tabular-nums;font-size:15px;white-space:nowrap}
 .plus{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none}
@@ -74,48 +76,48 @@ button.row:active,.row.tap:active{background:var(--s2)}
 .x{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--t3);flex:none}
 .x svg{width:16px;height:16px}
 
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;border-radius:14px;background:var(--accent);color:#fff;font-weight:600;font-size:17px;margin-top:16px;transition:transform .1s,opacity .1s}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;border-radius:14px;background:var(--accent);color:#fff;font-weight:600;font-size:17px;margin-top:16px;transition:transform .1s,opacity .1s}
 .btn:active{transform:scale(.98);opacity:.85}
 .btn.ghost{background:var(--s1);color:var(--accent)}
 .btn.plain{background:none;color:var(--accent);height:44px;margin-top:8px}
 .btn.danger{background:var(--s1);color:var(--warn)}
-.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
-.big{font-size:34px;font-weight:700;letter-spacing:-.03em;margin-top:6px;font-variant-numeric:tabular-nums}
-.big small{font-size:15px;font-weight:500;color:var(--t2);margin:0 4px 0 2px;letter-spacing:0}
-.big .x2{color:var(--t3);font-weight:400;margin:0 2px}
+.big{font-size:28px;font-weight:700;letter-spacing:-.03em;margin-top:8px;font-variant-numeric:tabular-nums}
+.big small{font-size:15px;font-weight:500;color:var(--t2);margin:0 4px 0 4px;letter-spacing:0}
+.big .x2{color:var(--t3);font-weight:400;margin:0 4px}
 .card-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.pill{font-size:12px;font-weight:600;color:var(--t2);background:var(--s2);padding:4px 10px;border-radius:99px;white-space:nowrap}
+.pill{font-size:13px;font-weight:600;color:var(--t2);background:var(--s2);padding:4px 12px;border-radius:99px;white-space:nowrap}
 .pill.a{color:var(--accent);background:rgba(10,132,255,.15)}
 .pill.w{color:var(--warn);background:rgba(255,159,10,.15)}
-.done-line{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:600;margin-top:8px}
+.done-line{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:600;margin-top:8px}
 .ck{width:30px;height:30px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#fff;flex:none}
 .ck svg{width:16px;height:16px;stroke-width:3}
-.empty{text-align:center;padding:26px 12px}
+.empty{text-align:center;padding:24px 12px}
 .empty .muted{font-size:15px}
 
-.srow{display:flex;align-items:center;gap:12px;padding:10px 0}
+.srow{display:flex;align-items:center;gap:12px;padding:12px 0}
 .srow+.srow{border-top:.5px solid var(--sep)}
 .srow>span:first-child{flex:1;font-size:17px;min-width:0}
-.stepper{display:flex;align-items:center;gap:6px}
-.stepper button{width:38px;height:38px;border-radius:50%;background:var(--s2);font-size:22px;line-height:1;color:var(--t1);display:grid;place-items:center}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:40px;height:40px;border-radius:50%;background:var(--s2);font-size:22px;line-height:1;color:var(--t1);display:grid;place-items:center}
 .stepper button:active{background:var(--s3)}
-.stepper input{width:76px;text-align:center;background:transparent;font-size:22px;font-weight:600;padding:6px 0;font-variant-numeric:tabular-nums}
+.stepper input{width:80px;text-align:center;background:transparent;font-size:22px;font-weight:600;padding:8px 0;font-variant-numeric:tabular-nums}
 .unit{width:30px;color:var(--t2);font-size:15px}
 
-.seg{display:flex;background:rgba(118,118,128,.24);border-radius:9px;padding:2px;gap:2px}
-.seg button{flex:1;height:32px;border-radius:7px;font-size:14px;font-weight:500;color:var(--t1);transition:background .15s}
+.seg{display:flex;background:rgba(118,118,128,.24);border-radius:9px;padding:4px;gap:4px}
+.seg button{flex:1;height:32px;border-radius:7px;font-size:15px;font-weight:500;color:var(--t1);transition:background .15s}
 .seg button.on{background:#636366;font-weight:600}
 .field{margin-top:16px}
 .field>.lbl{margin-bottom:8px}
-.feas{font-size:13px;margin-top:10px}
+.feas{font-size:13px;margin-top:12px}
 
-.e1{text-align:center;padding:18px 0 4px}
+.e1{text-align:center;padding:16px 0 4px}
 .rmt{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
 .rmt div{text-align:center}
 .rmt small{display:block;font-size:11px;color:var(--t2)}
 .rmt b{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
-details summary{list-style:none;cursor:pointer;font-size:15px;color:var(--accent);text-align:center;margin-top:14px}
+details summary{list-style:none;cursor:pointer;font-size:15px;color:var(--accent);text-align:center;margin-top:16px}
 details summary::-webkit-details-marker{display:none}
 
 .d{width:62px;font-size:13px;color:var(--t2);flex:none;font-variant-numeric:tabular-nums}
@@ -125,23 +127,23 @@ details summary::-webkit-details-marker{display:none}
 .circ.on{background:var(--accent);border-color:var(--accent)}
 .circ.on svg{opacity:1}
 .row.fin .t{color:var(--t2)}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:6px;vertical-align:2px}
-.note{font-size:15px;color:var(--t2);margin-top:14px;padding-top:14px;border-top:.5px solid var(--sep)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:8px;vertical-align:2px}
+.note{font-size:15px;color:var(--t2);margin-top:16px;padding-top:16px;border-top:.5px solid var(--sep)}
 
 /* plan list */
-.pcard{display:block;width:100%;text-align:left;background:var(--s1);border-radius:16px;padding:16px 18px}
-.pcard+.pcard{margin-top:10px}
+.pcard{display:block;width:100%;text-align:left;background:var(--s1);border-radius:16px;padding:16px}
+.pcard+.pcard{margin-top:12px}
 .pcard:active{background:var(--s2)}
 .pcard .h{display:flex;align-items:center;gap:8px}
 .pcard .h .t{flex:1;font-weight:600}
-.pcard .w{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
-.pcard .w small{font-size:14px;color:var(--t2);font-weight:500;margin-left:4px}
+.pcard .w{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:8px;font-variant-numeric:tabular-nums}
+.pcard .w small{font-size:15px;color:var(--t2);font-weight:500;margin-left:4px}
 
 /* calendar */
 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.tile{background:var(--s1);border-radius:14px;padding:10px 12px;text-align:left;min-width:0}
+.tile{background:var(--s1);border-radius:14px;padding:12px 12px;text-align:left;min-width:0}
 .tile .n{font-size:13px;color:var(--t2)}
-.tile .v{font-size:17px;white-space:nowrap;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.tile .v{font-size:17px;white-space:nowrap;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
 .tile.on{box-shadow:inset 0 0 0 2px var(--accent)}
 .cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .cal-h b{font-size:17px;font-weight:600}
@@ -156,77 +158,77 @@ details summary::-webkit-details-marker{display:none}
 .cd.sel:not(.has) span{background:var(--s3)}
 .cd.sel.has span{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
 .cd.plan::after{content:"";position:absolute;bottom:0;left:50%;margin-left:-2px;width:4px;height:4px;border-radius:50%;background:var(--t2)}
-.legend{display:flex;gap:16px;font-size:12px;color:var(--t2);margin-top:12px;justify-content:center}
-.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:5px;vertical-align:0}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--t2);margin-top:12px;justify-content:center}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:4px;vertical-align:0}
 .legend i.p{background:var(--t2);width:5px;height:5px;vertical-align:1px}
 
 /* refs */
 .refs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.ref{background:var(--s2);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:inset 0 0 0 2px transparent;transition:box-shadow .15s}
+.ref{background:var(--s2);border-radius:14px;padding:12px 8px;text-align:center;box-shadow:inset 0 0 0 2px transparent;transition:box-shadow .15s}
 .ref.on{box-shadow:inset 0 0 0 2px var(--accent)}
 .ref .n{font-size:13px;color:var(--t2);font-weight:600}
 .ref .v{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums}
 .ref .u{font-size:11px;color:var(--t2)}
-.ref .d2{font-size:11px;color:var(--t2);margin-top:6px;font-variant-numeric:tabular-nums}
+.ref .d2{font-size:11px;color:var(--t2);margin-top:8px;font-variant-numeric:tabular-nums}
 
 #chart svg{width:100%;height:auto;display:block}
 
-nav.tb{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;background:rgba(18,18,18,.82);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep);padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
-nav.tb button{flex:1;max-width:120px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:#8e8e93;padding:4px 0}
+nav.tb{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center;background:rgba(18,18,18,.82);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--sep);padding:8px 0 calc(8px + env(safe-area-inset-bottom))}
+nav.tb button{flex:1;max-width:120px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#8e8e93;padding:4px 0}
 nav.tb svg{width:25px;height:25px;stroke-width:1.8}
 nav.tb button.on{color:var(--accent)}
 
 .ov{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center}
 .ov.open{display:flex;animation:fade .2s}
-.panel{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:var(--s1);border-radius:14px 14px 0 0;padding:8px 16px calc(20px + env(safe-area-inset-bottom));animation:up .28s cubic-bezier(.2,.8,.2,1)}
+.panel{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:var(--s1);border-radius:14px 14px 0 0;padding:8px 16px calc(24px + env(safe-area-inset-bottom));animation:up .28s cubic-bezier(.2,.8,.2,1)}
 .panel .card,.panel .group{background:var(--s2)}
 .panel .seg{background:rgba(118,118,128,.3)}
 .panel .stepper button{background:var(--s3)}
 .panel .ref{background:var(--s2)}
 @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 @media(min-width:600px){.ov{align-items:center}.panel{border-radius:14px}}
-.grab{width:36px;height:5px;border-radius:3px;background:var(--s3);margin:0 auto 10px}
-.sh-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px}
-.sh-h h3{font-size:18px;font-weight:700}
+.grab{width:36px;height:5px;border-radius:3px;background:var(--s3);margin:0 auto 12px}
+.sh-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px}
+.sh-h h3{font-size:17px;font-weight:700}
 .sh-h button{color:var(--accent);font-size:17px;min-width:64px;text-align:left}
 .sh-h button:last-child{text-align:right}
-.in{width:100%;padding:12px 14px;font-size:17px}
+.in{width:100%;padding:12px 16px;font-size:17px}
 .search{position:relative}
 .search svg{position:absolute;left:12px;top:50%;margin-top:-9px;width:18px;height:18px;color:var(--t2)}
 .search input{padding-left:38px}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chips button{flex:none;height:32px;padding:0 14px;border-radius:99px;background:var(--s2);font-size:14px;font-weight:500;color:var(--t2)}
+.chips button{flex:none;height:32px;padding:0 16px;border-radius:99px;background:var(--s2);font-size:15px;font-weight:500;color:var(--t2)}
 .chips button.on{background:var(--t1);color:#000}
 .pk-list{max-height:52vh;overflow:auto}
 .flist{max-height:56vh;overflow:auto}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .grid3 label{font-size:13px;color:var(--t2)}
-.grid3 input{width:100%;margin-top:6px;padding:12px;font-size:20px;font-weight:600;text-align:center}
+.grid3 input{width:100%;margin-top:8px;padding:12px;font-size:22px;font-weight:600;text-align:center}
 .switch{position:relative;width:51px;height:31px;flex:none}
 .switch input{opacity:0;width:0;height:0}
 .switch span{position:absolute;inset:0;background:rgba(120,120,128,.32);border-radius:99px;transition:.2s}
 .switch span::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:.2s}
 .switch input:checked+span{background:var(--accent)}
 .switch input:checked+span::after{transform:translateX(20px)}
-.row input.r{width:90px;text-align:right;background:transparent;padding:6px 0;font-size:17px;color:var(--t2)}
+.row input.r{width:90px;text-align:right;background:transparent;padding:8px 0;font-size:17px;color:var(--t2)}
 .row input.r:focus{box-shadow:none;color:var(--t1)}
-.slbl{font-size:13px;color:var(--t2);margin:20px 4px 8px}
+.slbl{font-size:13px;color:var(--t2);margin:24px 4px 8px}
 
-.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;z-index:70;background:rgba(58,58,60,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:12px 18px;border-radius:14px;font-size:15px;font-weight:500;display:flex;gap:16px;align-items:center;transition:.25s;max-width:90vw;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;z-index:70;background:rgba(58,58,60,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:12px 16px;border-radius:14px;font-size:15px;font-weight:500;display:flex;gap:16px;align-items:center;transition:.25s;max-width:90vw;white-space:nowrap}
 .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast button{color:var(--accent);font-weight:600}
 
 #tut{position:fixed;inset:0;z-index:80;background:#000;display:none;flex-direction:column}
 #tut.open{display:flex}
-.tut-top{display:flex;justify-content:flex-end;padding:calc(14px + env(safe-area-inset-top)) 20px 0;height:56px}
+.tut-top{display:flex;justify-content:flex-end;padding:calc(16px + env(safe-area-inset-top)) 24px 0;height:56px}
 .tut-top button{color:var(--t2);font-size:15px}
 .tut-view{flex:1;overflow:hidden}
 .tut-track{display:flex;height:100%;transition:transform .4s cubic-bezier(.2,.8,.2,1)}
-.slide{flex:0 0 100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 28px;overflow-y:auto}
-.slide h2{font-size:30px;font-weight:700;letter-spacing:-.02em;margin-top:30px}
+.slide{flex:0 0 100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px;overflow-y:auto}
+.slide h2{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:32px}
 .slide p{font-size:17px;color:var(--t2);margin-top:12px;line-height:1.5;white-space:pre-line}
-.mock{width:100%;max-width:300px;background:var(--s1);border-radius:20px;padding:18px;text-align:left}
+.mock{width:100%;max-width:300px;background:var(--s1);border-radius:20px;padding:16px;text-align:left}
 .logo{width:112px;height:112px;border-radius:26px;overflow:hidden;box-shadow:0 12px 40px rgba(10,132,255,.35)}
 .logo svg{display:block}
 
@@ -234,37 +236,81 @@ nav.tb button.on{color:var(--accent)}
 .dots{display:flex;justify-content:center;gap:8px;margin-bottom:8px}
 .dots i{width:7px;height:7px;border-radius:50%;background:var(--s3);transition:.2s}
 .dots i.on{background:var(--t1);width:20px;border-radius:4px}
-.setup{width:100%;max-width:380px;text-align:left;margin-top:22px}
+.setup{width:100%;max-width:380px;text-align:left;margin-top:24px}
 .share-btn{display:flex;align-items:center;gap:4px;color:var(--accent);font-size:15px;font-weight:500}
 .share-btn svg{width:17px;height:17px}
-.bal3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
-.bal3 .v{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
-.cmp{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12px;color:var(--t2)}
+.bal3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.bal3 .v{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums}
+.cmp{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:13px;color:var(--t2)}
 .cmp .bar{flex:1;margin:0}
 .chips.wrap{flex-wrap:wrap;overflow:visible;padding-top:4px}
 .shot{width:100%;border-radius:14px;display:block;background:#000}
-.tm{width:44px;flex:none;font-size:14px;color:var(--t2)}
-.eq{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:14px;color:var(--t2);flex-wrap:wrap}
-.eq b{color:var(--t1);font-weight:600;font-size:17px;margin-left:2px}
-.lg{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.tm{width:44px;flex:none;font-size:15px;color:var(--t2)}
+.eq{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:15px;color:var(--t2);flex-wrap:wrap}
+.eq b{color:var(--t1);font-weight:600;font-size:17px;margin-left:4px}
+.lg{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
 .lg.lgi{background:var(--t1)}.lg.lgo{background:var(--accent)}
 .dbar{height:6px;border-radius:3px;background:var(--s2);overflow:hidden;margin-top:8px}
 .dbar i{display:block;height:100%;border-radius:3px}
 .dbar i.bi{background:var(--t1)}.dbar i.bo{background:var(--accent)}
-.goal{font-size:14px;margin-top:14px;font-weight:500}
+.goal{font-size:15px;margin-top:16px;font-weight:500}
 .goal b{font-size:17px;font-weight:700}
-details.bd summary{text-align:left;font-size:13px;color:var(--t2);margin-top:10px}
+details.bd summary{text-align:left;font-size:13px;color:var(--t2);margin-top:12px}
 details.bd .sub{margin-top:4px}
 .trow input{background:transparent;color:var(--accent);font-size:17px;padding:4px 0;text-align:right}
 .trow input:focus{box-shadow:none}
 .shotwrap{margin-top:12px;border-radius:14px;overflow:hidden;background:#000}
 .shotwrap.clear{background:repeating-conic-gradient(#3a3a3c 0 25%,#2c2c2e 0 50%) 0 0/20px 20px}
 .shotwrap .shot{border-radius:0;background:transparent;max-height:58vh;object-fit:contain}
-.brandrow{display:flex;align-items:center;gap:8px}.brandrow svg{border-radius:5px;flex:none}
-.about{display:flex;align-items:center;gap:14px;margin:26px 4px 4px}
+.brandrow{display:flex;align-items:center;gap:12px;margin-bottom:4px}.brandrow svg{border-radius:5px;flex:none}
+.about{display:flex;align-items:center;gap:16px;margin:24px 4px 4px}
 .about svg{border-radius:13px;flex:none}
-.brandmark{display:flex;align-items:center;gap:8px;color:var(--t2);font-size:12px;font-weight:700;letter-spacing:.12em}
+.brandmark{display:flex;align-items:center;gap:8px;color:var(--t2);font-size:13px;font-weight:700;letter-spacing:.12em}
 .brandmark svg{border-radius:5px}
+.budget{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:end;gap:4px;margin-top:16px;padding:12px;border-radius:12px;background:var(--s2)}
+.budget .v{font-size:17px;font-weight:600;margin-top:4px}
+.budget .op{color:var(--t3);font-size:15px;padding-bottom:1px}
+.maintbox{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:12px 16px;border-radius:12px;background:var(--s2);margin-bottom:8px}
+.maintbox .v{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:4px}
+.maintbox .v small{font-size:13px;color:var(--t2);font-weight:500}
+.link{display:block;color:var(--accent);font-size:15px;margin-top:12px;text-align:left}
+.info .pill{width:96px;text-align:center;flex:none}
+.info h4{font-size:15px;font-weight:600;margin:24px 4px 8px}
+.info h4:first-child{margin-top:4px}
+.info p{font-size:15px;color:var(--t2);line-height:1.6;margin:8px 4px 0}
+.info ul{margin:8px 4px 0 24px;font-size:13px;line-height:1.6}
+.info li{margin-bottom:8px}
+.goalline{font-size:15px;color:var(--t2);margin-top:8px}
+.goalline b{color:var(--t1);font-weight:600}
+.goalline b.accent{color:var(--accent);font-size:17px}.goalline b.warn{color:var(--warn);font-size:17px}
+.scale{margin-top:16px}
+.scale .track{position:relative;height:8px;border-radius:4px;background:var(--s2)}
+.scale .track i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--t1)}
+.scale .track i.over{background:var(--warn)}
+.scale .tick{position:absolute;top:-4px;width:2px;height:16px;margin-left:-1px;border-radius:1px}
+.scale .tick.tk-goal{background:var(--accent)}.scale .tick.tk-zero{background:var(--t3)}
+.legend3{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;margin-top:12px}
+.legend3 div{font-size:11px;color:var(--t2);line-height:1.35}
+.legend3 span{display:block}
+.legend3 b{display:block;font-size:15px;font-weight:600;color:var(--t1);margin-top:4px}
+.legend3 b.accent{color:var(--accent)}
+.legend3 em{display:block;font-style:normal;color:var(--t3)}
+.legend3 .k{display:inline-block;vertical-align:1px;margin-right:4px}
+.k.k-in{width:8px;height:8px;border-radius:50%;background:var(--t1)}
+.k.k-goal{width:2px;height:10px;background:var(--accent)}
+.k.k-zero{width:2px;height:10px;background:var(--t3)}
+.legend3 div span{display:inline}
+.scale .marks{position:relative;height:40px;margin-top:8px;font-size:11px;color:var(--t2)}
+.scale .m{position:absolute;top:0;white-space:nowrap;line-height:1.35}
+.scale .m em{display:block;font-style:normal;color:var(--t3)}
+.scale .m.g{transform:translateX(-50%);text-align:center;color:var(--accent)}
+.scale .m.z{transform:translateX(-100%);text-align:right}
+.added{margin-top:12px;border-radius:12px;background:rgba(10,132,255,.12);padding:8px 12px}
+.added-h{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--accent);font-weight:600;padding:4px 0}
+.added-h span{display:flex;align-items:center;gap:4px}.added-h svg{width:14px;height:14px;stroke-width:3}
+.added-h b{color:var(--t1);font-size:15px}
+.added-r{display:flex;align-items:center;gap:8px;min-height:32px}
+.added-r .t{font-size:15px}
 .hidden{display:none!important}
 </style>
 </head>
@@ -506,12 +552,12 @@ EAA|いーえーえー あみのさん|1杯|36|9.0|0|0
 ハンバーガー|はんばーがー|1個|260|13.0|9.4|30.0
 チーズバーガー|ちーずばーがー はんばーがー|1個|310|16.0|13.0|31.0
 フライドポテト（M）|ふらいどぽてと ぽてと|1個|410|5.0|20.0|52.0
-チョコレート|ちょこれーと ちょこ|1枚(50g)|276|3.5|17.0|27.9
-ポテトチップス|ぽてとちっぷす ぽてち|1袋(60g)|324|2.8|21.0|32.0
-アイスクリーム|あいすくりーむ あいす|1個|200|3.5|10.0|24.0
-ショートケーキ|しょーとけーき けーき|1個|350|7.0|16.0|45.0
-どら焼き|どらやき|1個|250|6.0|3.0|52.0
-大福|だいふく|1個(100g)|223|4.6|0.5|52.0
+チョコレート|ちょこれーと ちょこ おかし おやつ スイーツ|1枚(50g)|276|3.5|17.0|27.9
+ポテトチップス|ぽてとちっぷす ぽてち おかし おやつ スナック|1袋(60g)|324|2.8|21.0|32.0
+アイスクリーム|あいすくりーむ あいす おかし おやつ スイーツ|1個|200|3.5|10.0|24.0
+ショートケーキ|しょーとけーき けーき おかし おやつ スイーツ|1個|350|7.0|16.0|45.0
+どら焼き|どらやき おかし おやつ わがし 和菓子|1個|250|6.0|3.0|52.0
+大福|だいふく おかし おやつ わがし 和菓子|1個(100g)|223|4.6|0.5|52.0
 コーラ|こーら|500ml|225|0|0|56.5
 スポーツドリンク|すぽーつどりんく|500ml|105|0|0|26.0
 オレンジジュース|おれんじじゅーす じゅーす|200ml|88|1.4|0.2|21.0
@@ -530,6 +576,50 @@ EAA|いーえーえー あみのさん|1杯|36|9.0|0|0
 ミックスナッツ|みっくすなっつ なっつ|25g|150|5.0|13.0|4.5
 アーモンド|あーもんど なっつ|10粒(12g)|73|2.3|6.3|2.4
 きな粉|きなこ|大さじ1|32|2.6|1.8|2.0
+ラスク|らすく おかし おやつ やきがし 焼き菓子|1枚(10g)|45|0.9|2.0|6.0
+クッキー・ビスケット|くっきー びすけっと おかし おやつ やきがし 焼き菓子|1枚(10g)|51|0.6|2.8|6.3
+クラッカー|くらっかー おかし おやつ|5枚(15g)|73|1.5|3.2|9.5
+リーフパイ|りーふぱい ぱい おかし おやつ やきがし 焼き菓子 おみやげ|1枚(15g)|80|0.9|4.5|9.0
+ラングドシャ（チョコサンド）|らんぐどしゃ おかし おやつ やきがし 焼き菓子 おみやげ|1枚(12g)|60|0.7|3.2|7.2
+マドレーヌ|まどれーぬ おかし おやつ やきがし 焼き菓子 おみやげ|1個(30g)|132|1.7|7.5|14.7
+フィナンシェ|ふぃなんしぇ おかし おやつ やきがし 焼き菓子 おみやげ|1個(30g)|140|1.9|8.2|14.5
+バウムクーヘン|ばうむくーへん おかし おやつ やきがし 焼き菓子 おみやげ|1切れ(50g)|220|3.0|12.8|23.0
+カステラ|かすてら おかし おやつ おみやげ|1切れ(50g)|157|3.6|2.3|30.9
+パウンドケーキ|ぱうんどけーき けーき おかし おやつ やきがし 焼き菓子 おみやげ|1切れ(40g)|170|2.0|9.0|20.0
+個包装の焼き菓子（1個）|こほうそう やきがし 焼き菓子 おみやげ おかし おやつ|1個(25g)|115|1.5|6.0|14.0
+ワッフル（カスタード）|わっふる おかし おやつ|1個(40g)|100|2.6|3.0|15.5
+マカロン|まかろん おかし おやつ スイーツ|1個(15g)|65|1.0|3.0|8.5
+シュークリーム|しゅーくりーむ おかし おやつ スイーツ|1個(70g)|160|4.0|8.0|18.0
+エクレア|えくれあ おかし おやつ スイーツ|1個(60g)|200|4.0|12.0|19.0
+ロールケーキ|ろーるけーき けーき おかし おやつ スイーツ|1切れ(60g)|190|3.0|10.0|22.0
+チーズケーキ|ちーずけーき けーき おかし おやつ スイーツ|1切れ(80g)|253|6.0|17.0|19.0
+モンブラン|もんぶらん けーき おかし おやつ スイーツ|1個(100g)|303|4.0|15.0|38.0
+フルーツタルト|ふるーつたると たると けーき おかし おやつ スイーツ|1切れ(100g)|282|4.0|14.0|35.0
+プリン|ぷりん おかし おやつ スイーツ|1個(100g)|121|5.0|5.0|14.0
+ドーナツ|どーなつ おかし おやつ|1個(60g)|227|4.0|11.0|28.0
+ソフトクリーム|そふとくりーむ あいす おかし おやつ スイーツ|1個|145|3.8|5.6|20.0
+せんべい（しょうゆ）|せんべい 煎餅 おかし おやつ わがし 和菓子 おみやげ|1枚(20g)|74|1.6|0.2|16.6
+揚げせんべい|あげせんべい せんべい おかし おやつ|1枚(15g)|69|0.9|2.6|10.5
+あられ・おかき|あられ おかき おかし おやつ わがし 和菓子|30g|114|2.3|0.3|25.4
+かりんとう|かりんとう おかし おやつ わがし 和菓子|30g|126|2.3|3.5|21.4
+まんじゅう（こしあん）|まんじゅう 饅頭 おかし おやつ わがし 和菓子 おみやげ|1個(40g)|104|1.8|0.2|23.8
+もみじ饅頭|もみじまんじゅう まんじゅう おかし おやつ わがし 和菓子 おみやげ|1個(35g)|100|1.8|1.0|21.0
+もなか|もなか 最中 おかし おやつ わがし 和菓子 おみやげ|1個(40g)|110|2.0|0.1|25.3
+羊羹（練り）|ようかん 羊羹 おかし おやつ わがし 和菓子 おみやげ|1切れ(50g)|145|1.8|0.1|34.0
+水ようかん|みずようかん ようかん おかし おやつ わがし 和菓子|1個(80g)|134|2.1|0.1|31.6
+きんつば|きんつば おかし おやつ わがし 和菓子 おみやげ|1個(50g)|131|3.0|0.3|29.0
+生八つ橋（あん入り）|なまやつはし やつはし 八ツ橋 おかし おやつ わがし 和菓子 おみやげ|1個(25g)|70|1.2|0.1|16.0
+ういろう|ういろう 外郎 おかし おやつ わがし 和菓子 おみやげ|1切れ(50g)|91|0.5|0.1|22.0
+おはぎ|おはぎ ぼたもち おかし おやつ わがし 和菓子|1個(100g)|228|5.0|0.5|51.0
+みたらし団子|みたらしだんご だんご 団子 おかし おやつ わがし 和菓子|1本(60g)|117|1.9|0.2|27.0
+月餅|げっぺい おかし おやつ おみやげ|1個(80g)|282|4.2|9.0|46.0
+個包装の和菓子（1個）|こほうそう わがし 和菓子 おみやげ おかし おやつ|1個(40g)|110|2.0|0.3|25.0
+チョコ菓子（スティック）|ちょこがし ちょこ すてぃっく おかし おやつ|1袋(36g)|179|2.7|8.0|24.0
+グミ|ぐみ おかし おやつ|1袋(50g)|168|3.0|0|42.0
+キャンディ|きゃんでぃ あめ 飴 おかし おやつ|1個(4g)|15|0|0|3.9
+甘栗|あまぐり くり 栗 おかし おやつ|50g|111|2.5|0.5|24.4
+ドライマンゴー|どらいまんごー どらいふるーつ おかし おやつ|30g|100|0.7|0.1|24.0
+干し芋|ほしいも いも おかし おやつ|1枚(30g)|83|0.9|0.2|21.6
 `.trim().split('\n').map(l => { const [n, k, u, kc, p, f, c] = l.split('|'); return { name: n, key: norm(n + k), unit: u, kcal: +kc, p: +p, f: +f, c: +c }; });
 
 /* ================= State ================= */
@@ -543,9 +633,8 @@ const DEF = {
     { name: 'ベリー＆プロテイン', kcal: 210, p: 20, f: 2, c: 23 },
     { name: '自炊弁当', kcal: 550, p: 40, f: 8, c: 70 }
   ],
-  plans: [], logs: [], cardio: [], customEx: [], recEx: 'スミスベンチプレス', body: { bw: 70, act: 'mid' }, remind: { on: false, min: 180, lastId: null }, onboarded: false
+  plans: [], logs: [], cardio: [], customEx: [], recEx: 'スミスベンチプレス', body: { bw: 70, h: 170, age: 30, sex: 'm', act: 'mid' }, v: 8, remind: { on: false, min: 180, lastId: null }, onboarded: false
 };
-let S = load();
 function load() {
   let d = null;
   try { d = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
@@ -564,6 +653,8 @@ function load() {
     d.plans = [P]; delete d.plan;
   }
   d.cardio = d.cardio || [];
+  d.body = { h: 170, age: 30, sex: 'm', ...d.body }; if (!PAL[d.body.act]) d.body.act = 'mid';
+  if ((d.v || 0) < 8) { d.v = 8; if (d.onboarded) d.targets = autoTargets(d.body, d.mode); }
   d.remind = { ...DEF.remind, ...(d.remind || {}) };
   Object.values(d.meals).forEach(arr =>arr.forEach(m => { if (!m.slot) m.slot = autoSlot(m.t || '12:00'); }));
   return d;
@@ -571,7 +662,7 @@ function load() {
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
 const MODE = { cut: '減量', maint: '維持', bulk: '増量' };
-const PH = { vol: 'ボリューム', str: '強化', peak: 'ピーク', dl: '回復', test: 'MAX' };
+const PH = { base: '基礎', vol: 'ボリューム', str: '強化', peak: 'ピーク', dl: '回復週', taper: 'テーパー', test: 'MAX' };
 
 /* ----- 消費カロリー（METs × 体重 × 時間 × 1.05） ----- */
 const CARDIO = [
@@ -591,29 +682,37 @@ const CARDIO = [
   ['ヨガ・ストレッチ', [2.3, 2.5, 4.0], ['ストレッチ', 'ヨガ', 'パワーヨガ']],
 ];
 const LVL = ['軽め', 'ふつう', 'きつめ'];
-const BASE = { low: 27, mid: 30, high: 33 };                // トレ以外の日常消費（kcal/kg）
+/* 日常の消費（トレ以外）= 基礎代謝（Mifflin-St Jeor式）× 活動係数。運動は記録から別に足す */
+const PAL = { low: ['座り仕事', 1.2], mid: ['よく歩く', 1.375], high: ['肉体労働', 1.55] };
+const r10 = n => Math.round(n / 10) * 10;
+function bmrOf(b) { return 10 * b.bw + 6.25 * b.h - 5 * b.age + (b.sex === 'f' ? -161 : 5); }
+function maintOf(b = S.body) { return r10(bmrOf(b) * PAL[b.act || 'mid'][1]); }
 const metKcal = (met, min) => Math.round(met * S.body.bw * min / 60 * 1.05);
 const strengthKcal = l => metKcal(5.0, (l.sets || 1) * 3);   // 1セット≒3分（休憩込み）
 function burnOf(date) {
-  const base = Math.round(S.body.bw * BASE[S.body.act || 'mid']);
+  const base = maintOf();
   const strength = S.logs.filter(l => l.date === date).reduce((a, l) => a + strengthKcal(l), 0);
   const cardio = S.cardio.filter(c => c.date === date).reduce((a, c) => a + c.kcal, 0);
   return { base, strength, cardio, total: base + strength + cardio };
 }
-const ADVICE = { cut: '減量中は重量を落とさず、セット数を控えめに。', maint: '毎週、重量か回数を少しずつ上乗せ。', bulk: 'ボリュームを積んで、しっかり食べる。' };
-const ACT = { low: ['少なめ', 30], mid: ['ふつう', 33], high: ['多め', 36] };
-const DELTA = { cut: -400, maint: 0, bulk: 250 };
-function autoTargets(bw, mode, act = 'mid') {
-  const kcal = Math.round((bw * ACT[act][1] + DELTA[mode]) / 10) * 10;
-  const p = Math.round(bw * (mode === 'cut' ? 2.2 : 2)), f = Math.round(kcal * .25 / 9), c = Math.max(0, Math.round((kcal - p * 4 - f * 9) / 4));
+const ADVICE = { cut: '減量中：重さは維持し、ボリューム日のセット数を減らしています。', maint: '維持期：4週ごとに回復週を入れながら、少しずつ重くします。', bulk: '増量中：ボリューム日のセット数を多めにしています。' };
+// 体重変化のペース：減量 −0.5%/週、増量 +0.25%/週（脂肪1kg≒7,700kcal）
+const deltaOf = (bw, mode) => mode === 'cut' ? -r10(bw * .005 * 7700 / 7) : mode === 'bulk' ? r10(bw * .0025 * 7700 / 7) : 0;
+function autoTargets(b, mode) {
+  const kcal = maintOf(b) + deltaOf(b.bw, mode);
+  const p = Math.round(b.bw * (mode === 'cut' ? 2.2 : 2)), f = Math.round(kcal * .25 / 9), c = Math.max(0, Math.round((kcal - p * 4 - f * 9) / 4));
   return { kcal, p, f, c };
 }
-function refCards(bw, act, sel) {
-  const sub = { cut: '−0.4kg/週目安', maint: '体重キープ', bulk: '+0.25kg/週目安' };
-  return `<div class="refs">${['cut', 'maint', 'bulk'].map(m => { const t = autoTargets(bw, m, act);
-    return `<button class="ref ${m === sel ? 'on' : ''}" data-act="pickRef" data-v="${m}"><div class="n">${MODE[m]}</div><div class="v">${t.kcal.toLocaleString()}</div><div class="u">kcal</div><div class="d2">P${t.p} F${t.f} C${t.c}</div></button>`; }).join('')}</div>
-    <div class="sub" style="text-align:center">${sub[sel] || ''}　タップで選択</div>`;
+function refCards(b, sel) {
+  const pace = { cut: `週 −${r1(b.bw * .005)}kg ペース`, maint: '体重キープ', bulk: `週 +${r1(b.bw * .0025)}kg ペース` };
+  return `<div class="maintbox"><div><div class="lbl">維持カロリー（トレ以外）</div><div class="v num">${maintOf(b).toLocaleString()}<small> kcal</small></div></div>
+      <div class="sub num" style="margin:0;text-align:right">基礎代謝 ${r10(bmrOf(b)).toLocaleString()}<br>× 活動係数 ${PAL[b.act][1]}</div></div>
+    <div class="refs">${['cut', 'maint', 'bulk'].map(m => { const t = autoTargets(b, m), d = deltaOf(b.bw, m);
+    return `<button class="ref ${m === sel ? 'on' : ''}" data-act="pickRef" data-v="${m}"><div class="n">${MODE[m]}</div><div class="v">${t.kcal.toLocaleString()}</div><div class="u">${d ? signed(d) : '±0'} kcal</div></button>`; }).join('')}</div>
+    <div class="sub" style="text-align:center">${pace[sel] || ''} · タップで目標に反映</div>`;
 }
+
+let S = load();
 
 /* ================= UI helpers ================= */
 let tt;
@@ -666,14 +765,14 @@ function renderHome() {
     const ms = meals.filter(m => m.slot === k), kc = Math.round(sumOf(ms).kcal);
     return `<div class="sec"><b>${n}</b><span class="num">${kc ? kc.toLocaleString() + ' kcal' : ''}</span></div><div class="group">
       ${ms.map(m => `<button class="row" data-act="editMeal" data-id="${m.id}"><span class="tm num">${m.t}</span><div class="grow"><div class="t">${esc(m.name)}</div><div class="s num">P ${fmtN(r1(m.p))} · F ${fmtN(r1(m.f))} · C ${fmtN(r1(m.c))}</div></div><span class="kc">${Math.round(m.kcal)} kcal</span></button>`).join('')}
-      <button class="row" data-act="food" data-slot="${k}"><span class="plus sm">${I.plus}</span><span class="grow accent" style="font-size:16px">追加</span></button></div>`;
+      <button class="row" data-act="food" data-slot="${k}"><span class="plus sm">${I.plus}</span><span class="grow accent" style="font-size:17px">追加</span></button></div>`;
   }).join('');
   const since = sinceLastMeal();
   $('#tab-home').innerHTML = header('今日') + balanceHero(sum, pfc) + `
     <div class="sec"><b>トレーニング</b><button class="share-btn" data-act="share" data-v="train">${I.share}シェア</button></div>
     ${trainCards()}
     ${exerciseGroup()}
-    <div class="sec" style="margin-top:34px"><b style="font-size:20px">食事</b>${since ? `<span class="num ${since.over ? 'warn' : ''}">前の食事から ${since.txt}</span>` : ''}</div>
+    <div class="sec" style="margin-top:32px"><b style="font-size:22px">食事</b>${since ? `<span class="num ${since.over ? 'warn' : ''}">前の食事から ${since.txt}</span>` : ''}</div>
     ${slots}`;
 }
 
@@ -685,16 +784,35 @@ function balanceTone(bal) {
 }
 const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(Math.round(n)).toLocaleString();
 function balanceHero(sum, pfc) {
-  const b = burnOf(today()), intake = Math.round(sum.kcal), bal = intake - b.total, goal = DELTA[S.mode];
-  const room = b.total + goal - intake, mx = Math.max(intake, b.total, 1);
+  const b = burnOf(today()), intake = Math.round(sum.kcal), bal = intake - b.total;
+  const target = Math.round(S.targets.kcal), ex = b.strength + b.cardio, goal = target - b.base;   // 目標の収支（例：−420）
+  const room = target + ex - intake, eatTo = target + ex;                                          // ここまで食べると目標の収支
+  const mx = Math.max(b.total, intake, eatTo, 1), pc = v => Math.min(100, v / mx * 100);
   return `<div class="card">
     <div class="card-top"><span class="lbl">今日のカロリー収支</span><button class="share-btn" data-act="share" data-v="balance">${I.share}シェア</button></div>
     <div class="hero" style="margin-top:4px">${signed(bal)}<small>kcal</small></div>
-    <div class="eq num"><span><i class="lg lgi"></i>摂取 <b>${intake.toLocaleString()}</b></span><span class="muted">−</span><span><i class="lg lgo"></i>消費 <b>${b.total.toLocaleString()}</b></span></div>
-    <div class="dbar"><i class="bi" style="width:${intake / mx * 100}%"></i></div>
-    <div class="dbar"><i class="bo" style="width:${b.total / mx * 100}%"></i></div>
-    <div class="goal ${room >= 0 ? 'accent' : 'warn'}">${room >= 0 ? `あと <b>${room.toLocaleString()}</b> kcal 食べられる<span class="muted">（目標 ${signed(goal)}）</span>` : `目標より <b>${(-room).toLocaleString()}</b> kcal オーバー<span class="muted">（目標 ${signed(goal)}）</span>`}</div>
-    <details class="bd"><summary>消費の内訳</summary><div class="sub num">日常 ${b.base.toLocaleString()} ＋ 筋トレ ${b.strength} ＋ 有酸素 ${b.cardio} kcal（日常は1日分の見込み）</div></details>
+    <div class="goalline ${room >= 0 ? '' : 'over'}">${room >= 0
+      ? `目標 <b>${signed(goal)}</b> まで：あと <b class="accent">${room.toLocaleString()}</b> kcal 食べられる`
+      : `目標 <b>${signed(goal)}</b> を <b class="warn">${(-room).toLocaleString()}</b> kcal オーバー`}</div>
+    <div class="scale">
+      <div class="track"><i class="${room >= 0 ? '' : 'over'}" style="width:${pc(intake)}%"></i>
+        <span class="tick tk-goal" style="left:${pc(eatTo)}%"></span><span class="tick tk-zero" style="left:${pc(b.total)}%"></span></div>
+      <div class="legend3 num">
+        <div><i class="k k-in"></i><span>摂取</span><b>${intake.toLocaleString()}</b></div>
+        <div><i class="k k-goal"></i><span>ここまで食べてOK</span><b class="accent">${eatTo.toLocaleString()}</b><em>収支 ${signed(goal)}</em></div>
+        <div><i class="k k-zero"></i><span>消費</span><b>${b.total.toLocaleString()}</b><em>収支 ±0</em></div>
+      </div>
+    </div>
+    <details class="bd"><summary>計算のしくみ</summary>
+      <div class="budget num">
+        <div><div class="lbl">目標摂取</div><div class="v">${target.toLocaleString()}</div></div><span class="op">＋</span>
+        <div><div class="lbl">運動</div><div class="v">${ex.toLocaleString()}</div></div><span class="op">−</span>
+        <div><div class="lbl">摂取</div><div class="v">${intake.toLocaleString()}</div></div><span class="op">＝</span>
+        <div><div class="lbl">${room >= 0 ? 'あと' : 'オーバー'}</div><div class="v ${room >= 0 ? 'accent' : 'warn'}">${Math.abs(room).toLocaleString()}</div></div>
+      </div>
+      <div class="sub num">収支 ＝ 摂取 − 消費。消費 ＝ 日常 ${b.base.toLocaleString()}（基礎代謝×活動係数・1日分）＋ 筋トレ ${b.strength} ＋ 有酸素 ${b.cardio}。<br>朝は1日分の消費が先に入るので大きなマイナスから始まり、食べるほど目標の収支 ${signed(goal)} に近づきます。</div>
+      <button class="link" data-act="calcInfo">計算式と出典を見る ›</button>
+    </details>
     <div class="pfc">${pfc}</div>
   </div>`;
 }
@@ -705,7 +823,7 @@ function exerciseGroup() {
     + cs.map(c => `<div class="row"><div class="grow"><div class="t">${esc(c.name)}</div><div class="s num">有酸素 · ${LVL[c.lvl]} · ${c.min}分</div></div><span class="kc">${c.kcal} kcal</span></div>`).join('');
   const b = burnOf(td);
   return `<div class="sec"><span>今日の記録</span><span class="num">${b.strength + b.cardio} kcal</span></div><div class="group">${rows}
-    <button class="row" data-act="goLog"><span class="plus sm">${I.plus}</span><span class="grow accent" style="font-size:16px">筋トレ・有酸素を記録</span>${I.chev}</button></div>`;
+    <button class="row" data-act="goLog"><span class="plus sm">${I.plus}</span><span class="grow accent" style="font-size:17px">筋トレ・有酸素を記録</span>${I.chev}</button></div>`;
 }
 
 /* ----- 有酸素（記録タブ内） ----- */
@@ -724,12 +842,12 @@ function trainCards() {
   const items = S.plans.flatMap(P => P.sessions.filter(s => s.date === td).map(s => ({ P, s })));
   if (!items.length) {
     const nx = S.plans.flatMap(P => P.sessions.filter(s => s.date > td && !s.done).map(s => ({ P, s }))).sort((a, b) => a.s.date < b.s.date ? -1 : 1)[0];
-    return `<div class="card"><div class="big" style="font-size:26px;margin-top:0">今日は休み</div>
+    return `<div class="card"><div class="big" style="font-size:28px;margin-top:0">今日は休み</div>
       ${nx ? `<div class="sub num">次回 ${fmtD(nx.s.date)} · ${esc(nx.P.ex)} ${nx.s.w}kg × ${nx.s.r}</div>` : ''}</div>`;
   }
   return items.map(({ P, s }) => {
     const left = diffDays(td, P.targetDate), cd = left > 0 ? `MAXまで ${left}日` : left === 0 ? 'MAX当日' : '';
-    const top = `<div class="card-top"><span class="lbl">${esc(P.ex)}</span><span class="pill ${s.max ? 'w' : 'a'}">${s.max ? 'MAX挑戦' : PH[s.ph]}</span></div>`;
+    const top = `<div class="card-top"><span class="lbl">${esc(P.ex)}</span><span class="pill ${s.max ? 'w' : 'a'}">${s.max ? 'MAX挑戦' : (kindLabel(s) || PH[s.ph])}</span></div>`;
     if (s.done) {
       const a = s.actual || s;
       return `<div class="card">${top}<div class="done-line"><span class="ck">${I.check}</span><span class="num">${a.w}kg × ${a.r}回</span></div>
@@ -738,7 +856,7 @@ function trainCards() {
     }
     return `<div class="card">${top}
       <div class="big">${s.w}<small>kg</small><span class="x2">×</span>${s.r}<small>回</small><span class="x2">×</span>${s.sets}<small>セット</small></div>
-      <div class="sub">${s.max ? 'W-up ' + s.warm : cd}</div>
+      <div class="sub">${s.max ? 'W-up ' + s.warm : [rirTxt(s) && rirTxt(s) + '残す', cd].filter(Boolean).join(' · ')}</div>
       <button class="btn" data-act="complete" data-pid="${P.id}" data-id="${s.id}">完了</button></div>`;
   }).join('');
 }
@@ -751,29 +869,47 @@ function sinceLastMeal() {
   const min = Math.floor((now - t) / 60000); if (min < 0) return null;
   return { min, last, over: S.remind.on && min >= S.remind.min, txt: min < 60 ? `${min}分` : `${Math.floor(min / 60)}時間${min % 60 ? (min % 60) + '分' : ''}` };
 }
-function addMeal(p, slot, t) {
+function addMeal(p, slot, t, quiet) {
   t = t || nowHM();
   const m = { id: uid(), name: p.name, kcal: Math.round(num(p.kcal)), p: r1(num(p.p)), f: r1(num(p.f)), c: r1(num(p.c)), t, slot: slot || autoSlot(t) };
   mealsToday().push(m); save(); if (cur === 'home') renderHome();
-  toast(`${SLOTN[m.slot]} ${m.t} +${m.kcal} kcal`, () => { S.meals[today()] = mealsToday().filter(x => x.id !== m.id); save(); if (cur === 'home') renderHome(); });
+  if (!quiet) toast(`${SLOTN[m.slot]} ${m.t} +${m.kcal} kcal`, () => { S.meals[today()] = mealsToday().filter(x => x.id !== m.id); save(); if (cur === 'home') renderHome(); });
+  return m;
 }
 function recentFoods() {
   const seen = new Set(), out = [];
   Object.keys(S.meals).sort().reverse().forEach(d => S.meals[d].slice().reverse().forEach(m => { if (!seen.has(m.name) && out.length < 12) { seen.add(m.name); out.push(m); } }));
   return out;
 }
-const fs = { slot: 'b', q: '', item: null, res: [], t: '' };
+const fs = { slot: 'b', q: '', item: null, res: [], t: '', added: [] };
 const timeRow = (id, v) => `<label class="row trow"><span class="grow">食べた時刻</span><input type="time" id="${id}" value="${v}"></label>`;
-function foodSheet(slot) {
-  fs.t = nowHM(); fs.slot = slot || autoSlot(fs.t); fs.q = ''; fs.item = null;
-  openSheet(`<div class="sh-h"><button data-act="close">キャンセル</button><h3>食事を追加</h3><span style="min-width:64px"></span></div>
+function foodSheet(slot, keep) {
+  if (!keep) { fs.t = nowHM(); fs.slot = slot || autoSlot(fs.t); fs.added = []; }
+  fs.q = ''; fs.item = null;
+  openSheet(`<div class="sh-h"><span style="min-width:64px"></span><h3>食事を追加</h3><button data-act="close" style="font-weight:600">完了</button></div>
     ${seg('fslot', SLOTS, fs.slot)}
-    <div class="group" style="margin-top:10px">${timeRow('ftime', fs.t)}</div>
-    <div class="search" style="margin-top:12px">${I.search}<input class="in" id="fq" placeholder="食品を検索（例：とりむね、ご飯）" autocomplete="off"></div>
+    <div class="group" style="margin-top:12px">${timeRow('ftime', fs.t)}</div>
+    <div id="fadded"></div>
+    <div class="search" style="margin-top:12px">${I.search}<input class="in" id="fq" placeholder="食品を検索（例：ラスク、とりむね）" autocomplete="off"></div>
     <div id="fbody" style="margin-top:12px"></div>`);
+  renderAdded();
   $('#fq').addEventListener('input', e => { fs.q = e.target.value.trim(); fs.item = null; renderFood(); });
   $('#ftime').addEventListener('change', e => { fs.t = e.target.value || nowHM(); fs.slot = autoSlot(fs.t); document.querySelectorAll('[data-seg=fslot] button').forEach(b => b.classList.toggle('on', b.dataset.v === fs.slot)); if (fs.item) updFood(); });
   renderFood();
+}
+function renderAdded() {
+  const el = $('#fadded'); if (!el) return;
+  const ms = mealsToday().filter(m => fs.added.includes(m.id));
+  if (!ms.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="added"><div class="added-h"><span>${I.check}追加済み ${ms.length}件</span><b class="num">${Math.round(sumOf(ms).kcal).toLocaleString()} kcal</b></div>
+    ${ms.map(m => `<div class="added-r"><span class="grow t">${esc(m.name)}</span><span class="kc">${Math.round(m.kcal)}</span><button class="x" data-act="fUndo" data-id="${m.id}" aria-label="取り消す">${I.x}</button></div>`).join('')}</div>`;
+}
+function addKeep(item) {                        // シートを閉じずに追加 → 次の食品へ
+  const m = addMeal(item, fs.slot, fs.t, true);
+  fs.added.push(m.id); fs.item = null; fs.q = '';
+  const q = $('#fq'); if (q) q.value = '';
+  renderAdded(); renderFood(); $('#panel').scrollTop = 0;
+  toast(`${SLOTN[m.slot]}に追加 +${m.kcal} kcal`);
 }
 const foodRow = (it, act, i, quick) => `<button class="row" data-act="${act}" data-i="${i}"><div class="grow"><div class="t">${esc(it.name)}</div><div class="s num">${it.unit ? esc(it.unit) + ' · ' : ''}P ${fmtN(r1(it.p))} F ${fmtN(r1(it.f))} C ${fmtN(r1(it.c))}</div></div><span class="kc">${Math.round(it.kcal)} kcal</span>${quick ? `<span class="plus sm">${I.plus}</span>` : I.chev}</button>`;
 function renderFood() {
@@ -791,6 +927,7 @@ function renderFood() {
   }
   const rec = recentFoods();
   el.innerHTML = `
+    <div class="chips" style="padding-top:0">${[['おかし', 'お菓子・スイーツ'], ['わがし', '和菓子'], ['おみやげ', 'おみやげ'], ['こんびに', 'コンビニ'], ['どんぶり', '丼'], ['らーめん', 'ラーメン']].map(([q, l]) => `<button data-act="fCat" data-q="${q}">${l}</button>`).join('')}</div>
     ${S.presets.length ? `<div class="slbl" style="margin-top:4px">マイメニュー（タップで追加）</div><div class="group">${S.presets.map((p, i) => foodRow(p, 'fPreset', i, true)).join('')}</div>` : ''}
     ${rec.length ? `<div class="slbl">最近食べたもの</div><div class="group flist" style="max-height:34vh">${rec.map((m, i) => foodRow(m, 'fRecent', i, true)).join('')}</div>` : ''}
     <div class="group" style="margin-top:12px"><button class="row" data-act="customMeal"><span class="grow accent">手入力で追加</span>${I.chev}</button></div>`;
@@ -801,11 +938,11 @@ function renderFoodDetail() {
   const q0 = fs.gram || 1, step = fs.gram ? (fs.gram >= 100 ? 10 : 5) : 0.5;
   $('#fbody').innerHTML = `
     <div class="card"><div class="t" style="font-weight:600;white-space:normal">${esc(it.name)}</div><div class="s">${esc(it.unit || '1食')}あたり ${it.kcal} kcal</div>
-      <div class="srow" style="margin-top:6px"><span>${fs.gram ? '量' : '量（' + esc(it.unit || '1食') + '）'}</span>${stepper('fqty', q0, step, fs.gram ? gm[2] : '倍')}</div></div>
-    <div class="card" style="text-align:center"><div class="hero m" id="fk"></div><div class="pfc" id="fpfc" style="margin-top:14px"></div></div>
+      <div class="srow" style="margin-top:8px"><span>${fs.gram ? '量' : '量（' + esc(it.unit || '1食') + '）'}</span>${stepper('fqty', q0, step, fs.gram ? gm[2] : '倍')}</div></div>
+    <div class="card" style="text-align:center"><div class="hero m" id="fk"></div><div class="pfc" id="fpfc" style="margin-top:16px"></div></div>
     ${it.src === 'db' || !it.src ? `<div class="group" style="margin-top:12px"><label class="row"><span class="grow">マイメニューに登録</span><span class="switch"><input type="checkbox" id="fsave"><span></span></span></label></div>` : ''}
     <button class="btn" data-act="fAdd"></button>
-    <button class="btn plain" data-act="fBack">戻る</button>`;
+    <button class="btn plain" data-act="fBack">検索に戻る</button>`;
   $('#fqty').addEventListener('input', updFood); updFood();
 }
 function foodScaled() {
@@ -822,30 +959,31 @@ function updFood() {
 
 function customMealSheet(slot) {
   const t = fs.t || nowHM(), sl = slot || fs.slot || autoSlot(t);
-  openSheet(`<div class="sh-h"><button data-act="close">キャンセル</button><h3>手入力</h3><button data-act="saveCustom" style="font-weight:600">追加</button></div>
+  openSheet(`<div class="sh-h"><button data-act="backFood">戻る</button><h3>手入力</h3><button data-act="saveCustom" style="font-weight:600">追加</button></div>
     ${seg('cslot', SLOTS, sl)}
-    <div class="group" style="margin-top:10px">${timeRow('ctime', t)}</div>
+    <div class="group" style="margin-top:12px">${timeRow('ctime', t)}</div>
     <input class="in" id="cn" placeholder="メニュー名（例：鶏むね＋ご飯）" style="margin-top:12px">
     <div class="grid3" style="margin-top:12px">
       <label>P (g)<input id="cp" type="number" inputmode="decimal"></label>
       <label>F (g)<input id="cf" type="number" inputmode="decimal"></label>
       <label>C (g)<input id="cc" type="number" inputmode="decimal"></label>
     </div>
-    <div class="card" style="margin-top:12px;text-align:center"><div class="lbl">カロリー（自動計算）</div><div class="hero m" id="ck">0<small>kcal</small></div></div>
+    <div class="group" style="margin-top:12px"><label class="row"><span class="grow">カロリー<div class="s" style="white-space:normal">パッケージの表示があればそのまま入力。空欄ならPFCから計算</div></span><input class="r num" id="ckin" type="number" inputmode="decimal" placeholder="自動"><span class="unit">kcal</span></label></div>
+    <div class="card" style="margin-top:12px;text-align:center"><div class="lbl" id="cklbl">カロリー（PFCから計算）</div><div class="hero m" id="ck">0<small>kcal</small></div></div>
     <div class="group" style="margin-top:12px"><label class="row"><span class="grow">マイメニューに登録</span><span class="switch"><input type="checkbox" id="cs"><span></span></span></label></div>`);
   $('#panel').dataset.slot = sl;
-  const upd = () => $('#ck').innerHTML = `${Math.round(calcK())}<small>kcal</small>`;
-  ['cp', 'cf', 'cc'].forEach(id => $('#' + id).addEventListener('input', upd));
+  const upd = () => { $('#ck').innerHTML = `${Math.round(calcK())}<small>kcal</small>`; $('#cklbl').textContent = $('#ckin').value ? 'カロリー（入力した値）' : 'カロリー（PFCから計算）'; };
+  ['cp', 'cf', 'cc', 'ckin'].forEach(id => $('#' + id).addEventListener('input', upd));
 }
-const calcK = () => num($('#cp').value) * 4 + num($('#cf').value) * 9 + num($('#cc').value) * 4;
+const calcK = () => ($('#ckin') && num($('#ckin').value)) || (num($('#cp').value) * 4 + num($('#cf').value) * 9 + num($('#cc').value) * 4);
 
 function editMealSheet(id) {
   const m = mealsToday().find(x => x.id === id); if (!m) return;
   openSheet(`<div class="sh-h"><button data-act="close">閉じる</button><h3>食べたもの</h3><span style="min-width:64px"></span></div>
-    <div class="card"><div class="t" style="font-weight:600;white-space:normal">${esc(m.name)}</div><div class="hero m" style="margin-top:6px">${Math.round(m.kcal)}<small>kcal</small></div>
+    <div class="card"><div class="t" style="font-weight:600;white-space:normal">${esc(m.name)}</div><div class="hero m" style="margin-top:8px">${Math.round(m.kcal)}<small>kcal</small></div>
     <div class="sub num">P ${fmtN(r1(m.p))} · F ${fmtN(r1(m.f))} · C ${fmtN(r1(m.c))}</div></div>
     <div class="slbl">いつ食べた？</div>${seg('mslot', SLOTS, m.slot)}
-    <div class="group" style="margin-top:10px">${timeRow('mtime', m.t)}</div>
+    <div class="group" style="margin-top:12px">${timeRow('mtime', m.t)}</div>
     <button class="btn danger" data-act="delMeal" data-id="${m.id}">削除</button>`);
   $('#panel').dataset.mid = id;
   $('#mtime').addEventListener('change', e => { if (!e.target.value) return; m.t = e.target.value; save(); renderHome(); });
@@ -871,7 +1009,7 @@ function completeSheet(pid, sid) {
   const P = findPlan(pid), s = P.sessions.find(x => x.id === sid);
   openSheet(`<div class="sh-h"><button data-act="close">キャンセル</button><h3>${s.max ? 'MAX挑戦' : '記録'}</h3><span style="min-width:64px"></span></div>
     <div class="lbl" style="text-align:center">${esc(P.ex)}</div>
-    <div class="card" style="margin-top:12px;padding:6px 18px">
+    <div class="card" style="margin-top:12px;padding:8px 16px">
       <div class="srow"><span>重量</span>${stepper('aw', s.w, 2.5, 'kg')}</div>
       <div class="srow"><span>回数</span>${stepper('ar', s.r, 1, '回')}</div>
       <div class="srow"><span>セット</span>${stepper('as', s.sets, 1, '')}</div>
@@ -899,7 +1037,7 @@ function renderPlan() {
   const active = S.plans.filter(P => !isFinished(P)), done = S.plans.filter(isFinished);
   const card = P => { const n = P.sessions.filter(s => s.done).length, left = diffDays(today(), P.targetDate);
     return `<button class="pcard" data-act="openPlan" data-id="${P.id}"><div class="h"><span class="t">${esc(P.ex)}</span><span class="pill">${esc(P.part || partOf(P.ex))}</span>${I.chev}</div>
-      <div class="w">${P.cur}<span class="muted" style="font-weight:400;margin:0 6px">→</span><span class="accent">${P.target}</span><small>kg</small></div>
+      <div class="w">${P.cur}<span class="muted" style="font-weight:400;margin:0 8px">→</span><span class="accent">${P.target}</span><small>kg</small></div>
       <div class="bar thin"><i style="width:${n / P.sessions.length * 100}%"></i></div>
       <div class="sub num">${left > 0 ? `MAXまで ${left}日` : left === 0 ? '今日がMAX挑戦日' : '終了'} · ${n}/${P.sessions.length}</div></button>`; };
   el.innerHTML = header('プラン') + `
@@ -913,10 +1051,10 @@ function planDetail(P) {
   let weeks = '';
   for (let i = 1; i <= P.weeks; i++) {
     const ss = P.sessions.filter(s => s.week === i); if (!ss.length) continue;
-    weeks += `<div class="sec"><span>WEEK ${i}</span><span>${PH[ss[0].ph]}</span></div><div class="group">
+    weeks += `<div class="sec"><span>WEEK ${i}</span><span>${PH[ss[0].ph] || ''}</span></div><div class="group">
       ${ss.map(s => `<div class="row ${s.date === td ? 'today' : ''} ${s.done ? 'fin' : ''}">
         <span class="d">${s.date === td ? '<span class="dot"></span>今日' : fmtD(s.date)}</span>
-        <div class="grow"><div class="t num">${s.max ? `<span class="warn">MAX</span> ${s.w}kg` : `${s.w}kg × ${s.r} × ${s.sets}`}</div>${s.label ? `<div class="s">${s.label}</div>` : ''}</div>
+        <div class="grow"><div class="t num">${s.max ? `<span class="warn">MAX</span> ${s.w}kg` : `${s.w}kg × ${s.r}回 × ${s.sets}`}</div><div class="s">${s.max ? esc(s.label) : [kindLabel(s), rirTxt(s)].filter(Boolean).join(' · ')}</div></div>
         <button class="circ ${s.done ? 'on' : ''}" data-act="toggle" data-pid="${P.id}" data-id="${s.id}" aria-label="完了">${I.check}</button></div>`).join('')}
     </div>`;
   }
@@ -927,6 +1065,7 @@ function planDetail(P) {
       <div class="bar"><i style="width:${doneN / P.sessions.length * 100}%"></i></div>
       <div class="sub num">${left > 0 ? `MAXまで ${left}日（${fmtD(P.targetDate)}）` : left === 0 ? '今日がMAX挑戦日' : 'サイクル終了'} · ${doneN}/${P.sessions.length} · 週${P.freq}回</div>
       <div class="note">${ADVICE[P.mode]}</div>
+      <button class="link" data-act="planInfo">このプランの組み方と根拠 ›</button>
     </div>
     ${weeks}
     <button class="btn" data-act="share" data-v="plan" data-id="${P.id}">${I.share}画像でシェア</button>
@@ -938,10 +1077,10 @@ function planForm() {
   return `
     <div class="group"><button class="row" data-act="pickPlanEx"><span class="grow">種目</span><span class="val">${esc(pf.ex)}</span>${I.chev}</button></div>
     <div class="sec">いまの実力</div>
-    <div class="card" style="padding:6px 18px">
+    <div class="card" style="padding:8px 16px">
       <div class="srow"><span>重量</span>${stepper('fw', pf.w, 2.5, 'kg')}</div>
       <div class="srow"><span>回数</span>${stepper('fr', pf.r, 1, '回')}</div>
-      <div class="srow"><span class="muted">推定1RM</span><b class="num" id="pf1" style="font-size:20px"></b><span class="unit">kg</span></div>
+      <div class="srow"><span class="muted">推定1RM</span><b class="num" id="pf1" style="font-size:22px"></b><span class="unit">kg</span></div>
     </div>
     <div class="sec">目標</div>
     <div class="card">
@@ -951,7 +1090,7 @@ function planForm() {
       <div class="chips" style="padding:4px 0 0">${[4, 8, 12, 16, 24, 36].map(w => `<button data-act="setWeeks" data-v="${w}">${w}週</button>`).join('')}</div>
       <div class="sub num" id="fdate"></div>
       <div id="fsug"></div>
-      <div class="field"><div class="lbl">この種目の頻度</div>${seg('freq', [[1, '週1'], [2, '週2'], [3, '週3']], pf.freq)}</div>
+      <div class="field"><div class="lbl">この種目の頻度</div>${seg('freq', [[1, '週1'], [2, '週2'], [3, '週3']], pf.freq)}<div class="sub" id="freqNote"></div></div>
       <div class="field"><div class="lbl">モード</div>${seg('mode', [['cut', '減量'], ['maint', '維持'], ['bulk', '増量']], pf.mode)}</div>
       <div class="field"><div class="lbl">開始日</div><input type="date" id="fs" class="in" value="${pf.start}"></div>
     </div>
@@ -981,43 +1120,139 @@ function planPreview() {
   let sug = '';
   if (c && pf.target > c && cls === 'warn') {
     const lim = { cut: .6, maint: 1, bulk: 1.5 }[pf.mode], need = Math.min(52, Math.max(3, Math.ceil((pf.target / c - 1) * 100 / lim)));
-    if (need > pf.weeks) sug = `<button class="btn ghost" style="height:40px;font-size:15px;margin-top:10px" data-act="setWeeks" data-v="${need}">無理のないペースなら ${need}週 → 設定する</button>`;
+    if (need > pf.weeks) sug = `<button class="btn ghost" style="height:40px;font-size:15px;margin-top:12px" data-act="setWeeks" data-v="${need}">無理のないペースなら ${need}週 → 設定する</button>`;
   }
   $('#fsug').innerHTML = sug;
+  $('#freqNote').innerHTML = ({ 1: '高重量の日だけ', 2: '高重量の日 ＋ ボリュームの日', 3: '高重量 ＋ テクニック ＋ ボリュームの日' })[pf.freq] + ' · <button class="link" style="display:inline;margin:0" data-act="planInfo">組み方と根拠</button>';
 }
+/* ---- プラン生成（根拠は planInfo() を参照） ----
+   ・4週1ブロック：3週かけて少しずつ重く（余力3→2→1回）、4週目は回復週（ボリューム半分）
+   ・ブロックが進むほど回数を減らして重く：基礎（6回）→ 強化（4回）→ ピーク（2回）
+   ・週2〜3回の日は役割を分ける（日替わり波状）：高重量／ボリューム／テクニック
+   ・最後の1週はテーパー（ボリューム約半分・重さは維持）→ MAX挑戦
+   ・重量は「目標の推定1RM × (余力込みの回数)」からO'Conner式で逆算 */
+const KIND = { heavy: '高重量', vol: 'ボリューム', tech: 'テクニック', dl: '回復', taper: '調整', prime: '軽めの調整', max: 'MAX挑戦' };
+const KIND_NOTE = { heavy: 'その日のメイン。重さに慣れる日', vol: '回数を多めに。筋量と練習量を稼ぐ日', tech: '軽めを速く正確に。フォームを固める日', dl: '疲労を抜く週。重さも量も控えめ', taper: '量を減らし、重さはキープ', prime: '本番前の動きの確認だけ', max: '目標重量に挑戦' };
+const BLOCK = { base: { n: '基礎', h: 6 }, str: { n: '強化', h: 4 }, peak: { n: 'ピーク', h: 2 } };
+const kindLabel = s => s.kind ? KIND[s.kind] : (s.label || '');
+const rirTxt = s => s.rir != null ? `余力${s.rir}回` : '';
 function genPlan(cfg, id) {
   const cur = e1rm(cfg.w, cfg.r), N = cfg.weeks, tgt = cfg.target, m = cfg.mode;
   const offs = { 1: [0], 2: [0, 3], 3: [0, 2, 4] }[cfg.freq];
-  const SETS = { vol: { cut: 3, maint: 3, bulk: 4 }, str: { cut: 3, maint: 4, bulk: 5 }, peak: { cut: 3, maint: 3, bulk: 3 } };
-  const emAt = i => cur + (tgt - cur) * (i - 1) / (N - 1);
-  const sessions = [];
+  const roles = { 1: ['heavy'], 2: ['heavy', 'vol'], 3: ['heavy', 'tech', 'vol'] }[cfg.freq];
+  const em = i => cur + (tgt - cur) * (i - 1) / Math.max(1, N - 1);        // その週に想定する推定1RM
+  const wt = (e, reps, rir) => r25(e / (1 + (reps + rir) / 40));
+  // 週の種類を決める
+  const type = [];
   for (let i = 1; i <= N; i++) {
-    const ws = addDays(cfg.start, (i - 1) * 7);
-    let ph;
-    if (i === N) ph = 'test';
-    else if (N >= 10 && i % 5 === 0 && i < N - 1) ph = 'dl';   // 長期プランは5週ごとに回復週
-    else { const fr = i / (N - 1); ph = fr <= .4 ? 'vol' : fr <= .75 ? 'str' : 'peak'; }
-    if (ph === 'dl') {
-      offs.forEach((o, k) => sessions.push({ id: `${id}_${i}-${k}`, week: i, ph, date: addDays(ws, o), label: '回復（軽め）', w: r25(emAt(i) * .6), r: 5, sets: 2, done: false }));
-    } else if (ph !== 'test') {
-      const reps = ph === 'vol' ? (m === 'cut' ? 8 : 10) : ph === 'str' ? 5 : 3;
-      const rir = ph === 'peak' ? 1 : 2;
-      const w = r25(emAt(i) / (1 + (reps + rir) / 40));
-      const st = SETS[ph][m];
-      offs.forEach((o, k) => {
-        let s;
-        if (k === 0) s = { label: '', w, r: reps, sets: st };
-        else if (k === 1) s = { label: '補助', w: r25(w * .9), r: reps + 2, sets: m === 'cut' ? Math.max(2, st - 1) : st };
-        else s = { label: 'スピード重視', w: r25(w * .8), r: Math.max(3, reps - 2), sets: 3 };
-        sessions.push({ id: `${id}_${i}-${k}`, week: i, ph, date: addDays(ws, o), ...s, done: false });
+    if (i === N) type[i] = 'test';
+    else if (N >= 5 && i === N - 1) type[i] = 'taper';
+    else if (N >= 8 && i % 4 === 0) type[i] = 'dl';
+    else type[i] = 'load';
+  }
+  // 回復週・テーパーで区切られた「負荷週のかたまり」ごとに1ブロック
+  const groups = []; let g = [];
+  for (let i = 1; i <= N; i++) { if (type[i] === 'load') g.push(i); else if (g.length) { groups.push(g); g = []; } }
+  if (g.length) groups.push(g);
+  const G = groups.length, seq = G === 1 ? ['str'] : G === 2 ? ['base', 'peak'] : G === 3 ? ['base', 'str', 'peak'] : null;
+  const blockOfGroup = gi => seq ? seq[gi] : (gi / (G - 1) < .4 ? 'base' : gi / (G - 1) < .75 ? 'str' : 'peak');
+  const gIdx = i => groups.findIndex(x => x.includes(i));
+  const blockOf = i => blockOfGroup(gIdx(i));
+  const volSets = { cut: 2, maint: 3, bulk: 4 }[m];            // 減量中は量を控えめに（強度は維持）
+  const sessions = [];
+  let prevBlock = null;
+  for (let i = 1; i <= N; i++) {
+    const ws = addDays(cfg.start, (i - 1) * 7), t = type[i], e = em(i);
+    const push = (k, o, x) => sessions.push({ id: `${id}_${i}-${k}`, week: i, ph: x.ph, date: addDays(ws, o), done: false, ...x });
+    if (t === 'load') {
+      const bl = blockOf(i), H = BLOCK[bl].h;
+      const pos = groups[gIdx(i)].indexOf(i);                                    // ブロック内の何週目か
+      const rir = [3, 2, 1][Math.min(pos, 2)];
+      roles.forEach((role, k2) => {
+        if (role === 'heavy') push(k2, offs[k2], { ph: bl, kind: 'heavy', w: wt(e, H, rir), r: H, sets: cfg.freq === 1 ? 4 : 3, rir });
+        if (role === 'vol') push(k2, offs[k2], { ph: bl, kind: 'vol', w: wt(e, H + 4, rir + 1), r: H + 4, sets: volSets, rir: rir + 1 });
+        if (role === 'tech') push(k2, offs[k2], { ph: bl, kind: 'tech', w: r25(e * .72), r: 3, sets: 5, rir: 5 });
       });
+      prevBlock = bl;
+    } else if (t === 'dl') {
+      const H = BLOCK[prevBlock || 'base'].h;
+      roles.forEach((role, k2) => push(k2, offs[k2], { ph: 'dl', kind: 'dl', w: r25(wt(e, H, 4) * .9), r: H, sets: 2, rir: 5 }));
+    } else if (t === 'taper') {
+      roles.forEach((role, k2) => role === 'heavy'
+        ? push(k2, offs[k2], { ph: 'taper', kind: 'taper', w: wt(e, 2, 1), r: 2, sets: 2, rir: 1 })
+        : push(k2, offs[k2], { ph: 'taper', kind: 'prime', w: r25(e * .7), r: 3, sets: 2, rir: 5 }));
     } else {
-      if (cfg.freq >= 2) sessions.push({ id: `${id}_${i}-0`, week: i, ph, date: ws, label: '調整（軽め）', w: r25(emAt(N - 1) * .75), r: 3, sets: 3, done: false });
+      if (cfg.freq >= 2) push(0, 0, { ph: 'test', kind: 'prime', w: r25(tgt * .7), r: 3, sets: 2, rir: 5 });
       const warm = [.5, .7, .85, .93].map(x => r25(tgt * x)).join(' → ');
-      sessions.push({ id: `${id}_${i}-m`, week: i, ph, date: addDays(ws, offs[offs.length - 1]), label: 'W-up ' + warm, warm, w: tgt, r: 1, sets: 1, max: true, done: false });
+      push('m', offs[offs.length - 1], { ph: 'test', kind: 'max', w: tgt, r: 1, sets: 1, max: true, warm, label: 'W-up ' + warm });
     }
   }
-  return { ...cfg, id, part: partOf(cfg.ex), cur: r1(cur), sessions, targetDate: sessions[sessions.length - 1].date };
+  return { ...cfg, id, v: 2, part: partOf(cfg.ex), cur: r1(cur), sessions, targetDate: sessions[sessions.length - 1].date };
+}
+
+function calcInfo() {
+  const L = (t, u) => `<a href="${u}" target="_blank" rel="noopener" class="accent">${t}</a>`;
+  const b = S.body, bmr = r10(bmrOf(b)), mt = maintOf(b);
+  openSheet(`<div class="sh-h"><span style="min-width:64px"></span><h3>カロリー計算の根拠</h3><button data-act="close">閉じる</button></div>
+    <div class="info">
+      <h4>① 基礎代謝</h4>
+      <p>Mifflin-St Jeor式で計算しています。<br><span class="num" style="color:var(--t1)">男性：10×体重 ＋ 6.25×身長 − 5×年齢 ＋ 5<br>女性：10×体重 ＋ 6.25×身長 − 5×年齢 − 161</span><br>あなたの場合：約 <b class="num" style="color:var(--t1)">${bmr.toLocaleString()} kcal</b></p>
+      <ul>
+        <li>${L('Mifflin et al. (1990) 健康な成人の安静時代謝を推定する式', 'https://pubmed.ncbi.nlm.nih.gov/2305711/')}</li>
+        <li>${L('Frankenfield et al. (2005) 推定式を比べた系統的レビュー。肥満でない人ではMifflin-St Jeor式が最も誤差が小さい', 'https://www.andeal.org/files/Docs/Frankenfield_et_al_2005%5B1%5D.pdf')}</li>
+      </ul>
+      <h4>② 日常の消費（維持カロリー）</h4>
+      <p>基礎代謝 × 活動係数（座り仕事 1.2 ／ よく歩く 1.375 ／ 肉体労働 1.55）。あなたの場合：<b class="num" style="color:var(--t1)">${mt.toLocaleString()} kcal</b><br>トレーニングは記録から別に足すため、この係数にはトレーニングを含めていません。係数は栄養計算で一般的に使われる目安の値で、特定の研究で決めた値ではありません。</p>
+      <h4>③ 運動の消費</h4>
+      <p>METs × 体重(kg) × 時間(h) × 1.05。METsは身体活動の強さの国際的な一覧（Compendium）の値です。筋トレは5.0 METs、1セットを休憩込み3分として計算しています（Compendiumの筋トレは3.5〜6.0 METs）。</p>
+      <ul><li>${L('Ainsworth et al. (2011) Compendium of Physical Activities（活動ごとのMETs一覧）', 'https://pubmed.ncbi.nlm.nih.gov/21681120/')}</li></ul>
+      <h4>④ 目標摂取（減量・増量）</h4>
+      <p>減量は体重の週0.5%減、増量は週0.25%増のペースで、脂肪1kg≒7,700kcalとして1日あたりの差を出しています。筋肉を残して減量するには週0.5〜1%のペースが勧められています。なお「1kg＝7,700kcal」は目安で、実際は減量が進むほど減り方がゆるやかになります。</p>
+      <ul>
+        <li>${L('Helms et al. (2014) ナチュラルボディビルの減量期の栄養ガイドライン（週0.5〜1%減を推奨）', 'https://pubmed.ncbi.nlm.nih.gov/24864135/')}</li>
+        <li>${L('Hall (2008) 体重1単位を減らすのに必要なエネルギー不足は一定ではない', 'https://pubmed.ncbi.nlm.nih.gov/17848938/')}</li>
+      </ul>
+      <h4>⑤ PFCの目標</h4>
+      <p>タンパク質は体重×2.0g（減量中は2.2g）、脂質はカロリーの25%、残りを炭水化物にしています。筋トレの効果は約1.6g/kgで頭打ちになり、多めに見て2.2g/kgまでが目安とされています。減量中はやや多めが勧められています。</p>
+      <ul>
+        <li>${L('Morton et al. (2018) タンパク質と筋トレのメタ分析（1.6g/kg、上限の目安2.2g/kg）', 'https://pubmed.ncbi.nlm.nih.gov/28698222/')}</li>
+        <li>${L('Helms et al. (2014) 減量期は除脂肪体重あたり2.3〜3.1g/kgを推奨', 'https://pubmed.ncbi.nlm.nih.gov/24864135/')}</li>
+      </ul>
+      <h4>⑥ 食品のカロリー</h4>
+      <p>アプリ内の食品は、日本食品標準成分表（八訂）の値をもとに、一般的な1個・1食の重さで換算した推定値です。市販品やおみやげはパッケージの栄養成分表示が一番正確なので、「手入力」でカロリーをそのまま入れてください。PFCから計算するときは P×4 ＋ F×9 ＋ C×4（kcal/g）を使います。</p>
+      <ul><li>${L('文部科学省「日本食品標準成分表（八訂）増補2023年」', 'https://www.mext.go.jp/a_menu/syokuhinseibun/mext_00001.html')}</li>
+      <li>${L('文部科学省「食品成分データベース」（食品ごとの値を検索できます）', 'https://fooddb.mext.go.jp/')}</li></ul>
+      <p class="sub">どの式も集団の平均から出した推定です。2〜3週間、体重の変化を見て、目標カロリーを±100〜200kcalずつ調整するのが確実です。</p>
+    </div>`);
+}
+
+function planInfo() {
+  const L = (t, u) => `<a href="${u}" target="_blank" rel="noopener" class="accent">${t}</a>`;
+  openSheet(`<div class="sh-h"><span style="min-width:64px"></span><h3>プランの組み方</h3><button data-act="close">閉じる</button></div>
+    <div class="info">
+      <h4>1週間の役割</h4>
+      <div class="group">
+        ${['heavy', 'vol', 'tech'].map(k => `<div class="row"><span class="pill ${k === 'heavy' ? 'a' : ''}">${KIND[k]}</span><div class="grow s" style="white-space:normal;margin:0">${KIND_NOTE[k]}</div></div>`).join('')}
+      </div>
+      <p>週2回なら「高重量＋ボリューム」、週3回なら「高重量＋テクニック＋ボリューム」。同じ種目でも日によって重さと回数を変える「日替わり波状」という組み方です。以前の「補助日」はボリューム日に置き換えました。</p>
+      <h4>4週で1ブロック</h4>
+      <p>3週かけて余力を3回→2回→1回と減らしながら重くし、4週目は回復週（量を半分）にします。ブロックが進むほど回数を減らして重くします（基礎 6回 → 強化 4回 → ピーク 2回）。</p>
+      <h4>最後の2週</h4>
+      <p>MAXの前の週は、量を約半分に減らして重さは保つ「テーパー」。最終週は軽く動かしてからMAXに挑戦します。</p>
+      <h4>重量の決め方</h4>
+      <p>週ごとに「今の推定1RM → 目標」へ少しずつ上がる線を引き、その週の回数＋余力の回数から O'Conner式（1RM ＝ 重量 ×（1 ＋ 回数÷40））で重量を逆算しています。</p>
+      <h4>減量中</h4>
+      <p>カロリー不足は筋肉の増え方を落としますが、筋力の伸びへの影響は小さいとされています。そこで重さは維持し、ボリューム日のセット数だけ減らします。</p>
+      <h4>根拠にした研究</h4>
+      <ul>
+        <li>${L('Williams et al. (2017) 期分けした筋トレは、しない場合より最大筋力が伸びる（メタ分析）', 'https://link.springer.com/article/10.1007/s40279-017-0734-y')}</li>
+        <li>${L('Moesgaard et al. (2022) 量をそろえた比較で、波状の期分けが筋力に有利（メタ分析）', 'https://pubmed.ncbi.nlm.nih.gov/35044672/')}</li>
+        <li>${L('Grgic et al. (2018) 頻度を上げると筋力の伸びが大きい。主に総ボリュームの差による（メタ分析）', 'https://pubmed.ncbi.nlm.nih.gov/29470825/')}</li>
+        <li>${L('Pritchard et al. (2016) 一流パワーリフターは試合前に量を約半分に減らし、強度は維持する', 'https://pubmed.ncbi.nlm.nih.gov/26670988/')}</li>
+        <li>${L('Murphy & Koehler (2022) カロリー不足は筋量の伸びを妨げるが、筋力は妨げにくい（メタ分析）', 'https://pubmed.ncbi.nlm.nih.gov/34623696/')}</li>
+      </ul>
+      <p class="sub">4週ブロック・余力の段階・回数の割り当ては、上の研究とトレーニング現場で一般的なやり方をもとにした目安です。体調に合わせて調整してください。</p>
+    </div>`);
 }
 
 /* ================= LOG ================= */
@@ -1041,7 +1276,7 @@ function renderLog() {
         <div class="lbl" style="margin-top:8px">強度</div>
         <div style="margin-top:8px">${seg('clvl', LVL.map((l, i) => [i, l]), cdo.lvl)}</div>
         <div class="sub" id="cdesc" style="text-align:center"></div>
-        <div class="srow" style="margin-top:6px;border-top:.5px solid var(--sep)"><span>時間</span>${stepper('cmin', last ? last.min : 30, 5, '分')}</div>
+        <div class="srow" style="margin-top:8px;border-top:.5px solid var(--sep)"><span>時間</span>${stepper('cmin', last ? last.min : 30, 5, '分')}</div>
         <div class="e1"><div class="lbl">消費カロリー</div><div class="hero" id="ckc"></div></div>
         <button class="btn" data-act="saveCardio">保存</button>
       </div>
@@ -1057,7 +1292,7 @@ function renderLog() {
   const ex = S.recEx, last = S.logs.filter(l => l.ex === ex).slice(-1)[0];
   $('#tab-log').innerHTML = header('記録') + kindSeg + `
     <div class="group"><button class="row" data-act="pickRecEx"><span class="grow">種目</span><span class="val">${esc(ex)}</span>${I.chev}</button>${dateRow}</div>
-    <div class="card" style="margin-top:12px;padding:6px 18px 18px">
+    <div class="card" style="margin-top:12px;padding:8px 16px 16px">
       <div class="srow"><span>重量</span>${stepper('lw', last ? last.w : 60, 2.5, 'kg')}</div>
       <div class="srow"><span>回数</span>${stepper('lr', last ? last.r : 10, 1, '回')}</div>
       <div class="srow"><span>セット</span>${stepper('ls', last ? last.sets : 3, 1, '')}</div>
@@ -1068,7 +1303,7 @@ function renderLog() {
     <div class="sec"><b>推移</b></div>
     <div class="card" id="chart"></div>
     <div class="sec"><b>履歴</b></div>
-    <div style="margin-bottom:10px">${seg('hist', [[0, 'この種目'], [1, 'すべて']], histAll ? 1 : 0)}</div>
+    <div style="margin-bottom:12px">${seg('hist', [[0, 'この種目'], [1, 'すべて']], histAll ? 1 : 0)}</div>
     <div id="hist"></div>`;
   calc(); drawChart(ex); renderHist();
 }
@@ -1116,7 +1351,7 @@ function drawChart(ex) {
   const by = {};
   S.logs.filter(l => l.ex === ex).forEach(l => by[l.date] = Math.max(by[l.date] || 0, l.e1));
   const pts = Object.keys(by).sort().map(d => ({ d, v: by[d] }));
-  if (pts.length < 2) { el.innerHTML = '<div class="empty" style="padding:14px"><div class="muted">2日分記録するとグラフが出ます</div></div>'; return; }
+  if (pts.length < 2) { el.innerHTML = '<div class="empty" style="padding:16px"><div class="muted">2日分記録するとグラフが出ます</div></div>'; return; }
   const goal = goalOf(ex) || null;
   const vals = pts.map(p => p.v).concat(goal ? [goal] : []);
   let lo = Math.min(...vals), hi = Math.max(...vals); const pd = Math.max(2.5, (hi - lo) * .15); lo -= pd; hi += pd;
@@ -1171,13 +1406,13 @@ function renderCal() {
     <div class="sec" style="margin-top:4px"><b>最後にやった日</b><span>タップで絞り込み</span></div>
     <div class="tiles">${tiles}</div>
     <div class="card" style="margin-top:12px">
-      <div class="cal-h"><b>${y}年${m + 1}月 <span class="muted" style="font-weight:400;font-size:14px;margin-left:6px">${calPart === 'all' ? '' : calPart + ' · '}${count}日</span></b>
+      <div class="cal-h"><b>${y}年${m + 1}月 <span class="muted" style="font-weight:400;font-size:15px;margin-left:8px">${calPart === 'all' ? '' : calPart + ' · '}${count}日</span></b>
         <div class="nav"><button data-act="calPrev" aria-label="前の月">${I.left}</button><button data-act="calNext" aria-label="次の月">${I.right}</button></div></div>
       <div class="cal">${cells}</div>
       <div class="legend"><span><i></i>トレした日</span><span><i class="p"></i>予定</span></div>
     </div>
     <div class="sec"><b>${fmtD(calSel)}</b><span>${calSel === today() ? '今日' : ''}</span></div>
-    ${dayList ? `<div class="group">${dayList}</div>` : `<div class="card empty" style="padding:18px"><div class="muted">${calPart === 'all' ? '記録なし' : calPart + 'の記録なし'}</div></div>`}`;
+    ${dayList ? `<div class="group">${dayList}</div>` : `<div class="card empty" style="padding:16px"><div class="muted">${calPart === 'all' ? '記録なし' : calPart + 'の記録なし'}</div></div>`}`;
 }
 
 /* ================= Exercise picker ================= */
@@ -1218,18 +1453,26 @@ function renderPicker() {
 }
 
 /* ================= Settings ================= */
-const st = { bw: 70, act: 'mid', mode: 'cut' };
+const st = { b: null, mode: 'cut' };
+const profileFields = (pre, b) => `
+    <div class="card" style="padding:4px 16px"><div class="srow"><span>体重</span>${stepper(pre + 'bw', b.bw, 0.5, 'kg')}</div>
+      <div class="srow"><span>身長</span>${stepper(pre + 'h', b.h, 1, 'cm')}</div>
+      <div class="srow"><span>年齢</span>${stepper(pre + 'age', b.age, 1, '歳')}</div></div>
+    <div style="margin-top:8px">${seg(pre + 'sex', [['m', '男性'], ['f', '女性']], b.sex)}</div>
+    <div class="slbl">日常の活動量（トレーニング以外）</div>${seg(pre + 'act', Object.entries(PAL).map(([k, v]) => [k, v[0]]), b.act)}`;
+function readProfile(pre, b) { ['bw', 'h', 'age'].forEach(k => { const v = num($('#' + pre + k).value); if (v > 0) b[k] = v; }); return b; }
 function settingsSheet() {
-  st.bw = S.body.bw; st.act = S.body.act || 'mid'; st.mode = S.mode;
+  st.b = { ...S.body }; st.mode = S.mode;
   const T = S.targets;
   const r = (id, l, v, u) => `<label class="row"><span class="grow">${l}</span><input class="r num" id="${id}" type="number" inputmode="decimal" value="${v}"><span class="unit">${u}</span></label>`;
   openSheet(`<div class="sh-h"><button data-act="close">キャンセル</button><h3>設定</h3><button data-act="saveSettings" style="font-weight:600">保存</button></div>
-    <div class="slbl" style="margin-top:4px">体重から参考カロリー</div>
-    <div class="card" style="padding:6px 18px"><div class="srow"><span>体重</span>${stepper('sbw', st.bw, 0.5, 'kg')}</div></div>
-    <div class="slbl">日常の活動量（トレ以外）</div>${seg('sact', Object.entries(ACT).map(([k, v]) => [k, v[0]]), st.act)}
-    <div id="srefs" style="margin-top:12px">${refCards(st.bw, st.act, st.mode)}</div>
-    <div class="slbl">1日の目標（手動で調整もOK）</div>
+    <div class="slbl" style="margin-top:4px">からだ</div>
+    ${profileFields('s', st.b)}
+    <div id="srefs" style="margin-top:16px">${refCards(st.b, st.mode)}</div>
+    <div class="slbl">1日の目標摂取（手動で調整もOK）</div>
     <div class="group">${r('sk', 'カロリー', T.kcal, 'kcal')}${r('sp', 'タンパク質', T.p, 'g')}${r('sf', '脂質', T.f, 'g')}${r('sc', '炭水化物', T.c, 'g')}</div>
+    <div class="sub" style="margin:8px 4px 0">筋トレ・有酸素で消費した分は、その日の「あと食べられる」に自動で足されます。</div>
+    <button class="link" style="margin-left:4px" data-act="calcInfo">計算式と出典を見る ›</button>
     ${S.presets.length ? `<div class="slbl">マイメニュー</div><div class="group">${S.presets.map((p, i) => `<div class="row"><span class="grow t">${esc(p.name)}</span><span class="kc">${Math.round(p.kcal)}</span><button class="x" data-act="delPreset" data-i="${i}">${I.x}</button></div>`).join('')}</div>` : ''}
     <div class="slbl">食事リマインダー</div>
     <div class="group">
@@ -1244,38 +1487,37 @@ function settingsSheet() {
       <button class="row accent" data-act="restore">バックアップから復元</button>
       <button class="row warn" data-act="reset">すべてのデータを削除</button>
     </div>
-    <div class="about">${logoSVG(56)}<div><div style="font-weight:600">Workout Planner</div><div class="sub" style="margin-top:2px">食事と筋トレを、ひとつに。</div></div></div>
-    <textarea id="bText" class="hidden" rows="4" style="width:100%;margin-top:10px;padding:12px;font-size:12px" placeholder="ここにバックアップを貼り付け"></textarea>
+    <div class="about">${logoSVG(56)}<div><div style="font-weight:600">Workout Planner</div><div class="sub" style="margin-top:4px">食事と筋トレを、ひとつに。</div></div></div>
+    <textarea id="bText" class="hidden" rows="4" style="width:100%;margin-top:12px;padding:12px;font-size:13px" placeholder="ここにバックアップを貼り付け"></textarea>
     <button id="bGo" class="btn hidden" data-act="restoreGo">復元する</button>`);
   $('#rmOn').addEventListener('change', e => { try { if (e.target.checked && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (err) {} });
-  $('#sbw').addEventListener('input', () => { st.bw = num($('#sbw').value) || 70; $('#srefs').innerHTML = refCards(st.bw, st.act, st.mode); });
+  ['sbw', 'sh', 'sage'].forEach(id => $('#' + id).addEventListener('input', () => { readProfile('s', st.b); $('#srefs').innerHTML = refCards(st.b, st.mode); applyRefToInputs(); }));
 }
-function applyRefToInputs() { const t = autoTargets(st.bw, st.mode, st.act); $('#sk').value = t.kcal; $('#sp').value = t.p; $('#sf').value = t.f; $('#sc').value = t.c; }
+function applyRefToInputs() { const t = autoTargets(st.b, st.mode); $('#sk').value = t.kcal; $('#sp').value = t.p; $('#sf').value = t.f; $('#sc').value = t.c; }
 
 /* ================= Tutorial ================= */
-let tIdx = 0; const tu = { mode: 'cut', act: 'mid', bw: 70 };
+let tIdx = 0; const tu = { mode: 'cut', b: null };
 function openTutorial() {
-  tIdx = 0; tu.mode = S.mode; tu.act = S.body.act || 'mid'; tu.bw = S.body.bw || 70;
-  const mockHome = `<div class="mock"><div class="lbl">残り</div><div class="hero" style="font-size:40px">1,240<small>kcal</small></div><div class="bar"><i style="width:38%"></i></div>
-    <div class="lbl" style="margin-top:14px">朝食</div><div class="row" style="padding:6px 0 0;min-height:0"><div class="grow"><div class="t" style="font-size:15px">鶏むね肉 150g</div></div><span class="kc">158</span></div></div>`;
-  const mockPlan = `<div class="mock"><div class="t" style="font-weight:600;font-size:15px">スミスベンチプレス</div><div class="hero" style="font-size:30px">87.5<span class="muted" style="font-weight:400;margin:0 6px">→</span><span class="accent">92.5</span><small>kg</small></div>
-    <div class="t" style="font-weight:600;font-size:15px;margin-top:14px">スクワット</div><div class="hero" style="font-size:30px">120<span class="muted" style="font-weight:400;margin:0 6px">→</span><span class="accent">130</span><small>kg</small></div></div>`;
+  tIdx = 0; tu.mode = S.mode; tu.b = { ...S.body };
+  const mockHome = `<div class="mock"><div class="lbl">残り</div><div class="hero" style="font-size:34px">1,240<small>kcal</small></div><div class="bar"><i style="width:38%"></i></div>
+    <div class="lbl" style="margin-top:16px">朝食</div><div class="row" style="padding:8px 0 0;min-height:0"><div class="grow"><div class="t" style="font-size:15px">鶏むね肉 150g</div></div><span class="kc">158</span></div></div>`;
+  const mockPlan = `<div class="mock"><div class="t" style="font-weight:600;font-size:15px">スミスベンチプレス</div><div class="hero" style="font-size:28px">87.5<span class="muted" style="font-weight:400;margin:0 8px">→</span><span class="accent">92.5</span><small>kg</small></div>
+    <div class="t" style="font-weight:600;font-size:15px;margin-top:16px">スクワット</div><div class="hero" style="font-size:28px">120<span class="muted" style="font-weight:400;margin:0 8px">→</span><span class="accent">130</span><small>kg</small></div></div>`;
   const mockCal = `<div class="mock"><div class="tiles" style="grid-template-columns:repeat(3,1fr)"><div class="tile" style="background:var(--s2)"><div class="n">胸</div><div class="v">今日</div></div><div class="tile" style="background:var(--s2)"><div class="n">背中</div><div class="v">2日前</div></div><div class="tile" style="background:var(--s2)"><div class="n">脚</div><div class="v warn">8日前</div></div></div></div>`;
   const slides = [
     `<div class="logo">${logoSVG(112)}</div><h2>Workout Planner</h2><p>食事と筋トレを、ひとつに。</p>`,
     `${mockHome}<h2>食事</h2><p>食品名で検索して、朝・昼・夜に追加。\n残りカロリーがすぐわかる。</p>`,
     `${mockPlan}<h2>プラン</h2><p>種目ごとに目標重量を入れるだけ。\nMAX更新メニューを自動で作成。</p>`,
     `${mockCal}<h2>カレンダー</h2><p>トレした日と、部位ごとに\n最後にやった日がひと目でわかる。</p>`,
-    `<h2 style="margin-top:0">目標を決めよう</h2><p>体重から目安を出します。</p>
-     <div class="setup"><div class="card" style="padding:6px 18px"><div class="srow"><span>体重</span>${stepper('tbw', tu.bw, 0.5, 'kg')}</div></div>
-     <div class="lbl" style="margin:14px 4px 8px">活動量</div>${seg('tact', Object.entries(ACT).map(([k, v]) => [k, v[0]]), tu.act)}
-     <div id="trefs" style="margin-top:14px">${refCards(tu.bw, tu.act, tu.mode)}</div></div>`
+    `<h2 style="margin-top:0">目標を決めよう</h2><p>からだの情報から目安を出します。</p>
+     <div class="setup">${profileFields('t', tu.b)}
+     <div id="trefs" style="margin-top:16px">${refCards(tu.b, tu.mode)}</div></div>`
   ];
   $('#tut').innerHTML = `<div class="tut-top"><button data-act="tutSkip">スキップ</button></div>
     <div class="tut-view"><div class="tut-track" id="ttrack">${slides.map(s => `<div class="slide">${s}</div>`).join('')}</div></div>
     <div class="tut-bottom"><div class="dots">${slides.map(() => '<i></i>').join('')}</div><button class="btn" id="tNext" data-act="tutNext">次へ</button></div>`;
   $('#tut').classList.add('open');
-  $('#tbw').addEventListener('input', () => { tu.bw = num($('#tbw').value) || 70; $('#trefs').innerHTML = refCards(tu.bw, tu.act, tu.mode); });
+  ['tbw', 'th', 'tage'].forEach(id => $('#' + id).addEventListener('input', () => { readProfile('t', tu.b); $('#trefs').innerHTML = refCards(tu.b, tu.mode); }));
   let sx = null;
   $('#tut').ontouchstart = e => sx = e.touches[0].clientX;
   $('#tut').ontouchend = e => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 50) tutGo(tIdx + (dx < 0 ? 1 : -1)); };
@@ -1288,14 +1530,16 @@ function tutGo(i) {
   $('#tNext').textContent = tIdx === n - 1 ? 'はじめる' : '次へ';
 }
 function tutFinish(apply) {
-  if (apply) { S.mode = tu.mode; S.body = { bw: tu.bw, act: tu.act }; S.targets = autoTargets(tu.bw, tu.mode, tu.act); }
+  if (apply) { readProfile('t', tu.b); S.mode = tu.mode; S.body = { ...tu.b }; S.targets = autoTargets(S.body, tu.mode); }
   S.onboarded = true; save(); $('#tut').classList.remove('open'); render();
 }
 
 /* ================= Share images ================= */
+/* 1080px幅・8pxグリッド。余白 M=80、文字サイズは IMG の段階だけを使う */
 const DISP = '"Inter Tight", "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif';
-const C = { w: '#ffffff', dim: 'rgba(255,255,255,0.58)', faint: 'rgba(255,255,255,0.2)', acc: '#0A84FF' };
-const M = 84;
+const C = { w: '#ffffff', dim: 'rgba(255,255,255,0.6)', faint: 'rgba(255,255,255,0.2)', rule: 'rgba(255,255,255,0.12)', acc: '#0A84FF' };
+const M = 80;
+const IMG = { cap: 22, body: 32, sub: 40, title: 56, display: 96, hero: 240 };
 const fmtK = n => Math.round(n).toLocaleString();
 const sh = { kind: 'train', arg: null, style: 'black', ratio: 'post', photo: null, blob: null, name: '' };
 const dot2 = k => { const d = parseKey(k); return `${pad(d.getMonth() + 1)}.${pad(d.getDate())}`; };
@@ -1308,25 +1552,30 @@ function T(x, s, px, py, size, o = {}) {
   const str = o.max ? fit(x, s, o.max) : String(s); x.fillText(str, px, py);
   const w = x.measureText(str).width; if ('letterSpacing' in x) x.letterSpacing = '0px'; return w;
 }
-const hair = (x, W, y, c = C.faint) => { x.fillStyle = c; x.fillRect(M, y, W - M * 2, 2); };
-function label(x, s, y, color = C.w) {
+function fitSize(x, s, size, maxW, w = 700, min = 40) {   // 幅に収まるまで段階的に縮める
+  let z = size; x.font = `${w} ${z}px ${DISP}`;
+  while (z > min && x.measureText(s).width > maxW) { z -= 8; x.font = `${w} ${z}px ${DISP}`; }
+  return z;
+}
+const rule = (x, W, y, c = C.faint, h = 2) => { x.fillStyle = c; x.fillRect(M, y, W - M * 2, h); };
+function label(x, s, y) {
   x.beginPath(); x.arc(M + 6, y - 8, 6, 0, Math.PI * 2); x.fillStyle = C.acc; x.fill();
-  T(x, s, M + 26, y, 22, { w: 700, ls: 6, c: color });
+  T(x, s, M + 24, y, IMG.cap, { w: 700, ls: 6 });
 }
 function hero(x, v, unit, y, size, cap) {
   const w = T(x, v, M - size * .04, y, size, { w: 800, ls: -size * .045 });
-  const ux = M - size * .04 + w + 14;
-  if (unit) T(x, unit, ux, y, Math.round(size * .15), { w: 700, ls: 3, c: C.dim });
-  if (cap) T(x, cap, ux + 2, y - size * .15 - 14, 20, { w: 700, ls: 4, c: C.dim });
-  return y - size * .74;   // 数字の上端
+  const ux = M - size * .04 + w + 16;
+  if (unit) T(x, unit, ux, y, IMG.body, { w: 700, ls: 3, c: C.dim });
+  if (cap) T(x, cap, ux + 2, y - IMG.body - 16, IMG.cap, { w: 700, ls: 4, c: C.dim });
+  return y - size * .74;
 }
-function stats(x, W, items, y) {
+function stats(x, W, items, y) {                       // 3列グリッド
   const cw = (W - M * 2) / items.length;
   items.forEach((it, i) => {
     const cx = M + i * cw;
-    T(x, it.l, cx, y - 62, 19, { w: 700, ls: 4, c: C.dim });
-    const w = T(x, it.v, cx, y, 46, { w: 700, ls: 0, c: it.c || C.w, max: cw - 20 });
-    if (it.u) T(x, it.u, cx + w + 8, y, 20, { w: 700, ls: 2, c: C.dim });
+    T(x, it.l, cx, y - 56, IMG.cap - 2, { w: 700, ls: 4, c: C.dim });
+    const w = T(x, it.v, cx, y, IMG.sub, { w: 700, c: it.c || C.w, max: cw - 24 });
+    if (it.u) T(x, it.u, cx + w + 8, y, IMG.cap - 2, { w: 700, ls: 2, c: C.dim });
   });
 }
 function paintBg(x, W, H) {
@@ -1335,66 +1584,93 @@ function paintBg(x, W, H) {
     const im = sh.photo, s = Math.max(W / im.width, H / im.height), iw = im.width * s, ih = im.height * s;
     x.drawImage(im, (W - iw) / 2, (H - ih) / 2, iw, ih);
     let g = x.createLinearGradient(0, 0, 0, H * .22); g.addColorStop(0, 'rgba(0,0,0,0.5)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H * .22);
-    g = x.createLinearGradient(0, H * .3, 0, H); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.55, 'rgba(0,0,0,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0.88)'); x.fillStyle = g; x.fillRect(0, H * .3, W, H * .7);
+    g = x.createLinearGradient(0, H * .25, 0, H); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.5, 'rgba(0,0,0,0.6)'); g.addColorStop(1, 'rgba(0,0,0,0.9)'); x.fillStyle = g; x.fillRect(0, H * .25, W, H * .75);
   } else if (sh.style === 'photo') { x.fillStyle = '#000'; x.fillRect(0, 0, W, H); }
 }
 function chrome(x, W) {
   drawGlyph(x, M - 11, 81, 62, C.w);
-  T(x, 'WORKOUT PLANNER', M + 60, 120, 22, { w: 700, ls: 7 });
-  T(x, dot3(today()), W - M, 120, 22, { w: 500, ls: 3, c: C.dim, a: 'right' });
+  T(x, 'WORKOUT PLANNER', M + 60, 120, IMG.cap, { w: 700, ls: 7 });
+  T(x, dot3(today()), W - M, 120, IMG.cap, { w: 500, ls: 3, c: C.dim, a: 'right' });
 }
+const Y_STATS = H => H - 136;          // 下段の数値のベースライン（8の倍数）
+const PART_EN = { '胸': 'CHEST', '背中': 'BACK', '肩': 'SHOULDERS', '腕': 'ARMS', '脚': 'LEGS', '腹': 'ABS', '有酸素': 'CARDIO', 'その他': 'OTHER' };
 
-function sceneTrain(x, W, H) {
-  const td = today(), yB = H - 130;
-  const logs = S.logs.filter(l => l.date === td), cs = S.cardio.filter(v => v.date === td);
+/* 今日のメニュー：何を・どれだけ やったかを主役に */
+function trainRows() {
+  const td = today(), logs = S.logs.filter(l => l.date === td), cs = S.cardio.filter(v => v.date === td);
   const byEx = {}; logs.forEach(l => (byEx[l.ex] = byEx[l.ex] || []).push(l));
-  let rows = Object.entries(byEx).map(([ex, ls]) => { const t = ls.reduce((m, l) => l.e1 > m.e1 ? l : m, ls[0]); return { n: ex, v: `${fmtN(t.w)}×${t.r}`, s: `× ${ls.reduce((a, l) => a + l.sets, 0)}` }; })
-    .concat(cs.map(v => ({ n: v.name, v: `${v.min}`, s: 'MIN' })));
-  const vol = logs.reduce((a, l) => a + l.w * l.r * l.sets, 0), mins = cs.reduce((a, v) => a + v.min, 0), b = burnOf(td);
-  let lbl = "TODAY'S SESSION", hv, hu;
-  if (vol) { hv = fmtK(vol); hu = 'KG VOL'; } else if (mins) { hv = String(mins); hu = 'MIN'; }
-  else {
-    lbl = "TODAY'S PLAN";
-    rows = S.plans.flatMap(P => P.sessions.filter(s => s.date === td).map(s => ({ n: P.ex, v: s.max ? `${fmtN(s.w)}` : `${fmtN(s.w)}×${s.r}`, s: s.max ? 'MAX' : `× ${s.sets}` })));
-    hv = rows.length ? String(rows.length) : '0'; hu = rows.length ? 'LIFTS' : 'REST DAY';
+  let rows = Object.entries(byEx).map(([ex, ls]) => {
+    const same = ls.every(l => l.w === ls[0].w && l.r === ls[0].r);
+    const d = same ? `${fmtN(ls[0].w)}kg × ${ls[0].r}回 × ${ls.reduce((a, l) => a + l.sets, 0)}セット`
+      : ls.map(l => `${fmtN(l.w)}×${l.r}×${l.sets}`).join(' / ') + ' kg';
+    return { n: ex, d, part: partOf(ex) };
+  }).concat(cs.map(v => ({ n: v.name, d: `${v.min}分 · ${LVL[v.lvl]}`, part: '有酸素' })));
+  let planned = false;
+  if (!rows.length) {
+    planned = true;
+    rows = S.plans.flatMap(P => P.sessions.filter(s => s.date === td).map(s => ({ n: P.ex, d: s.max ? `MAX ${fmtN(s.w)}kg` : `${fmtN(s.w)}kg × ${s.r}回 × ${s.sets}セット`, part: P.part || partOf(P.ex) })));
   }
-  stats(x, W, [{ l: 'EXERCISES', v: String(rows.length) }, { l: 'SETS', v: String(logs.reduce((a, l) => a + l.sets, 0)) }, { l: 'BURN', v: fmtK(b.strength + b.cardio), u: 'KCAL' }], yB);
-  let y = yB - 120; hair(x, W, y);
-  rows.slice(0, 5).reverse().forEach((r, i) => {
-    const yy = y - 34;
-    const sw = T(x, r.s, W - M, yy, 22, { w: 700, ls: 2, c: C.dim, a: 'right' });
-    const vw = T(x, r.v, W - M - sw - 12, yy, 32, { w: 700, a: 'right' });
-    T(x, r.n, M, yy, 30, { w: 600, max: W - M * 2 - sw - vw - 60 });
-    y -= 76; if (i < Math.min(rows.length, 5) - 1) { x.fillStyle = 'rgba(255,255,255,0.1)'; x.fillRect(M, y, W - M * 2, 1); }
+  return { rows, planned, sets: logs.reduce((a, l) => a + l.sets, 0) };
+}
+function sceneTrain(x, W, H) {
+  const { rows, planned, sets } = trainRows(), b = burnOf(today()), yB = Y_STATS(H), CW = W - M * 2;
+  stats(x, W, [{ l: 'EXERCISES', v: String(rows.length) }, { l: planned ? 'STATUS' : 'SETS', v: planned ? 'PLAN' : String(sets) }, { l: 'BURN', v: planned ? '—' : fmtK(b.strength + b.cardio), u: planned ? '' : 'KCAL' }], yB);
+  const ruleY = yB - 104; rule(x, W, ruleY);
+  // 行数に応じて段階を切り替え（2行組 大 → 2行組 小 → 1行組）
+  const maxRows = H > 1500 ? 12 : 8, shown = rows.slice(0, rows.length > maxRows ? maxRows - 1 : maxRows), more = rows.length - shown.length;
+  const n = shown.length + (more ? 1 : 0);
+  const L = n <= 3 ? { two: true, nm: IMG.body, dt: IMG.title, h: 144, nb: 44, db: 112 }
+    : n <= 5 ? { two: true, nm: 28, dt: IMG.sub, h: 112, nb: 40, db: 88 }
+    : { two: false, nm: IMG.body, dt: IMG.body, h: 72, nb: 48, db: 48 };
+  const listH = n * L.h, top = ruleY - 24 - listH;
+  shown.forEach((r, i) => {
+    const y0 = top + i * L.h;
+    if (i) { x.fillStyle = C.rule; x.fillRect(M, y0, CW, 1); }
+    if (L.two) {
+      const tw = T(x, r.part, W - M, y0 + L.nb, IMG.cap - 2, { w: 700, ls: 3, c: C.dim, a: 'right' });
+      T(x, r.n, M, y0 + L.nb, L.nm, { w: 600, c: C.dim, max: CW - tw - 32 });
+      const z = fitSize(x, r.d, L.dt, CW, 700, 28); T(x, r.d, M, y0 + L.db, z, { w: 700 });
+    } else {
+      const z = fitSize(x, r.d, L.dt, CW * .5, 700, 24);
+      const dw = T(x, r.d, W - M, y0 + L.db, z, { w: 700, a: 'right' });
+      T(x, r.n, M, y0 + L.nb, L.nm, { w: 500, c: C.dim, max: CW - dw - 32 });
+    }
   });
-  const top = hero(x, hv, hu, y - 44, 230);
-  label(x, lbl, top - 40); return top - 70;
+  if (more) T(x, `ほか ${more} 種目`, M, top + shown.length * L.h + L.nb, IMG.cap + 2, { w: 600, c: C.dim });
+  // 見出し：今日の部位
+  const parts = [...new Set(rows.map(r => r.part))];
+  const title = parts.length ? parts.map(p => PART_EN[p] || p).join(' · ') : 'REST DAY';
+  const tz = fitSize(x, title, IMG.display, CW, 800, 48);
+  const tY = top - 40; T(x, title, M - 4, tY, tz, { w: 800, ls: -tz * .02 });
+  const lY = tY - tz * .74 - 40; label(x, planned ? "TODAY'S PLAN" : "TODAY'S SESSION", lY);
+  return lY - 32;
 }
 function sceneBalance(x, W, H) {
-  const td = today(), yB = H - 130, sum = sumOf(S.meals[td] || []), b = burnOf(td), bal = Math.round(sum.kcal - b.total);
+  const td = today(), yB = Y_STATS(H), sum = sumOf(S.meals[td] || []), b = burnOf(td), bal = Math.round(sum.kcal - b.total);
   stats(x, W, [{ l: 'IN', v: fmtK(sum.kcal), u: 'KCAL' }, { l: 'OUT', v: fmtK(b.total), u: 'KCAL' }, { l: 'P · F · C', v: `${Math.round(sum.p)}·${Math.round(sum.f)}·${Math.round(sum.c)}`, u: 'G' }], yB);
-  const y = yB - 120; hair(x, W, y);
-  const top = hero(x, signed(bal), 'KCAL', y - 60, 250);
-  label(x, `CALORIE BALANCE · ${({ cut: 'CUT', maint: 'MAINTAIN', bulk: 'BULK' })[S.mode]}`, top - 40); return top - 70;
+  const y = yB - 104; rule(x, W, y);
+  const hz = fitSize(x, signed(bal), IMG.hero, W - M * 2 - 120, 800, 120);
+  const top = hero(x, signed(bal), 'KCAL', y - 56, hz);
+  label(x, `CALORIE BALANCE · ${({ cut: 'CUT', maint: 'MAINTAIN', bulk: 'BULK' })[S.mode]}`, top - 40); return top - 72;
 }
 function scenePlan(x, W, H, P) {
-  const yB = H - 130, left = diffDays(today(), P.targetDate);
+  const yB = Y_STATS(H), left = diffDays(today(), P.targetDate);
   stats(x, W, [{ l: 'FROM', v: fmtN(P.cur), u: 'KG' }, { l: 'MAX DAY', v: dot2(P.targetDate) }, { l: 'COUNTDOWN', v: left > 0 ? `D-${left}` : left === 0 ? 'TODAY' : 'DONE', c: C.acc }], yB);
-  const y = yB - 120; hair(x, W, y);
+  const y = yB - 104; rule(x, W, y);
   const wk = []; for (let i = 1; i <= P.weeks; i++) { const ss = P.sessions.filter(s => s.week === i); if (ss.length) wk.push({ max: ss.some(s => s.max), done: ss.every(s => s.done) }); }
   const gap = wk.length > 30 ? 4 : 8, tw = (W - M * 2 - gap * (wk.length - 1)) / wk.length;
-  wk.forEach((v, i) => { x.fillStyle = v.max ? C.acc : v.done ? C.w : C.faint; x.fillRect(M + i * (tw + gap), y - 76, tw, 40); });
-  const top = hero(x, fmtN(P.target), 'KG', y - 140, 330);
-  T(x, P.ex, M, top - 36, 44, { w: 700, max: W - M * 2 });
-  label(x, 'ROAD TO NEW MAX', top - 110); return top - 140;
+  wk.forEach((v, i) => { x.fillStyle = v.max ? C.acc : v.done ? C.w : C.faint; x.fillRect(M + i * (tw + gap), y - 72, tw, 40); });
+  const top = hero(x, fmtN(P.target), 'KG', y - 128, IMG.hero + 40);
+  T(x, P.ex, M, top - 40, IMG.sub, { w: 700, max: W - M * 2 });
+  label(x, 'ROAD TO NEW MAX', top - 112); return top - 144;
 }
 function scenePR(x, W, H, pr) {
-  const yB = H - 130, real = pr.r <= 1;
+  const yB = Y_STATS(H), real = pr.r <= 1;
   stats(x, W, [{ l: real ? 'LIFT' : 'SET', v: real ? `${fmtN(pr.w)}` : `${fmtN(pr.w)}×${pr.r}`, u: real ? 'KG' : '' }, { l: 'GAIN', v: pr.prev ? `+${r1(pr.e1 - pr.prev)}` : '—', u: pr.prev ? 'KG' : '', c: C.acc }, { l: 'DATE', v: dot2(pr.date || today()) }], yB);
-  const y = yB - 120; hair(x, W, y);
-  const top = hero(x, fmtN(real ? pr.w : pr.e1), 'KG', y - 60, 340, real ? '1RM' : 'EST. 1RM');
-  T(x, pr.ex, M, top - 36, 44, { w: 700, max: W - M * 2 });
-  label(x, pr.goal ? `GOAL ACHIEVED · ${fmtN(pr.goal)}KG` : 'NEW PERSONAL RECORD', top - 110); return top - 140;
+  const y = yB - 104; rule(x, W, y);
+  const top = hero(x, fmtN(real ? pr.w : pr.e1), 'KG', y - 56, IMG.hero + 80, real ? '1RM' : 'EST. 1RM');
+  T(x, pr.ex, M, top - 40, IMG.sub, { w: 700, max: W - M * 2 });
+  label(x, pr.goal ? `GOAL ACHIEVED · ${fmtN(pr.goal)}KG` : 'NEW PERSONAL RECORD', top - 112); return top - 144;
 }
 
 function renderShot() {
@@ -1402,18 +1678,18 @@ function renderShot() {
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const x = c.getContext('2d');
   paintBg(x, W, H);
-  if (sh.style !== 'black') { x.shadowColor = 'rgba(0,0,0,0.35)'; x.shadowBlur = 18; }
+  if (sh.style !== 'black') { x.shadowColor = 'rgba(0,0,0,0.35)'; x.shadowBlur = 16; }
   chrome(x, W);
   const scene = xx => sh.kind === 'train' ? sceneTrain(xx, W, H) : sh.kind === 'balance' ? sceneBalance(xx, W, H) : sh.kind === 'plan' ? scenePlan(xx, W, H, findPlan(sh.arg)) : scenePR(xx, W, H, sh.arg);
   if (sh.style === 'black') {
-    // 黒背景：内容ブロックを見やすい位置（やや上寄りの中央）へ
+    // 黒背景：内容ブロックをやや上寄りの中央へ（8pxに丸める）
     const probe = document.createElement('canvas').getContext('2d');
-    const top = scene(probe), bottom = H - 130, blockH = bottom - top;
-    const areaTop = 190, areaBot = H - 150, want = areaTop + (areaBot - areaTop - blockH) * 0.42;
-    x.save(); x.translate(0, want - top); scene(x); x.restore();
-    x.fillStyle = C.faint; x.fillRect(M, H - 118, W - M * 2, 2);
-    T(x, 'Workout Planner', M, H - 64, 22, { w: 600, c: C.dim });
-    T(x, '#WorkoutPlanner', W - M, H - 64, 22, { w: 600, c: C.dim, a: 'right' });
+    const top = scene(probe), blockH = Y_STATS(H) - top;
+    const areaTop = 176, areaBot = H - 152, want = Math.round((areaTop + Math.max(0, areaBot - areaTop - blockH) * 0.42) / 8) * 8;
+    x.save(); x.translate(0, Math.min(0, want - top)); scene(x); x.restore();
+    rule(x, W, H - 120);
+    T(x, 'Workout Planner', M, H - 64, IMG.cap, { w: 600, c: C.dim });
+    T(x, '#WorkoutPlanner', W - M, H - 64, IMG.cap, { w: 600, c: C.dim, a: 'right' });
   } else scene(x);
   sh.blob = null; c.toBlob(b => sh.blob = b, 'image/png');
   sh.name = `workout-${sh.kind}-${today()}.png`;
@@ -1495,8 +1771,8 @@ document.addEventListener('click', e => {
     if (name === 'fslot') { fs.slot = v; if (fs.item) updFood(); }
     if (name === 'cslot') $('#panel').dataset.slot = v;
     if (name === 'mslot') { const m = mealsToday().find(x => x.id === $('#panel').dataset.mid); if (m) { m.slot = v; save(); renderHome(); } }
-    if (name === 'sact') { st.act = v; $('#srefs').innerHTML = refCards(st.bw, st.act, st.mode); applyRefToInputs(); }
-    if (name === 'tact') { tu.act = v; $('#trefs').innerHTML = refCards(tu.bw, tu.act, tu.mode); }
+    if (name === 'sact' || name === 'ssex') { st.b[name === 'sact' ? 'act' : 'sex'] = v; readProfile('s', st.b); $('#srefs').innerHTML = refCards(st.b, st.mode); applyRefToInputs(); }
+    if (name === 'tact' || name === 'tsex') { tu.b[name === 'tact' ? 'act' : 'sex'] = v; readProfile('t', tu.b); $('#trefs').innerHTML = refCards(tu.b, tu.mode); }
     return;
   }
   const a = e.target.closest('[data-act]'); if (!a) return;
@@ -1508,23 +1784,26 @@ document.addEventListener('click', e => {
 
     /* 食事 */
     case 'food': foodSheet(d.slot); break;
-    case 'fPreset': closeSheet(); addMeal(S.presets[+d.i], fs.slot, fs.t); break;
-    case 'fRecent': closeSheet(); addMeal(recentFoods()[+d.i], fs.slot, fs.t); break;
+    case 'fPreset': addKeep(S.presets[+d.i]); break;
+    case 'fRecent': addKeep(recentFoods()[+d.i]); break;
+    case 'fCat': fs.q = d.q; $('#fq').value = a.textContent; fs.item = null; renderFood(); break;
+    case 'fUndo': S.meals[today()] = mealsToday().filter(m => m.id !== d.id); fs.added = fs.added.filter(x => x !== d.id); save(); renderAdded(); if (cur === 'home') renderHome(); break;
+    case 'backFood': foodSheet(fs.slot, true); break;
     case 'fPick': fs.item = { src: 'db', ...fs.res[+d.i] }; if (fs.item.i !== undefined && fs.res[+d.i].src === 'preset') fs.item.src = 'preset'; renderFood(); $('#panel').scrollTop = 0; break;
     case 'fBack': fs.item = null; renderFood(); break;
     case 'fAdd': {
       const s = foodScaled();
       if ($('#fsave') && $('#fsave').checked) S.presets.push({ name: s.name, kcal: Math.round(s.kcal), p: r1(s.p), f: r1(s.f), c: r1(s.c) });
-      closeSheet(); addMeal(s, fs.slot, fs.t); break;
+      addKeep(s); break;
     }
     case 'customMeal': customMealSheet(fs.slot); break;
     case 'saveCustom': {
       const p = num($('#cp').value), f = num($('#cf').value), c = num($('#cc').value), k = Math.round(calcK());
-      if (!k) { toast('PFCを入力してください'); break; }
+      if (!k) { toast('カロリーかPFCを入力してください'); break; }
       const item = { name: $('#cn').value.trim() || '手入力', kcal: k, p, f, c }, slot = $('#panel').dataset.slot;
       if ($('#cs').checked) S.presets.push(item);
-      const ct = ($('#ctime') && $('#ctime').value) || nowHM();
-      closeSheet(); addMeal(item, slot, ct); break;
+      fs.t = ($('#ctime') && $('#ctime').value) || nowHM(); fs.slot = slot;
+      foodSheet(slot, true); addKeep(item); break;
     }
     case 'editMeal': editMealSheet(d.id); break;
     case 'delMeal': {
@@ -1612,6 +1891,8 @@ document.addEventListener('click', e => {
 
     /* 有酸素 */
     case 'goLog': go('log'); break;
+    case 'planInfo': planInfo(); break;
+    case 'calcInfo': calcInfo(); break;
     case 'cdPick': cdo.i = +d.i; updCardio(); break;
     case 'saveCardio': {
       const min = Math.round(num($('#cmin').value)); if (!(min > 0)) { toast('時間を入力してください'); break; }
@@ -1643,12 +1924,12 @@ document.addEventListener('click', e => {
 
     /* 設定 */
     case 'pickRef':
-      if ($('#tut').classList.contains('open')) { tu.mode = d.v; $('#trefs').innerHTML = refCards(tu.bw, tu.act, tu.mode); }
-      else { st.mode = d.v; $('#srefs').innerHTML = refCards(st.bw, st.act, st.mode); applyRefToInputs(); }
+      if ($('#tut').classList.contains('open')) { tu.mode = d.v; readProfile('t', tu.b); $('#trefs').innerHTML = refCards(tu.b, tu.mode); }
+      else { st.mode = d.v; readProfile('s', st.b); $('#srefs').innerHTML = refCards(st.b, st.mode); applyRefToInputs(); }
       break;
     case 'saveSettings':
       S.targets = { kcal: num($('#sk').value) || 2000, p: num($('#sp').value), f: num($('#sf').value), c: num($('#sc').value) };
-      S.mode = st.mode; S.body = { bw: st.bw, act: st.act };
+      S.mode = st.mode; S.body = { ...readProfile('s', st.b) };
       S.remind.on = $('#rmOn').checked; S.remind.min = Math.max(30, Math.round(num($('#rmMin').value)) || 180); save(); closeSheet(); render(); toast('保存しました'); break;
     case 'delPreset': S.presets.splice(+d.i, 1); save(); a.closest('.row').remove(); break;
     case 'tutorial': closeSheet(); openTutorial(); break;
