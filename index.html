@@ -340,6 +340,25 @@ details.bd .sub{margin-top:4px}
 .legend3{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr)}
 .refs{grid-template-columns:repeat(3,minmax(0,1fr))}
 .hbtns{display:flex;gap:8px}
+.rest{margin-top:16px;padding-top:16px;border-top:.5px solid var(--sep)}
+.restbtns{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:8px}
+.restbtns button{height:44px;border-radius:12px;background:var(--s2);font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.restbtns button small{font-size:11px;font-weight:500;color:var(--t2);margin-left:1px}
+.restbtns button.on{background:var(--accent);color:#fff}.restbtns button.on small{color:rgba(255,255,255,.8)}
+.rt{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,24px);opacity:0;pointer-events:none;z-index:65;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px;border-radius:99px;background:var(--toast);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 8px 24px rgba(0,0,0,.2);transition:.25s}
+body.rt-on .rt{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+body.rt-on .toast{bottom:calc(160px + env(safe-area-inset-bottom))}
+.rt-ring{width:28px;height:28px;transform:rotate(-90deg);flex:none}
+.rt-ring circle{fill:none;stroke-width:4}
+.rt-ring .bg{stroke:var(--s3)}.rt-ring .fg{stroke:var(--accent);stroke-dasharray:100;stroke-dashoffset:0;stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+.rt-time{font-size:22px;font-weight:700;min-width:64px;letter-spacing:-.01em}
+.rt button{height:32px;min-width:44px;padding:0 8px;border-radius:99px;background:var(--s2);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.rt .rt-x{min-width:32px;color:var(--t2)}
+.rt.done{background:var(--accent)}.rt.done .rt-time{color:#fff;min-width:120px}.rt.done button{display:none}.rt.done .rt-ring{display:none}
+.daychips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.daychips button{height:36px;border-radius:10px;background:var(--pc);font-size:15px;font-weight:500;color:var(--t2)}
+.daychips button.on{background:var(--t1);color:var(--on-t1);font-weight:600}
+body.rt-on main{padding-bottom:64px}
 .hidden{display:none!important}
 </style>
 </head>
@@ -362,6 +381,12 @@ details.bd .sub{margin-top:4px}
 <div class="ov" id="sheet"><div class="panel" id="panel"></div></div>
 <div class="ov" id="ask"><div class="panel" id="askp"></div></div>
 <div class="toast" id="toast"></div>
+<div class="rt" id="rt" role="timer" aria-live="polite">
+  <svg viewBox="0 0 36 36" class="rt-ring"><circle cx="18" cy="18" r="15.9" pathLength="100" class="bg"/><circle id="rtRing" cx="18" cy="18" r="15.9" pathLength="100" class="fg"/></svg>
+  <span class="rt-time num" id="rtTime">1:30</span>
+  <button data-act="restAdd" data-v="-15" aria-label="15秒減らす">−15</button><button data-act="restAdd" data-v="15" aria-label="15秒増やす">+15</button>
+  <button data-act="restStop" class="rt-x" aria-label="止める">×</button>
+</div>
 <div id="tut"></div>
 
 <script>
@@ -718,8 +743,19 @@ const PAL = { low: ['座り仕事', 1.2], mid: ['よく歩く', 1.375], high: ['
 const r10 = n => Math.round(n / 10) * 10;
 function bmrOf(b) { return 10 * b.bw + 6.25 * b.h - 5 * b.age + (b.sex === 'f' ? -161 : 5); }
 function maintOf(b = S.body) { return r10(bmrOf(b) * PAL[b.act || 'mid'][1]); }
-const metKcal = (met, min) => Math.round(met * S.body.bw * min / 60 * 1.05);
-const strengthKcal = l => metKcal(5.0, (l.sets || 1) * 3);   // 1セット≒3分（休憩込み）
+/* 運動の消費は「安静時を除いた分（MET−1）」で計算。安静時の分は日常の消費に含まれているため二重に数えない */
+const metKcal = (met, min) => Math.round(Math.max(0, met - 1) * S.body.bw * min / 60 * 1.05);
+const LIFT_MET = 3.5;                                          // Compendium: 筋トレ（複数種目・8〜15回）
+const strengthKcal = l => metKcal(LIFT_MET, (l.sets || 1) * 3);  // 1セット≒3分（休憩込み）
+/* セットの表記をアプリ全体で統一：「80kg × 10回 × 3セット」 */
+const fmtSet = (w, r, sets) => `${fmtN(+w)}kg × ${r}回${sets ? ` × ${sets}セット` : ''}`;
+function setGroups(ls) {                                       // 同じ重量×回数をまとめる
+  const g = [];
+  ls.forEach(l => { const last = g[g.length - 1]; if (last && last.w === l.w && last.r === l.r) last.sets += l.sets; else g.push({ w: l.w, r: l.r, sets: l.sets }); });
+  return g;
+}
+const setsSummary = ls => { const g = setGroups(ls); if (g.length === 1) return fmtSet(g[0].w, g[0].r, g[0].sets);
+  const ws = g.map(x => x.w); return `${g.reduce((a, x) => a + x.sets, 0)}セット · ${fmtN(Math.min(...ws))}〜${fmtN(Math.max(...ws))}kg`; };
 function burnOf(date) {
   const base = maintOf();
   const strength = S.logs.filter(l => l.date === date).reduce((a, l) => a + strengthKcal(l), 0);
@@ -744,6 +780,11 @@ function refCards(b, sel) {
 }
 
 let S = load();
+S.timer = { sec: 90, auto: true, ...(S.timer || {}) };
+if ((S.v || 0) < 9) {   // v9：運動の消費を安静時を除いた値に計算し直す
+  S.cardio.forEach(c => { const i = CARDIO.findIndex(x => x[0] === c.name); if (i >= 0) c.kcal = metKcal(CARDIO[i][1][c.lvl], c.min); });
+  S.v = 9; save();
+}
 /* 外観：'dark' | 'light' | 'auto'（端末の設定に合わせる） */
 const mqLight = window.matchMedia ? matchMedia('(prefers-color-scheme: light)') : null;
 const isLight = () => S.theme === 'light' || (S.theme === 'auto' && mqLight && mqLight.matches);
@@ -864,7 +905,7 @@ function balanceHero(sum, pfc) {
 function exerciseGroup() {
   const td = today(), logs = S.logs.filter(l => l.date === td), cs = S.cardio.filter(c => c.date === td);
   const byEx = {}; logs.forEach(l => (byEx[l.ex] = byEx[l.ex] || []).push(l));
-  const rows = Object.entries(byEx).map(([ex, ls]) => `<div class="row"><div class="grow"><div class="t">${esc(ex)}</div><div class="s num">${ls.map(l => `${l.w}kg×${l.r}×${l.sets}`).join(' / ')}</div></div><span class="kc">${ls.reduce((a, l) => a + strengthKcal(l), 0)} kcal</span></div>`).join('')
+  const rows = Object.entries(byEx).map(([ex, ls]) => `<div class="row"><div class="grow"><div class="t">${esc(ex)}</div><div class="s num">${setsSummary(ls)}</div></div><span class="kc">${ls.reduce((a, l) => a + strengthKcal(l), 0)} kcal</span></div>`).join('')
     + cs.map(c => `<div class="row"><div class="grow"><div class="t">${esc(c.name)}</div><div class="s num">有酸素 · ${LVL[c.lvl]} · ${c.min}分</div></div><span class="kc">${c.kcal.toLocaleString()} kcal</span></div>`).join('');
   const b = burnOf(td);
   return `<div class="sec"><span>今日の記録</span><span class="num">${(b.strength + b.cardio).toLocaleString()} kcal</span></div><div class="group">${rows}
@@ -890,7 +931,7 @@ function trainCards() {
     const nexts = S.plans.filter(P => !isFinished(P)).map(P => ({ P, s: P.sessions.find(s => s.date > td && !s.done) })).filter(x => x.s).sort((a, b) => a.s.date < b.s.date ? -1 : 1);
     if (!nexts.length) return '';
     return `<div class="lbl" style="margin:0 4px 8px">プランの次回</div><div class="group">${nexts.map(({ P, s }) => `<button class="row" data-act="openPlanFromHome" data-id="${P.id}">
-      <span class="d">${fmtD(s.date)}</span><div class="grow"><div class="t">${esc(P.ex)}</div><div class="s num">${s.max ? `MAX ${s.w}kg` : `${s.w}kg × ${s.r}回 × ${s.sets}`} · ${kindLabel(s)}</div></div>${I.chev}</button>`).join('')}</div>`;
+      <span class="d">${fmtD(s.date)}</span><div class="grow"><div class="t">${esc(P.ex)}</div><div class="s num">${s.max ? `MAX ${fmtN(s.w)}kg` : fmtSet(s.w, s.r, s.sets)} · ${kindLabel(s)}</div></div>${I.chev}</button>`).join('')}</div>`;
   }
   return items.map(({ P, s }) => {
     const left = diffDays(td, P.targetDate), cd = left > 0 ? `MAXまで ${left}日` : left === 0 ? 'MAX当日' : '';
@@ -1036,6 +1077,48 @@ function editMealSheet(id) {
   $('#mtime').addEventListener('change', e => { if (!e.target.value) return; m.t = e.target.value; save(); renderHome(); });
 }
 
+/* ----- インターバルタイマー ----- */
+const RT = { end: 0, dur: 0, iv: null };
+let actx = null;
+function unlockAudio() { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} }
+function beep() {
+  try { unlockAudio(); const t0 = actx.currentTime;
+    [0, .25, .5].forEach(dt => { const o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = 880; o.connect(g); g.connect(actx.destination);
+      g.gain.setValueAtTime(.0001, t0 + dt); g.gain.exponentialRampToValueAtTime(.3, t0 + dt + .02); g.gain.exponentialRampToValueAtTime(.0001, t0 + dt + .18); o.start(t0 + dt); o.stop(t0 + dt + .2); });
+  } catch (e) {}
+}
+const mmss = n => `${Math.floor(n / 60)}:${pad(n % 60)}`;
+function startRest(sec) {
+  unlockAudio(); sec = Math.max(5, Math.round(sec));
+  S.timer.sec = sec; save();
+  RT.dur = sec; RT.end = Date.now() + sec * 1000;
+  clearInterval(RT.iv); RT.iv = setInterval(tickRest, 250); tickRest();
+  document.body.classList.add('rt-on'); $('#rt').classList.remove('done');
+  document.querySelectorAll('.restbtns button').forEach(b => b.classList.toggle('on', b.dataset.v ? +b.dataset.v === sec : ![30, 60, 90, 120].includes(sec)));
+}
+function tickRest() {
+  const left = Math.max(0, Math.ceil((RT.end - Date.now()) / 1000));
+  const p = RT.dur ? Math.min(1, 1 - (RT.end - Date.now()) / (RT.dur * 1000)) : 1;
+  $('#rtTime').textContent = mmss(left);
+  $('#rtRing').style.strokeDashoffset = String(100 * p);
+  if (left <= 0) finishRest();
+}
+function finishRest() {
+  clearInterval(RT.iv); RT.iv = null;
+  $('#rt').classList.add('done'); $('#rtTime').textContent = '次のセット！';
+  beep(); try { navigator.vibrate && navigator.vibrate([300, 120, 300]); } catch (e) {}
+  try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') new Notification('インターバル終了', { body: '次のセットへ' }); } catch (e) {}
+  setTimeout(() => { if (!RT.iv) stopRest(); }, 6000);
+}
+function stopRest() { clearInterval(RT.iv); RT.iv = null; document.body.classList.remove('rt-on'); $('#rt').classList.remove('done'); }
+function restCustomSheet() {
+  const m = Math.floor(S.timer.sec / 60), sc = S.timer.sec % 60;
+  openSheet(`<div class="sh-h"><button data-act="close">キャンセル</button><h3>インターバル</h3><span style="min-width:64px"></span></div>
+    <div class="card" style="padding:4px 16px"><div class="srow"><span>分</span>${stepper('rtm', m, 1, '分')}</div><div class="srow"><span>秒</span>${stepper('rts', sc, 5, '秒')}</div></div>
+    <button class="btn" data-act="restGo">スタート</button>`);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && RT.iv) tickRest(); });
+
 /* ----- 食事リマインダー ----- */
 function checkRemind() {
   if (!S.remind.on) return;
@@ -1101,7 +1184,7 @@ function planDetail(P) {
     weeks += `<div class="sec"><span>WEEK ${i}</span><span>${PH[ss[0].ph] || ''}</span></div><div class="group">
       ${ss.map(s => `<div class="row ${s.date === td ? 'today' : ''} ${s.done ? 'fin' : ''}">
         <span class="d">${s.date === td ? '<span class="dot"></span>今日' : fmtD(s.date)}</span>
-        <div class="grow"><div class="t num">${s.max ? `<span class="warn">MAX</span> ${s.w}kg` : `${s.w}kg × ${s.r}回 × ${s.sets}`}</div><div class="s">${s.max ? esc(s.label) : [kindLabel(s), rirTxt(s)].filter(Boolean).join(' · ')}</div></div>
+        <div class="grow"><div class="t num">${s.max ? `<span class="warn">MAX</span> ${fmtN(s.w)}kg` : fmtSet(s.w, s.r, s.sets)}</div><div class="s">${s.max ? esc(s.label) : [kindLabel(s), rirTxt(s)].filter(Boolean).join(' · ')}</div></div>
         <button class="circ ${s.done ? 'on' : ''}" data-act="toggle" data-pid="${P.id}" data-id="${s.id}" aria-label="完了">${I.check}</button></div>`).join('')}
     </div>`;
   }
@@ -1251,7 +1334,7 @@ function calcInfo() {
       <h4>② 日常の消費（維持カロリー）</h4>
       <p>基礎代謝 × 活動係数（座り仕事 1.2 ／ よく歩く 1.375 ／ 肉体労働 1.55）。あなたの場合：<b class="num" style="color:var(--t1)">${mt.toLocaleString()} kcal</b><br>トレーニングは記録から別に足すため、この係数にはトレーニングを含めていません。係数は栄養計算で一般的に使われる目安の値で、特定の研究で決めた値ではありません。</p>
       <h4>③ 運動の消費</h4>
-      <p>METs × 体重(kg) × 時間(h) × 1.05。METsは身体活動の強さの国際的な一覧（Compendium）の値です。筋トレは5.0 METs、1セットを休憩込み3分として計算しています（Compendiumの筋トレは3.5〜6.0 METs）。</p>
+      <p>（METs − 1）× 体重(kg) × 時間(h) × 1.05。METsは身体活動の強さの国際的な一覧（Compendium）の値です。METsには安静にしているだけで使う分（1 MET）が含まれていて、その分はすでに②の日常の消費に入っているため、差し引いて二重に数えないようにしています。<br>筋トレはCompendiumの「複数種目・8〜15回」の3.5 METsを使い、1セットを休憩込み3分として計算しています（体重70kgなら1セットあたり約9kcal）。</p>
       <ul><li>${L('Ainsworth et al. (2011) Compendium of Physical Activities（活動ごとのMETs一覧）', 'https://pubmed.ncbi.nlm.nih.gov/21681120/')}</li></ul>
       <h4>④ 目標摂取（減量・増量）</h4>
       <p>減量は体重の週0.5%減、増量は週0.25%増のペースで、脂肪1kg≒7,700kcalとして1日あたりの差を出しています。筋肉を残して減量するには週0.5〜1%のペースが勧められています。なお「1kg＝7,700kcal」は目安で、実際は減量が進むほど減り方がゆるやかになります。</p>
@@ -1345,6 +1428,11 @@ function renderLog() {
       <div class="srow"><span>セット</span>${stepper('ls', last ? last.sets : 3, 1, '')}</div>
       <div class="e1"><div class="lbl">推定1RM</div><div class="hero" id="e1v"></div><div class="sub" id="e1m"></div></div>
       <button class="btn" data-act="saveLog">保存</button>
+      <div class="rest">
+        <div class="card-top"><span class="lbl">インターバル</span><span class="lbl num">${S.timer.sec >= 60 ? Math.floor(S.timer.sec / 60) + '分' + (S.timer.sec % 60 ? (S.timer.sec % 60) + '秒' : '') : S.timer.sec + '秒'}</span></div>
+        <div class="restbtns">${[30, 60, 90, 120].map(v => `<button data-act="rest" data-v="${v}" class="${S.timer.sec === v ? 'on' : ''}">${v}<small>秒</small></button>`).join('')}<button data-act="restCustom" class="${[30, 60, 90, 120].includes(S.timer.sec) ? '' : 'on'}">自由</button></div>
+        <label class="row" style="padding:8px 0 0;min-height:0"><span class="grow sub" style="margin:0">保存したら自動でスタート</span><span class="switch"><input type="checkbox" id="rtAuto" ${S.timer.auto ? 'checked' : ''}><span></span></span></label>
+      </div>
       <details><summary>RM換算表</summary><div class="rmt" id="rmt"></div></details>
     </div>
     <div class="sec"><b>推移</b></div>
@@ -1353,6 +1441,7 @@ function renderLog() {
     <div style="margin-bottom:12px">${seg('hist', [[0, 'この種目'], [1, 'すべて']], histAll ? 1 : 0)}</div>
     <div id="hist"></div>`;
   calc(); drawChart(ex); renderHist();
+  $('#rtAuto').addEventListener('change', e => { S.timer.auto = e.target.checked; save(); });
 }
 function calc() {
   if (!$('#e1v')) return;
@@ -1388,8 +1477,8 @@ function renderHist() {
   el.innerHTML = Object.entries(byDate).map(([d, ls]) => `<div class="lbl" style="margin:16px 4px 8px">${fmtD(d)}</div><div class="group">
     ${ls.map(l => l.k === 'c'
       ? `<div class="row"><div class="grow"><div class="t">${esc(l.name)}</div><div class="s num">有酸素 · ${LVL[l.lvl]} · ${l.min}分 · ${l.kcal.toLocaleString()}kcal</div></div><button class="x" data-act="delCardio" data-id="${l.id}" aria-label="削除">${I.x}</button></div>`
-      : `<div class="row"><div class="grow"><div class="t">${histAll ? esc(l.ex) : `<span class="num">${l.w}kg × ${l.r} × ${l.sets}</span>`}</div>
-      <div class="s num">${histAll ? `${l.w}kg × ${l.r} × ${l.sets} · ` : ''}1RM ${l.e1}kg</div></div>
+      : `<div class="row"><div class="grow"><div class="t">${histAll ? esc(l.ex) : `<span class="num">${fmtSet(l.w, l.r, l.sets)}</span>`}</div>
+      <div class="s num">${histAll ? `${fmtSet(l.w, l.r, l.sets)} · ` : ''}推定1RM ${l.e1}kg</div></div>
       ${pb.has(l.id) ? `<button class="pill a" data-act="sharePB" data-id="${l.id}">PB ${pbIcon}</button>` : ''}<button class="x" data-act="delLog" data-id="${l.id}" aria-label="削除">${I.x}</button></div>`).join('')}
   </div>`).join('');
 }
@@ -1445,8 +1534,8 @@ function renderCal() {
   }
   const selLogs = trained[calSel] || [], selPlan = planned[calSel] || [];
   const byEx = {}; selLogs.forEach(l => (byEx[l.ex] = byEx[l.ex] || []).push(l));
-  const dayList = Object.entries(byEx).map(([ex, ls]) => `<div class="row"><span class="ck" style="width:24px;height:24px">${I.check}</span><div class="grow"><div class="t">${esc(ex)}</div><div class="s num">${ls.map(l => `${l.w}kg×${l.r}×${l.sets}`).join(' / ')}</div></div><span class="pill">${partOf(ex)}</span></div>`).join('')
-    + selPlan.map(({ P, s }) => `<div class="row"><span class="circ"></span><div class="grow"><div class="t">${esc(P.ex)}</div><div class="s num">予定 ${s.max ? 'MAX ' + s.w + 'kg' : `${s.w}kg×${s.r}×${s.sets}`}</div></div><span class="pill">${esc(P.part || partOf(P.ex))}</span></div>`).join('')
+  const dayList = Object.entries(byEx).map(([ex, ls]) => `<div class="row"><span class="ck" style="width:24px;height:24px">${I.check}</span><div class="grow"><div class="t">${esc(ex)}</div><div class="s num">${setsSummary(ls)}</div></div><span class="pill">${partOf(ex)}</span></div>`).join('')
+    + selPlan.map(({ P, s }) => `<div class="row"><span class="circ"></span><div class="grow"><div class="t">${esc(P.ex)}</div><div class="s num">予定 ${s.max ? 'MAX ' + fmtN(s.w) + 'kg' : fmtSet(s.w, s.r, s.sets)}</div></div><span class="pill">${esc(P.part || partOf(P.ex))}</span></div>`).join('')
     + (cTrained[calSel] || []).map(c => `<div class="row"><span class="ck" style="width:24px;height:24px">${I.check}</span><div class="grow"><div class="t">${esc(c.name)}</div><div class="s num">${LVL[c.lvl]} · ${c.min}分 · ${c.kcal}kcal</div></div><span class="pill">有酸素</span></div>`).join('');
 
   $('#tab-cal').innerHTML = header('カレンダー') + `
@@ -1609,7 +1698,8 @@ function fitSize(x, s, size, maxW, w = 700, min = 40) {   // 幅に収まるま�
   while (z > min && x.measureText(s).width > maxW) { z -= 8; x.font = `${w} ${z}px ${DISP}`; }
   return z;
 }
-const rule = (x, W, y, c = C.faint, h = 2) => { x.fillStyle = c; x.fillRect(M, y, W - M * 2, h); };
+const RULE_H = 2;                                    // 画像内の線はすべて同じ太さ・同じ色
+const rule = (x, W, y) => { x.fillStyle = C.faint; x.fillRect(M, y, W - M * 2, RULE_H); };
 function label(x, s, y) {
   x.beginPath(); x.arc(M + 6, y - 8, 6, 0, Math.PI * 2); x.fillStyle = C.acc; x.fill();
   T(x, s, M + 24, y, IMG.cap, { w: 700, ls: 6 });
@@ -1643,15 +1733,16 @@ function paintBg(x, W, H) {
 function chrome(x, W) {
   drawGlyph(x, M - 11, 81, 62, C.w);
   T(x, 'WORKOUT PLANNER', M + 60, 120, IMG.cap, { w: 700, ls: 7 });
-  T(x, dot3(today()), W - M, 120, IMG.cap, { w: 500, ls: 3, c: C.dim, a: 'right' });
+  const dd = (sh.kind === 'train' || sh.kind === 'balance') ? (sh.date || today()) : sh.kind === 'pr' && sh.arg && sh.arg.date ? sh.arg.date : today();
+  T(x, dot3(dd), W - M, 120, IMG.cap, { w: 500, ls: 3, c: C.dim, a: 'right' });
 }
 const Y_STATS = H => H - 136;          // 下段の数値のベースライン（8の倍数）
 const PART_EN = { '胸': 'CHEST', '背中': 'BACK', '肩': 'SHOULDERS', '腕': 'ARMS', '脚': 'LEGS', '腹': 'ABS', '有酸素': 'CARDIO', 'その他': 'OTHER' };
 
-/* 行数に応じた組み方（2行組 大 → 2行組 小 → 1行組） */
-const trainLayout = n => n <= 3 ? { two: true, nm: IMG.body, dt: IMG.title, h: 144, nb: 44, db: 112 }
-  : n <= 5 ? { two: true, nm: 28, dt: IMG.sub, h: 112, nb: 40, db: 88 }
-  : { two: false, nm: IMG.body, dt: IMG.body, h: 72, nb: 48, db: 48 };
+/* 種目ブロック：種目名 28px ＋ セット行 40px（数値）/24px（単位）で固定。行が増えたら画像を縦に伸ばす */
+const SET_LH = 56, NAME_B = 44, BLOCK_PAD = 24;
+const COLX = { w: M + 112, r: M + 328, s: M + 520 };           // 各列の数値の右端（数字の桁がそろう）
+const blockH = r => NAME_B + r.lines.length * SET_LH + BLOCK_PAD;
 /* 見出し（部位）：1行で入れば96px、入らなければ72pxで「·」区切りのまま折り返す */
 function titleSpec(x, rows, maxW) {
   const words = [...new Set(rows.map(r => r.part))].map(p => PART_EN[p] || p);
@@ -1664,59 +1755,58 @@ function titleSpec(x, rows, maxW) {
   lines.push(curL); return { z, lines };
 }
 const titleH = t => t.z * .74 + (t.lines.length - 1) * Math.round(t.z * 1.05);
-function trainNeedH(W) {                               // 全行を入れるのに必要な高さ
-  const { rows } = trainRows();
+function trainNeedH(W) {                               // 全部を入れるのに必要な高さ
+  const { rows } = trainRows(sh.date);
   const t = titleSpec(document.createElement('canvas').getContext('2d'), rows, W - M * 2);
-  return 552 + rows.length * trainLayout(rows.length).h + titleH(t);
+  return 552 + rows.reduce((a, r) => a + blockH(r), 0) + titleH(t);
 }
-/* 今日のメニュー：何を・どれだけ やったかを主役に */
-function trainRows() {
-  const td = today(), logs = S.logs.filter(l => l.date === td), cs = S.cardio.filter(v => v.date === td);
+/* その日のメニュー：何を・どれだけ やったかを主役に */
+function trainRows(date = today()) {
+  const logs = S.logs.filter(l => l.date === date), cs = S.cardio.filter(v => v.date === date);
   const byEx = {}; logs.forEach(l => (byEx[l.ex] = byEx[l.ex] || []).push(l));
-  let rows = Object.entries(byEx).map(([ex, ls]) => {
-    const same = ls.every(l => l.w === ls[0].w && l.r === ls[0].r);
-    const d = same ? `${fmtN(ls[0].w)}kg × ${ls[0].r}回 × ${ls.reduce((a, l) => a + l.sets, 0)}セット`
-      : ls.map(l => `${fmtN(l.w)}×${l.r}×${l.sets}`).join(' / ') + ' kg';
-    return { n: ex, d, part: partOf(ex) };
-  }).concat(cs.map(v => ({ n: v.name, d: `${v.min}分 · ${LVL[v.lvl]}`, part: '有酸素' })));
+  let rows = Object.entries(byEx).map(([ex, ls]) => ({ n: ex, part: partOf(ex), lines: setGroups(ls) }))
+    .concat(cs.map(v => ({ n: v.name, part: '有酸素', lines: [{ min: v.min, lvl: LVL[v.lvl] }] })));
   let planned = false;
-  if (!rows.length) {
-    planned = true;
-    rows = S.plans.flatMap(P => P.sessions.filter(s => s.date === td).map(s => ({ n: P.ex, d: s.max ? `MAX ${fmtN(s.w)}kg` : `${fmtN(s.w)}kg × ${s.r}回 × ${s.sets}セット`, part: P.part || partOf(P.ex) })));
+  if (!rows.length && date >= today()) {
+    rows = S.plans.flatMap(P => P.sessions.filter(s => s.date === date).map(s => ({ n: P.ex, part: P.part || partOf(P.ex), lines: [{ w: s.w, r: s.r, sets: s.sets }] })));
+    planned = rows.length > 0;
   }
   return { rows, planned, sets: logs.reduce((a, l) => a + l.sets, 0) };
 }
+function drawSetLine(x, ln, y) {
+  const U = { w: 600, c: C.dim }, N = { w: 700, a: 'right' };
+  if (ln.min != null) {
+    T(x, String(ln.min), COLX.w, y, IMG.sub, N); T(x, '分', COLX.w + 8, y, 24, U);
+    T(x, ln.lvl, COLX.w + 96, y, 28, { w: 600, c: C.dim });
+    return;
+  }
+  T(x, fmtN(+ln.w), COLX.w, y, IMG.sub, N); T(x, 'kg', COLX.w + 8, y, 24, U);
+  T(x, '×', COLX.w + 76, y, 28, { w: 500, c: C.dim });
+  T(x, String(ln.r), COLX.r, y, IMG.sub, N); T(x, '回', COLX.r + 8, y, 24, U);
+  T(x, '×', COLX.r + 60, y, 28, { w: 500, c: C.dim });
+  T(x, String(ln.sets), COLX.s, y, IMG.sub, N); T(x, 'セット', COLX.s + 8, y, 24, U);
+}
 function sceneTrain(x, W, H) {
-  const { rows, planned, sets } = trainRows(), b = burnOf(today()), yB = Y_STATS(H), CW = W - M * 2;
+  const d = sh.date || today(), isToday = d === today();
+  const { rows, planned, sets } = trainRows(d), b = burnOf(d), yB = Y_STATS(H), CW = W - M * 2;
   stats(x, W, [{ l: 'EXERCISES', v: String(rows.length) }, { l: planned ? 'STATUS' : 'SETS', v: planned ? 'PLAN' : String(sets) }, { l: 'BURN', v: planned ? '—' : fmtK(b.strength + b.cardio), u: planned ? '' : 'KCAL' }], yB);
   const ruleY = yB - 104; rule(x, W, ruleY);
-  // 行数に応じて段階を切り替え（2行組 大 → 2行組 小 → 1行組）
-  const shown = rows, more = 0, n = rows.length;   // 省略しない（必要なら画像を縦に伸ばす）
-  const L = trainLayout(n);
-  const listH = n * L.h, top = ruleY - 24 - listH;
-  shown.forEach((r, i) => {
-    const y0 = top + i * L.h;
-    if (i) { x.fillStyle = C.rule; x.fillRect(M, y0, CW, 1); }
-    if (L.two) {
-      const tw = T(x, r.part, W - M, y0 + L.nb, IMG.cap - 2, { w: 700, ls: 3, c: C.dim, a: 'right' });
-      T(x, r.n, M, y0 + L.nb, L.nm, { w: 600, c: C.dim, max: CW - tw - 32 });
-      const z = fitSize(x, r.d, L.dt, CW, 700, 28); T(x, r.d, M, y0 + L.db, z, { w: 700 });
-    } else {
-      const z = fitSize(x, r.d, L.dt, CW * .5, 700, 24);
-      const dw = T(x, r.d, W - M, y0 + L.db, z, { w: 700, a: 'right' });
-      T(x, r.n, M, y0 + L.nb, L.nm, { w: 500, c: C.dim, max: CW - dw - 32 });
-    }
+  const listH = rows.reduce((a, r) => a + blockH(r), 0), top = ruleY - 16 - listH;
+  let y0 = top;
+  rows.forEach((r, i) => {
+    if (i) rule(x, W, y0);
+    T(x, r.n, M, y0 + NAME_B, 28, { w: 600, c: C.dim, max: CW });
+    r.lines.forEach((ln, k) => drawSetLine(x, ln, y0 + NAME_B + (k + 1) * SET_LH));
+    y0 += blockH(r);
   });
-  if (more) T(x, `ほか ${more} 種目`, M, top + shown.length * L.h + L.nb, IMG.cap + 2, { w: 600, c: C.dim });
-  // 見出し：今日の部位
   const ts = titleSpec(x, rows, CW), lh = Math.round(ts.z * 1.05);
   const tY = top - 40;
   ts.lines.forEach((ln, i) => T(x, ln, M - 4, tY - (ts.lines.length - 1 - i) * lh, ts.z, { w: 800, ls: -ts.z * .02 }));
-  const lY = tY - titleH(ts) - 40; label(x, planned ? "TODAY'S PLAN" : "TODAY'S SESSION", lY);
+  const lY = tY - titleH(ts) - 40; label(x, planned ? "TODAY'S PLAN" : isToday ? "TODAY'S SESSION" : 'SESSION', lY);
   return lY - 32;
 }
 function sceneBalance(x, W, H) {
-  const td = today(), yB = Y_STATS(H), sum = sumOf(S.meals[td] || []), b = burnOf(td), bal = Math.round(sum.kcal - b.total);
+  const td = sh.date || today(), yB = Y_STATS(H), sum = sumOf(S.meals[td] || []), b = burnOf(td), bal = Math.round(sum.kcal - b.total);
   stats(x, W, [{ l: 'IN', v: fmtK(sum.kcal), u: 'KCAL' }, { l: 'OUT', v: fmtK(b.total), u: 'KCAL' }, { l: 'P · F · C', v: `${Math.round(sum.p)}·${Math.round(sum.f)}·${Math.round(sum.c)}`, u: 'G' }], yB);
   const y = yB - 104; rule(x, W, y);
   const hz = fitSize(x, signed(bal), IMG.hero, W - M * 2 - 120, 800, 120);
@@ -1760,11 +1850,10 @@ function renderShot() {
     const areaTop = 176, areaBot = H - 152, want = Math.round((areaTop + Math.max(0, areaBot - areaTop - blockH) * 0.42) / 8) * 8;
     x.save(); x.translate(0, Math.min(0, want - top)); scene(x); x.restore();
     rule(x, W, H - 120);
-    T(x, 'Workout Planner', M, H - 64, IMG.cap, { w: 600, c: C.dim });
     T(x, '#WorkoutPlanner', W - M, H - 64, IMG.cap, { w: 600, c: C.dim, a: 'right' });
   } else scene(x);
   sh.blob = null; c.toBlob(b => sh.blob = b, 'image/png');
-  sh.name = `workout-${sh.kind}-${today()}.png`;
+  sh.name = `workout-${sh.kind}-${sh.date || today()}.png`;
   const img = $('#shotImg'); if (img) img.src = c.toDataURL('image/png');
   $('#shotWrap').classList.toggle('clear', sh.style === 'clear');
   $('#shotWrap').classList.toggle('white', sh.style === 'white');
@@ -1773,19 +1862,22 @@ function renderShot() {
 }
 async function shareShow(kind, arg) {
   if (kind === 'plan' && !findPlan(arg)) return;
-  sh.kind = kind; sh.arg = arg;
+  sh.kind = kind; sh.arg = arg; sh.date = today();
   if (!sh.touched && (sh.style === 'black' || sh.style === 'white')) sh.style = isLight() ? 'white' : 'black';
   try { await Promise.race([document.fonts.load(`800 100px "Inter Tight"`), new Promise(r => setTimeout(r, 1200))]); } catch (e) {}
   const canShare = !!(navigator.canShare && navigator.share);
   openSheet(`<div class="sh-h"><button data-act="close">閉じる</button><h3>画像でシェア</h3><span style="min-width:64px"></span></div>
     ${seg('shstyle', [['photo', '写真'], ['white', 'ホワイト'], ['black', 'ブラック'], ['clear', '透過']], sh.style)}
     <div style="margin-top:8px">${seg('shratio', [['post', '投稿 4:5'], ['story', 'ストーリー 9:16']], sh.ratio)}</div>
+    ${kind === 'train' || kind === 'balance' ? `<div class="group" style="margin-top:8px"><label class="row trow"><span class="grow">日付</span><input type="date" id="shd" value="${sh.date}" max="${today()}"></label></div>
+      <div class="daychips">${[['0', '今日'], ['1', '昨日'], ['2', 'おととい']].map(([k, l]) => `<button data-act="shDay" data-v="${k}" class="${k === '0' ? 'on' : ''}">${l}</button>`).join('')}</div>` : ''}
     <div class="shotwrap" id="shotWrap"><img class="shot" id="shotImg" alt="シェア用画像"></div>
     <button class="btn ghost hidden" id="photoPick" data-act="photoPick">写真を選ぶ</button>
     <input type="file" id="photoIn" accept="image/*" class="hidden">
     <button class="btn" data-act="shotSave">画像を保存</button>
     ${canShare ? '<button class="btn ghost" data-act="shotShare">共有…</button>' : ''}
     <div class="sub" style="text-align:center">透過はストーリーで自分の写真に重ねるのがおすすめ</div>`);
+  if ($('#shd')) $('#shd').addEventListener('change', e => { sh.date = e.target.value || today(); document.querySelectorAll('[data-act=shDay]').forEach(b => b.classList.toggle('on', addDays(today(), -(+b.dataset.v)) === sh.date)); renderShot(); });
   $('#photoIn').addEventListener('change', e => {
     const f = e.target.files[0]; if (!f) return;
     const im = new Image(); im.onload = () => { sh.photo = im; renderShot(); }; im.src = URL.createObjectURL(f);
@@ -1896,6 +1988,7 @@ document.addEventListener('click', e => {
       const est = r1(e1rm(w, r)), prev = bestOf(P.ex);
       S.logs.push({ id: uid(), date: today(), ex: P.ex, w, r, sets, e1: est, pid: P.id, sid: s.id });
       s.done = true; s.actual = { w, r, sets }; save(); closeSheet(); render();
+      if (S.timer.auto) startRest(S.timer.sec);
       if (est >= P.target || (prev && est > prev)) { const pr = { ex: P.ex, w, r, e1: est, prev, goal: est >= P.target ? P.target : 0, date: today() };
         toast(est >= P.target ? '🎉 目標達成！' : `自己ベスト更新 ${est}kg`, () => shareShow('pr', pr), 'シェア'); }
       else toast('ナイス！記録しました'); break;
@@ -1953,6 +2046,7 @@ document.addEventListener('click', e => {
       const w = num($('#lw').value), r = Math.round(num($('#lr').value)), sets = Math.max(1, Math.round(num($('#ls').value)));
       if (!(r > 0)) { toast('回数を入力してください'); break; }
       const log = { id: uid(), date: $('#ld').value || today(), ex: S.recEx, w, r, sets, e1: r1(e1rm(w, r)) };
+      if (S.timer.auto) startRest(S.timer.sec);
       const prev = bestOf(S.recEx);
       S.logs.push(log); save(); drawChart(S.recEx); renderHist(); calc();
       if (prev && log.e1 > prev) { const g = goalOf(S.recEx); toast(`自己ベスト更新 ${log.e1}kg`, () => shareShow('pr', { ex: log.ex, w, r, e1: log.e1, prev, goal: g && log.e1 >= g ? g : 0, date: log.date }), 'シェア'); }
@@ -1967,6 +2061,11 @@ document.addEventListener('click', e => {
     /* 有酸素 */
     case 'goLog': go('log'); break;
     case 'planInfo': planInfo(); break;
+    case 'rest': startRest(+d.v); break;
+    case 'restCustom': restCustomSheet(); break;
+    case 'restGo': { const sec = Math.round(num($('#rtm').value)) * 60 + Math.round(num($('#rts').value)); closeSheet(); startRest(sec || 60); break; }
+    case 'restAdd': if (RT.iv) { RT.end += (+d.v) * 1000; RT.dur = Math.max(1, RT.dur + (+d.v)); tickRest(); } break;
+    case 'restStop': stopRest(); break;
     case 'theme': S.theme = isLight() ? 'dark' : 'light'; save(); applyTheme(); render(); toast(isLight() ? 'ライトモード' : 'ダークモード'); break;
     case 'openPlanFromHome': pv = d.id; go('plan'); break;
     case 'calcInfo': calcInfo(); break;
@@ -1990,6 +2089,7 @@ document.addEventListener('click', e => {
       const prev = S.logs.filter(x => x.ex === l.ex && (x.date < l.date || (x.date === l.date && String(x.id) < String(l.id)))).reduce((m, x) => Math.max(m, x.e1), 0);
       shareShow('pr', { ex: l.ex, w: l.w, r: l.r, e1: l.e1, prev, goal: 0, date: l.date }); break; }
     case 'photoPick': $('#photoIn').click(); break;
+    case 'shDay': sh.date = addDays(today(), -(+d.v)); $('#shd').value = sh.date; document.querySelectorAll('[data-act=shDay]').forEach(b => b.classList.toggle('on', b === a)); renderShot(); break;
     case 'shotSave': shotSave(); break;
     case 'shotShare': shotShare(); break;
 
