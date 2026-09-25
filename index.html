@@ -1748,6 +1748,7 @@ function titleSpec(x, rows, maxW) {
   const words = [...new Set(rows.map(r => r.part))].map(p => PART_EN[p] || p);
   if (!words.length) return { z: IMG.display, lines: ['REST DAY'] };
   const one = words.join(' · ');
+  if ('letterSpacing' in x) x.letterSpacing = '0px';
   x.font = `800 ${IMG.display}px ${DISP}`; if (x.measureText(one).width <= maxW) return { z: IMG.display, lines: [one] };
   const z = 72; x.font = `800 ${z}px ${DISP}`;
   const lines = []; let curL = '';
@@ -1758,7 +1759,7 @@ const titleH = t => t.z * .74 + (t.lines.length - 1) * Math.round(t.z * 1.05);
 function trainNeedH(W) {                               // 全部を入れるのに必要な高さ
   const { rows } = trainRows(sh.date);
   const t = titleSpec(document.createElement('canvas').getContext('2d'), rows, W - M * 2);
-  return 552 + rows.reduce((a, r) => a + blockH(r), 0) + titleH(t);
+  return 576 + rows.reduce((a, r) => a + blockH(r), 0) + titleH(t);
 }
 /* その日のメニュー：何を・どれだけ やったかを主役に */
 function trainRows(date = today()) {
@@ -1773,18 +1774,30 @@ function trainRows(date = today()) {
   }
   return { rows, planned, sets: logs.reduce((a, l) => a + l.sets, 0) };
 }
+/* 等幅数字：数字1文字ずつを同じ幅のマスに置いて右揃え（1 と 4 の幅の差で列がずれないように） */
+function TN(x, str, right, y, size, o = {}) {
+  x.font = `${o.w || 700} ${size}px ${DISP}`; x.fillStyle = o.c || C.w; x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+  if ('letterSpacing' in x) x.letterSpacing = '0px';
+  const cell = Math.max(...'0123456789'.split('').map(d => x.measureText(d).width));
+  let px = right;
+  String(str).split('').reverse().forEach(ch => {
+    const w = x.measureText(ch).width, cw = /\d/.test(ch) ? cell : w;
+    px -= cw; x.fillText(ch, px + (cw - w) / 2, y);
+  });
+  return right - px;
+}
 function drawSetLine(x, ln, y) {
   const U = { w: 600, c: C.dim }, N = { w: 700, a: 'right' };
   if (ln.min != null) {
-    T(x, String(ln.min), COLX.w, y, IMG.sub, N); T(x, '分', COLX.w + 8, y, 24, U);
+    TN(x, String(ln.min), COLX.w, y, IMG.sub); T(x, '分', COLX.w + 8, y, 24, U);
     T(x, ln.lvl, COLX.w + 96, y, 28, { w: 600, c: C.dim });
     return;
   }
-  T(x, fmtN(+ln.w), COLX.w, y, IMG.sub, N); T(x, 'kg', COLX.w + 8, y, 24, U);
+  TN(x, fmtN(+ln.w), COLX.w, y, IMG.sub); T(x, 'kg', COLX.w + 8, y, 24, U);
   T(x, '×', COLX.w + 76, y, 28, { w: 500, c: C.dim });
-  T(x, String(ln.r), COLX.r, y, IMG.sub, N); T(x, '回', COLX.r + 8, y, 24, U);
+  TN(x, String(ln.r), COLX.r, y, IMG.sub); T(x, '回', COLX.r + 8, y, 24, U);
   T(x, '×', COLX.r + 60, y, 28, { w: 500, c: C.dim });
-  T(x, String(ln.sets), COLX.s, y, IMG.sub, N); T(x, 'セット', COLX.s + 8, y, 24, U);
+  TN(x, String(ln.sets), COLX.s, y, IMG.sub); T(x, 'セット', COLX.s + 8, y, 24, U);
 }
 function sceneTrain(x, W, H) {
   const d = sh.date || today(), isToday = d === today();
@@ -1800,9 +1813,9 @@ function sceneTrain(x, W, H) {
     y0 += blockH(r);
   });
   const ts = titleSpec(x, rows, CW), lh = Math.round(ts.z * 1.05);
-  const tY = top - 40;
-  ts.lines.forEach((ln, i) => T(x, ln, M - 4, tY - (ts.lines.length - 1 - i) * lh, ts.z, { w: 800, ls: -ts.z * .02 }));
-  const lY = tY - titleH(ts) - 40; label(x, planned ? "TODAY'S PLAN" : isToday ? "TODAY'S SESSION" : 'SESSION', lY);
+  const tY = top - 56;                                           // 見出しと種目名の間を広めに
+  ts.lines.forEach((ln, i) => T(x, ln, M - 4, tY - (ts.lines.length - 1 - i) * lh, ts.z, { w: 800 }));
+  const lY = tY - titleH(ts) - 48; label(x, planned ? "TODAY'S PLAN" : isToday ? "TODAY'S SESSION" : 'SESSION', lY);
   return lY - 32;
 }
 function sceneBalance(x, W, H) {
