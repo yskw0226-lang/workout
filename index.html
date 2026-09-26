@@ -312,6 +312,41 @@ details.bd .sub{margin-top:4px}
 .scale .track i.over{background:var(--warn)}
 .scale .tick{position:absolute;top:-4px;width:2px;height:16px;margin-left:-1px;border-radius:1px}
 .scale .tick.tk-goal{background:var(--accent)}.scale .tick.tk-zero{background:var(--t3)}
+.wknav{display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:15px;color:var(--t2)}
+.icon-btn.sm{width:32px;height:32px}.icon-btn.sm svg{width:16px;height:16px}.icon-btn.flip svg{transform:scaleX(-1)}.icon-btn:disabled{opacity:.3}
+.wkadj{margin-top:16px;padding:12px;border-radius:12px;background:var(--s2);font-size:15px;line-height:1.45}
+.wkadj .lbl{margin-bottom:4px}.wkadj b.accent{color:var(--accent)}.wkadj .sub{margin-top:4px}.wkadj .sub.warn{color:var(--warn)}
+.wkbars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:16px}
+.wb{text-align:center;min-width:0}.wb.td{opacity:.5}
+.wb .wv{font-size:11px;color:var(--t2);white-space:nowrap;overflow:hidden;height:16px}
+.wb .wz{position:relative;height:96px;margin:4px 0}
+.wb .wz::before{content:"";position:absolute;left:0;right:0;top:48px;height:1px;background:var(--t3)}
+.wb .wz i{position:absolute;left:25%;right:25%;border-radius:3px;background:var(--accent)}
+.wb .wz i.up{bottom:48px}.wb .wz i.dn{top:48px}.wb .wz i.warn{background:var(--warn)}
+.wb .wd{font-size:13px;color:var(--t1);line-height:1.3}.wb .wd span{display:block;font-size:11px;color:var(--t3)}
+.wkavg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px;padding:12px;border-radius:12px;background:var(--s2)}
+.wkavg .v{font-size:17px;font-weight:600;margin-top:4px;white-space:nowrap}
+.card-top .seg{flex:0 0 auto;width:160px;margin:0}
+.wcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-top:12px}
+.wcard .wmain{display:block;text-align:left;min-width:0}
+.wcard .t{font-size:17px;font-weight:600;margin-top:4px}
+.wv{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:4px;white-space:nowrap}.wv small{font-size:15px;font-weight:500;color:var(--t2);margin-left:4px}
+.wv .wd{font-size:15px;font-weight:600;margin-left:8px}.wd.accent{color:var(--accent)}.wd.warn{color:var(--warn)}
+.wbtn{flex:0 0 auto;font-size:15px;font-weight:600;color:var(--accent);padding:8px 14px;border-radius:18px;background:var(--s2);white-space:nowrap}.wkadj .wbtn{background:var(--accent);color:#fff}
+.wtoday{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:12px;background:var(--s2);font-size:17px;font-weight:600;color:var(--t1)}
+.wtoday span{font-size:11px;font-weight:500;color:var(--t2)}
+.wtip{margin-top:16px;font-size:13px;color:var(--t2);min-height:18px}.wtip b{color:var(--t1);font-weight:600}.wtip span{color:var(--accent)}
+.wleg{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--t2);margin-top:4px}
+.wleg i{display:inline-block;vertical-align:middle;margin-right:4px}
+.wleg .dot{width:5px;height:5px;border-radius:50%;background:var(--t3)}
+.wleg .ln{width:16px;height:2px;border-radius:1px;background:var(--accent)}
+.wleg .ln.dash{background:repeating-linear-gradient(90deg,var(--t3) 0 4px,transparent 4px 8px);height:1.5px}
+.wrow{gap:12px}.wrow .wl{flex:0 0 42%;min-width:0}
+.wbar{flex:1;position:relative;height:8px}
+.wbar::before{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:var(--t3)}
+.wbar i{position:absolute;top:0;bottom:0;border-radius:3px;background:var(--accent)}
+.wbar i.up{left:50%}.wbar i.dn{right:50%}.wbar i.warn{background:var(--warn)}
+.kc.warn{color:var(--warn)}
 .legend3{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;margin-top:12px}
 .legend3 div{font-size:11px;color:var(--t2);line-height:1.35}
 .legend3 span{display:block}
@@ -601,7 +636,31 @@ EAA|いーえーえー あみのさん|1杯|36|9.0|0|0
 野菜炒め|やさいいため|1皿|250|8.0|18.0|12.0
 肉じゃが|にくじゃが|1人前|280|11.0|8.0|38.0
 サバの味噌煮|さばのみそに さば|1切れ|260|17.0|14.0|12.0
-寿司（にぎり）|すし 寿司 にぎり|1貫|55|3.0|0.3|9.5
+にぎり寿司（平均）|すし 寿司 にぎり かいてんずし 回転寿司|1貫|55|3.0|0.8|8.2
+にぎり 赤身（まぐろ）|すし 寿司 にぎり まぐろ 鮪 あかみ|1貫|51|4.5|0.3|7.8
+にぎり 中トロ|すし 寿司 にぎり まぐろ ちゅうとろ とろ|1貫|70|3.8|2.5|7.8
+にぎり サーモン|すし 寿司 にぎり さーもん さけ|1貫|67|3.5|2.8|7.8
+にぎり はまち|すし 寿司 にぎり はまち ぶり|1貫|67|3.7|2.6|7.9
+にぎり えび|すし 寿司 にぎり えび 海老|1貫|43|2.5|0.1|7.8
+にぎり いか|すし 寿司 にぎり いか 烏賊|1貫|43|2.6|0.1|7.8
+にぎり たこ|すし 寿司 にぎり たこ 蛸|1貫|45|3.1|0.1|7.8
+にぎり ほたて|すし 寿司 にぎり ほたて 帆立|1貫|46|3.0|0.1|8.4
+にぎり たまご|すし 寿司 にぎり たまご 玉子|1貫|63|2.6|1.8|9.1
+にぎり えんがわ|すし 寿司 にぎり えんがわ|1貫|68|3.1|2.9|7.8
+軍艦 いくら|すし 寿司 ぐんかん いくら|1貫|72|5.4|2.4|8.2
+軍艦 ねぎとろ|すし 寿司 ぐんかん ねぎとろ|1貫|80|3.0|4.0|8.0
+軍艦 うに|すし 寿司 ぐんかん うに 雲丹|1貫|47|2.1|0.5|8.2
+軍艦 コーン（マヨ）|すし 寿司 ぐんかん こーん まよ|1貫|75|1.2|3.4|10.0
+かっぱ巻き|すし 寿司 まきずし 巻き寿司 ほそまき かっぱまき きゅうり|1本(6切れ)|160|3.0|0.3|35.0
+鉄火巻き|すし 寿司 まきずし 巻き寿司 ほそまき てっかまき まぐろ|1本(6切れ)|190|9.0|0.4|35.0
+納豆巻き|すし 寿司 まきずし 巻き寿司 ほそまき なっとうまき なっとう|1本(6切れ)|210|7.0|2.4|38.0
+かんぴょう巻き|すし 寿司 まきずし 巻き寿司 ほそまき かんぴょうまき|1本(6切れ)|185|3.5|0.3|41.0
+ねぎとろ巻き|すし 寿司 まきずし 巻き寿司 ほそまき ねぎとろ|1本(6切れ)|245|7.0|8.0|35.0
+太巻き|すし 寿司 まきずし 巻き寿司 ふとまき えほうまき 恵方巻き|1切れ|75|2.3|1.0|14.0
+太巻き（1本）|すし 寿司 まきずし 巻き寿司 ふとまき えほうまき 恵方巻き|1本(8切れ)|600|18.0|8.0|112.0
+サラダ巻き|すし 寿司 まきずし 巻き寿司 さらだまき かにかま|1切れ|80|2.0|3.5|10.0
+いなり寿司|すし 寿司 いなりずし おいなりさん|1個|120|3.0|4.0|17.0
+ちらし寿司|すし 寿司 ちらしずし|1人前|500|16.0|8.0|90.0
 おにぎり（鮭）|おにぎり おむすび さけ こんびに|1個|185|5.2|1.4|38.3
 おにぎり（ツナマヨ）|おにぎり おむすび つなまよ こんびに|1個|230|5.5|7.0|37.0
 サンドイッチ（ミックス）|さんどいっち こんびに|1パック|300|11.0|16.0|28.0
@@ -689,7 +748,7 @@ const DEF = {
     { name: 'ベリー＆プロテイン', kcal: 210, p: 20, f: 2, c: 23 },
     { name: '自炊弁当', kcal: 550, p: 40, f: 8, c: 70 }
   ],
-  plans: [], logs: [], cardio: [], customEx: [], recEx: 'スミスベンチプレス', body: { bw: 70, h: 170, age: 30, sex: 'm', act: 'mid' }, v: 8, theme: 'dark', remind: { on: false, min: 180, lastId: null }, onboarded: false
+  plans: [], logs: [], cardio: [], customEx: [], recEx: 'スミスベンチプレス', body: { bw: 70, h: 170, age: 30, sex: 'm', act: 'mid' }, v: 10, eatBack: .5, theme: 'dark', remind: { on: false, min: 180, lastId: null }, weights: [], onboarded: false
 };
 function load() {
   let d = null;
@@ -785,6 +844,8 @@ if ((S.v || 0) < 9) {   // v9：運動の消費を安静時を除いた値に計
   S.cardio.forEach(c => { const i = CARDIO.findIndex(x => x[0] === c.name); if (i >= 0) c.kcal = metKcal(CARDIO[i][1][c.lvl], c.min); });
   S.v = 9; save();
 }
+if ((S.v || 0) < 10) { if (S.eatBack == null) S.eatBack = .5; S.v = 10; save(); }   // v10：運動の食べ戻しは既定で半分
+const EB = () => (S.eatBack == null ? .5 : +S.eatBack);
 /* 外観：'dark' | 'light' | 'auto'（端末の設定に合わせる） */
 const mqLight = window.matchMedia ? matchMedia('(prefers-color-scheme: light)') : null;
 const isLight = () => S.theme === 'light' || (S.theme === 'auto' && mqLight && mqLight.matches);
@@ -854,7 +915,7 @@ function renderHome() {
       <button class="row" data-act="food" data-slot="${k}"><span class="plus sm">${I.plus}</span><span class="grow accent" style="font-size:17px">追加</span></button></div>`;
   }).join('');
   const since = sinceLastMeal();
-  $('#tab-home').innerHTML = header('今日') + balanceHero(sum, pfc) + `
+  $('#tab-home').innerHTML = header('今日') + balanceHero(sum, pfc) + weightCard() + `
     <div class="sec"><b>トレーニング</b><button class="share-btn" data-act="share" data-v="train">${I.share}シェア</button></div>
     ${trainCards()}
     ${exerciseGroup()}
@@ -869,14 +930,40 @@ function balanceTone(bal) {
   return Math.abs(bal) <= 200 ? 'accent' : 'warn';
 }
 const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(Math.round(n)).toLocaleString();
+/* 週の始まり（月曜） */
+const monday = k => addDays(k, -((parseKey(k).getDay() + 6) % 7));
+let balView = 'day', wkOff = 0;
+/* 1週間の集計：記録のある「終わった日」だけで目標との差を出し、残りの日で割って調整量にする */
+function weekStats(off) {
+  const td = today(), mon = addDays(monday(td), off * 7), eb = EB(), T = Math.round(S.targets.kcal);
+  const days = [...Array(7)].map((_, i) => {
+    const k = addDays(mon, i), ms = S.meals[k] || [], intake = Math.round(sumOf(ms).kcal), b = burnOf(k), ex = b.strength + b.cardio;
+    return { k, logged: ms.length > 0, intake, burn: b.total, bal: intake - b.total, goal: Math.round(T + ex * eb - b.total), past: k < td, isToday: k === td };
+  });
+  const done = days.filter(d => d.logged && d.past), n = done.length;
+  const sum = f => done.reduce((a, d) => a + d[f], 0);
+  const bal = sum('bal'), goal = sum('goal'), diff = bal - goal;
+  const rest = off === 0 ? days.filter(d => !d.past).length : 0;
+  return { mon, sun: addDays(mon, 6), days, n, bal, goal, diff, rest, adj: rest && n ? -diff / rest : 0, T,
+    avgIn: n ? sum('intake') / n : 0, avgOut: n ? sum('burn') / n : 0 };
+}
+/* 目標との差の良し悪し（減量なら多すぎ、増量なら少なすぎが要注意） */
+function diffTone(diff) {
+  const tol = 100;
+  if (S.mode === 'cut') return diff > tol ? 'warn' : 'accent';
+  if (S.mode === 'bulk') return diff < -tol ? 'warn' : 'accent';
+  return Math.abs(diff) > tol ? 'warn' : 'accent';
+}
 function balanceHero(sum, pfc) {
-  const b = burnOf(today()), intake = Math.round(sum.kcal), bal = intake - b.total;
-  const target = Math.round(S.targets.kcal), ex = b.strength + b.cardio, goal = target - b.base;   // 目標の収支（例：−420）
-  const room = target + ex - intake, eatTo = target + ex;                                          // ここまで食べると目標の収支
+  const top = `<div class="card-top">${seg('bview', [['day', '今日'], ['week', '今週']], balView)}${balView === 'day' ? `<button class="share-btn" data-act="share" data-v="balance">${I.share}シェア</button>` : ''}</div>`;
+  return `<div class="card">${top}${balView === 'week' ? weekBody() : dayBody(sum) + `<div class="pfc">${pfc}</div>`}</div>`;
+}
+function dayBody(sum) {
+  const b = burnOf(today()), intake = Math.round(sum.kcal), bal = intake - b.total, eb = EB();
+  const target = Math.round(S.targets.kcal), ex = b.strength + b.cardio, exC = Math.round(ex * eb);
+  const room = target + exC - intake, eatTo = target + exC, goal = eatTo - b.total;          // goal：目標の収支（例：−420）
   const mx = Math.max(b.total, intake, eatTo, 1), pc = v => Math.min(100, v / mx * 100);
-  return `<div class="card">
-    <div class="card-top"><span class="lbl">今日のカロリー収支</span><button class="share-btn" data-act="share" data-v="balance">${I.share}シェア</button></div>
-    <div class="hero" style="margin-top:4px">${signed(bal)}<small>kcal</small></div>
+  return `<div class="hero" style="margin-top:12px">${signed(bal)}<small>kcal</small></div>
     <div class="goalline ${room >= 0 ? '' : 'over'}">${room >= 0
       ? `あと <b class="accent">${room.toLocaleString()}</b> kcal 食べられる`
       : `目標より <b class="warn">${(-room).toLocaleString()}</b> kcal オーバー`}</div>
@@ -892,15 +979,50 @@ function balanceHero(sum, pfc) {
     <details class="bd"><summary>計算のしくみ</summary>
       <div class="budget num">
         <div><div class="lbl">目標摂取</div><div class="v">${target.toLocaleString()}</div></div><span class="op">＋</span>
-        <div><div class="lbl">運動</div><div class="v">${ex.toLocaleString()}</div></div><span class="op">−</span>
+        <div><div class="lbl">運動×${Math.round(eb * 100)}%</div><div class="v">${exC.toLocaleString()}</div></div><span class="op">−</span>
         <div><div class="lbl">摂取</div><div class="v">${intake.toLocaleString()}</div></div><span class="op">＝</span>
         <div><div class="lbl">${room >= 0 ? 'あと' : 'オーバー'}</div><div class="v ${room >= 0 ? 'accent' : 'warn'}">${Math.abs(room).toLocaleString()}</div></div>
       </div>
-      <div class="sub num">収支 ＝ 摂取 − 消費。消費 ＝ 日常 ${b.base.toLocaleString()}（基礎代謝×活動係数・1日分）＋ 筋トレ ${b.strength} ＋ 有酸素 ${b.cardio}。<br>朝は1日分の消費が先に入るので大きなマイナスから始まり、食べるほど目標の収支 ${signed(goal)} に近づきます。</div>
+      <div class="sub num">収支 ＝ 摂取 − 消費。消費 ＝ 日常 ${b.base.toLocaleString()}（基礎代謝×活動係数・1日分）＋ 筋トレ ${b.strength} ＋ 有酸素 ${b.cardio}。<br>運動で消費した ${ex.toLocaleString()} kcal のうち ${Math.round(eb * 100)}% を「食べてOK」に足しています（設定で変更）。<br>朝は1日分の消費が先に入るので大きなマイナスから始まり、食べるほど目標の収支 ${signed(goal)} に近づきます。</div>
       <button class="link" data-act="calcInfo">計算式と出典を見る ›</button>
-    </details>
-    <div class="pfc">${pfc}</div>
-  </div>`;
+    </details>`;
+}
+function weekBody() {
+  const w = weekStats(wkOff), md = k => { const d = parseKey(k); return `${d.getMonth() + 1}/${d.getDate()}`; };
+  const tone = diffTone(w.diff), bmrN = r10(bmrOf(S.body));
+  const nav = `<div class="wknav"><button class="icon-btn sm" data-act="wk" data-v="-1" aria-label="前の週">${I.left}</button>
+    <span class="num">${md(w.mon)} 〜 ${md(w.sun)}${wkOff === 0 ? ' · 今週' : ''}</span>
+    <button class="icon-btn sm flip" data-act="wk" data-v="1" aria-label="次の週" ${wkOff >= 0 ? 'disabled' : ''}>${I.left}</button></div>`;
+  if (!w.n) return nav + `<div class="hero" style="margin-top:12px;color:var(--t3)">—</div>
+    <div class="goalline">${wkOff === 0 ? '昨日までの記録がまだありません。明日から今週の合計が出ます' : 'この週は食事の記録がありません'}</div>${weekBars(w, md)}`;
+  const status = Math.abs(w.diff) < 50 ? 'ほぼ目標どおり'
+    : `目標より <b class="${tone}">${Math.abs(Math.round(w.diff)).toLocaleString()}</b> kcal ${w.diff > 0 ? '多い' : '少ない'}`;
+  let adj = '';
+  if (w.rest && Math.abs(w.adj) >= 20) {
+    const a = r10(Math.abs(w.adj)), perDay = r10(w.T + w.adj);
+    adj = `<div class="wkadj"><div class="lbl">日曜までに帳尻を合わせるなら</div>
+      <div class="num">残り${w.rest}日は 1日 <b class="accent">${w.adj < 0 ? '−' : '+'}${a.toLocaleString()} kcal</b></div>
+      <div class="sub num">目標摂取 ${w.T.toLocaleString()} → 約 ${perDay.toLocaleString()} kcal/日（運動した日はその分を上乗せ）</div>
+      ${perDay < bmrN || a > 500 ? `<div class="sub warn">1日500kcalを超える調整や基礎代謝（${bmrN.toLocaleString()}）を下回る食事は、トレーニングの質と筋肉に響きます。無理に今週で合わせず、来週にならして大丈夫です。</div>` : ''}</div>`;
+  } else if (w.rest) adj = `<div class="wkadj"><div class="num">このペースでOK。残り${w.rest}日も目標どおりに</div></div>`;
+  return nav + `<div class="hero" style="margin-top:12px">${signed(w.bal)}<small>kcal</small></div>
+    <div class="goalline">${status}<span class="num" style="color:var(--t3)"> · 目標 ${signed(w.goal)}（${w.n}日分）</span></div>
+    ${adj}${weekBars(w, md)}
+    <div class="wkavg num"><div><div class="lbl">平均摂取</div><div class="v">${Math.round(w.avgIn).toLocaleString()}</div></div>
+      <div><div class="lbl">平均消費</div><div class="v">${Math.round(w.avgOut).toLocaleString()}</div></div>
+      <div><div class="lbl">平均収支</div><div class="v">${signed(w.bal / w.n)}</div></div></div>
+    <div class="sub">記録のある昨日までの日で集計（今日は食事の途中なので含めません）。記録を忘れた日は数えないので、つけ忘れがあると実際より少なく見えます。</div>`;
+}
+/* 7日分の「目標との差」棒グラフ（上＝多い、下＝少ない） */
+function weekBars(w, md) {
+  const DOW = ['月', '火', '水', '木', '金', '土', '日'];
+  const vals = w.days.map(d => d.logged && d.past ? d.bal - d.goal : null), mx = Math.max(300, ...vals.filter(v => v != null).map(Math.abs));
+  return `<div class="wkbars">${w.days.map((d, i) => { const v = vals[i], h = v == null ? 0 : Math.max(2, Math.abs(v) / mx * 44);
+    return `<div class="wb ${d.isToday ? 'td' : ''}">
+      <div class="wv num">${v == null ? (d.isToday ? '途中' : d.past ? '—' : '') : signed(v)}</div>
+      <div class="wz"><i class="${v == null ? '' : v > 0 ? 'up' : 'dn'} ${v == null ? '' : diffTone(v)}" style="height:${h}px"></i></div>
+      <div class="wd">${DOW[i]}<span class="num">${md(d.k)}</span></div></div>`; }).join('')}</div>
+    <div class="sub" style="margin-top:4px">棒は各日の「目標との差」。上が食べすぎ、下が控えめ</div>`;
 }
 function exerciseGroup() {
   const td = today(), logs = S.logs.filter(l => l.date === td), cs = S.cardio.filter(c => c.date === td);
@@ -1015,7 +1137,7 @@ function renderFood() {
   }
   const rec = recentFoods();
   el.innerHTML = `
-    <div class="chips" style="padding-top:0">${[['おかし', 'お菓子・スイーツ'], ['わがし', '和菓子'], ['おみやげ', 'おみやげ'], ['こんびに', 'コンビニ'], ['どんぶり', '丼'], ['らーめん', 'ラーメン']].map(([q, l]) => `<button data-act="fCat" data-q="${q}">${l}</button>`).join('')}</div>
+    <div class="chips" style="padding-top:0">${[['おかし', 'お菓子・スイーツ'], ['わがし', '和菓子'], ['おみやげ', 'おみやげ'], ['すし', '寿司'], ['こんびに', 'コンビニ'], ['どんぶり', '丼'], ['らーめん', 'ラーメン']].map(([q, l]) => `<button data-act="fCat" data-q="${q}">${l}</button>`).join('')}</div>
     ${S.presets.length ? `<div class="slbl" style="margin-top:4px">マイメニュー（タップで追加）</div><div class="group">${S.presets.map((p, i) => foodRow(p, 'fPreset', i, true)).join('')}</div>` : ''}
     ${rec.length ? `<div class="slbl">最近食べたもの</div><div class="group flist" style="max-height:34vh">${rec.map((m, i) => foodRow(m, 'fRecent', i, true)).join('')}</div>` : ''}
     <div class="group" style="margin-top:12px"><button class="row" data-act="customMeal"><span class="grow accent">手入力で追加</span>${I.chev}</button></div>`;
@@ -1352,6 +1474,14 @@ function calcInfo() {
       <p>アプリ内の食品は、日本食品標準成分表（八訂）の値をもとに、一般的な1個・1食の重さで換算した推定値です。市販品やおみやげはパッケージの栄養成分表示が一番正確なので、「手入力」でカロリーをそのまま入れてください。PFCから計算するときは P×4 ＋ F×9 ＋ C×4（kcal/g）を使います。</p>
       <ul><li>${L('文部科学省「日本食品標準成分表（八訂）増補2023年」', 'https://www.mext.go.jp/a_menu/syokuhinseibun/mext_00001.html')}</li>
       <li>${L('文部科学省「食品成分データベース」（食品ごとの値を検索できます）', 'https://fooddb.mext.go.jp/')}</li></ul>
+      <h4>⑦ 運動した分は食べ戻す？</h4>
+      <p>このアプリの目標摂取は「トレーニング以外の生活」を元にしているので、運動した分を<b style="color:var(--t1)">まったく足さないと、その分だけ赤字が増えます</b>。減量ならペースが速くなり、増量なら狙った増え方になりません。<br>一方で、運動の消費は推定の誤差が大きく（ウェアラブル端末で27〜93%）、運動を始めると日常の活動が無意識に減る「代償」もよく起こります。そのため全部を食べ戻すと、思ったほど赤字にならないことがあります。<br>そこで既定では<b style="color:var(--t1)">半分</b>を足しています。目安は、減量中なら0〜50%、増量中なら50〜100%。最終的には2〜3週間の体重の変化で判断してください。</p>
+      <ul>
+        <li>${L('Shcherbina et al. (2017) 7種のウェアラブル端末：心拍は正確だが消費カロリーの誤差は27〜93%（Stanford）', 'https://med.stanford.edu/news/all-news/2017/05/fitness-trackers-accurately-measure-heart-rate-but-not-calories-burned.html')}</li>
+        <li>${L('Mansfeldt & Magkos (2023) 運動を始めると日常の活動が減る・食事が増える代償反応のレビュー', 'https://link.springer.com/article/10.1007/s13668-023-00467-y')}</li>
+      </ul>
+      <h4>⑧ 1週間で見る</h4>
+      <p>体重は1日単位の収支ではなく、数日〜数週間の合計で決まります。「今週」タブでは、記録のある昨日までの日の収支を合計し、目標との差を残りの日数で割って、1日あたりの調整量を出しています。1日500kcalを超える調整や、基礎代謝を下回る食事はトレーニングの質を落とすので、翌週にならすのが無難です。</p>
       <p class="sub">どの式も集団の平均から出した推定です。2〜3週間、体重の変化を見て、目標カロリーを±100〜200kcalずつ調整するのが確実です。</p>
     </div>`);
 }
@@ -1392,7 +1522,8 @@ const goalOf = ex => { const P = S.plans.filter(p => p.ex === ex && !isFinished(
 
 let recKind = 'lift';
 function renderLog() {
-  const kindSeg = `<div style="margin-bottom:12px">${seg('rkind', [['lift', '筋トレ'], ['cardio', '有酸素']], recKind)}</div>`;
+  const kindSeg = `<div style="margin-bottom:12px">${seg('rkind', [['lift', '筋トレ'], ['cardio', '有酸素'], ['weight', '体重']], recKind)}</div>`;
+  if (recKind === 'weight') return renderWeight(kindSeg);
   const dateRow = `<label class="row"><span class="grow">日付</span><input type="date" id="ld" value="${today()}" style="background:transparent;color:var(--t2);font-size:17px;padding:4px 0;text-align:right"></label>`;
   if (recKind === 'cardio') {
     const last = S.cardio.slice(-1)[0];
@@ -1506,6 +1637,150 @@ function drawChart(ex) {
   </svg>`;
 }
 
+/* ================= 体重 ================= */
+/* 体重は水分や食事で1日1〜2kg動くため、7日平均で比べる。週・月ごとの平均の差で増減を見る */
+let wUnit = 'week', wAll = false;
+const wSorted = () => S.weights.slice().sort((a, b) => a.date < b.date ? -1 : 1);
+const wOn = k => { const x = S.weights.find(w => w.date === k); return x ? x.kg : null; };
+function wAvg(from, to) {                                     // from〜to（両端含む）の平均
+  const xs = S.weights.filter(w => w.date >= from && w.date <= to);
+  return xs.length ? xs.reduce((a, w) => a + w.kg, 0) / xs.length : null;
+}
+const wPace = () => S.mode === 'cut' ? -S.body.bw * .005 : S.mode === 'bulk' ? S.body.bw * .0025 : 0;   // 目標の週あたり変化(kg)
+const kgS = (n, d = 1) => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).toFixed(d);
+/* 増減の良し悪し：減量は増加/速すぎ、増量は減少/速すぎ、維持は±0.2kg超を注意 */
+function wJudge(diff, pace) {
+  if (S.mode === 'maint') return Math.abs(diff) <= .2 ? { t: 'キープできています', c: 'accent', ok: 1 } : { t: diff > 0 ? '増えています' : '減っています', c: 'warn' };
+  const dir = S.mode === 'cut' ? -1 : 1, v = diff * dir, p = pace * dir;
+  if (v < -.05) return { t: S.mode === 'cut' ? '増えています' : '減っています', c: 'warn' };
+  if (v > p * (S.mode === 'cut' ? 1.8 : 2)) return { t: S.mode === 'cut' ? '速すぎ（筋肉が落ちやすい）' : '速すぎ（脂肪がつきやすい）', c: 'warn' };
+  if (v < p * .5) return { t: 'ゆるやか', c: 'accent' };
+  return { t: 'ペースどおり', c: 'accent', ok: 1 };
+}
+function wSummary() {
+  const td = today(), cur = wAvg(addDays(td, -6), td), prev = wAvg(addDays(td, -13), addDays(td, -7));
+  const all = wSorted(), span = all.length ? diffDays(all[0].date, td) : 0;
+  return { cur, prev, diff: cur != null && prev != null ? cur - prev : null, pace: wPace(), span, last: all[all.length - 1] };
+}
+/* 週（月曜はじまり）または月ごとの平均と、前の期間との差 */
+function wPeriods(unit) {
+  const g = {};
+  S.weights.forEach(w => { const k = unit === 'week' ? monday(w.date) : w.date.slice(0, 7); (g[k] = g[k] || []).push(w.kg); });
+  const keys = Object.keys(g).sort();
+  return keys.map((k, i) => { const avg = g[k].reduce((a, b) => a + b, 0) / g[k].length, pk = keys[i - 1];
+    const prevAvg = pk ? g[pk].reduce((a, b) => a + b, 0) / g[pk].length : null;
+    const adjacent = pk && (unit === 'week' ? diffDays(pk, k) === 7 : monthGap(pk, k) === 1);
+    return { k, avg, n: g[k].length, diff: prevAvg != null && adjacent ? avg - prevAvg : null }; }).reverse();
+}
+const monthGap = (a, b) => (+b.slice(0, 4) - +a.slice(0, 4)) * 12 + (+b.slice(5) - +a.slice(5));
+
+/* ホームの小さなカード */
+function weightCard() {
+  const s = wSummary(), tw = wOn(today());
+  if (!s.last) return `<button class="card wcard" data-act="weigh"><div class="grow"><div class="lbl">体重</div><div class="t">今朝の体重を記録する</div><div class="sub" style="margin:4px 0 0">週・月ごとの増減がグラフで見られます</div></div><span class="plus">${I.plus}</span></button>`;
+  const j = s.diff != null ? wJudge(s.diff, s.pace) : null;
+  return `<div class="card wcard"><button class="grow wmain" data-act="goWeight">
+      <div class="lbl">体重 · 7日平均</div>
+      <div class="wv num">${(s.cur ?? s.last.kg).toFixed(1)}<small>kg</small>${s.diff != null ? `<span class="wd ${j.c}">${kgS(s.diff)}kg</span>` : ''}</div>
+      <div class="sub" style="margin:2px 0 0">${s.diff != null ? `先週より · ${j.t}` : '1週間続けると先週との差が出ます'}</div></button>
+    ${tw == null ? `<button class="wbtn" data-act="weigh">記録</button>` : `<button class="wtoday num" data-act="weigh"><span>今日</span>${tw.toFixed(1)}</button>`}</div>`;
+}
+function weighSheet(date) {
+  const k = date || today(), v = wOn(k) ?? (wSorted().slice(-1)[0] || {}).kg ?? S.body.bw;
+  openSheet(`<div class="sh-h"><button data-act="close">キャンセル</button><h3>体重を記録</h3><button data-act="saveWeight" style="font-weight:600">保存</button></div>
+    <div class="group"><label class="row"><span class="grow">日付</span><input type="date" id="wdt" value="${k}" max="${today()}" style="background:transparent;color:var(--t2);font-size:17px;padding:4px 0;text-align:right"></label></div>
+    <div class="card" style="margin-top:12px"><div class="srow" style="border:0"><span>体重</span>${stepper('wkg', Number(v).toFixed(1), .1, 'kg')}</div></div>
+    <div class="sub" style="margin:8px 4px 0">毎朝、起きてトイレのあと・食べる前に測ると、日々のブレが小さくなります。最新の体重はカロリー計算にも使われます。</div>`);
+}
+function saveWeight() {
+  const k = $('#wdt').value || today(), kg = r1(num($('#wkg').value));
+  if (!(kg > 20 && kg < 300)) { toast('体重を入力してください'); return; }
+  const old = S.weights.find(w => w.date === k), prevKg = old ? old.kg : null, prevBw = S.body.bw;
+  if (old) old.kg = kg; else S.weights.push({ date: k, kg });
+  const latest = wSorted().slice(-1)[0]; if (latest) S.body.bw = latest.kg;
+  save(); closeSheet(); render();
+  toast(`${kg.toFixed(1)}kg を記録しました`, () => { if (old) old.kg = prevKg; else S.weights = S.weights.filter(w => w.date !== k); S.body.bw = prevBw; save(); render(); });
+}
+
+/* 記録タブ：体重 */
+function renderWeight(kindSeg) {
+  const s = wSummary(), per = wPeriods(wUnit).slice(0, 12);
+  let hero;
+  if (!s.last) hero = `<div class="card empty"><div class="muted">まだ記録がありません。<br>毎日記録すると、週・月ごとの増減が見えるようになります</div><button class="btn" data-act="weigh">今日の体重を記録</button></div>`;
+  else {
+    const j = s.diff != null ? wJudge(s.diff, s.pace) : null;
+    let adv = '';
+    if (j && !j.ok) {
+      if (s.span >= 14) {
+        const kc = Math.max(-300, Math.min(300, r10((s.pace - s.diff) * 7700 / 7)));
+        if (Math.abs(kc) >= 50) adv = `<div class="wkadj"><div class="lbl">カロリーの見直し</div>
+          <div class="num">目標摂取を 1日 <b class="accent">${kc > 0 ? '+' : '−'}${Math.abs(kc)} kcal</b>（${S.targets.kcal.toLocaleString()} → ${(S.targets.kcal + kc).toLocaleString()}）</div>
+          <div class="sub">2週続けてズレているときに調整するのがおすすめ。一度に動かすのは±300kcalまで。</div>
+          <button class="wbtn" style="margin-top:12px" data-act="wAdj" data-v="${kc}">目標に反映する</button></div>`;
+      } else adv = `<div class="sub" style="margin-top:12px">記録が2週間たまると、カロリーの調整量を提案します</div>`;
+    }
+    hero = `<div class="card">
+      <div class="card-top"><span class="lbl">7日平均</span><button class="wbtn" data-act="weigh">${wOn(today()) == null ? '今日の体重を記録' : `今日 ${wOn(today()).toFixed(1)}kg · 修正`}</button></div>
+      <div class="hero" style="margin-top:4px">${(s.cur ?? s.last.kg).toFixed(1)}<small>kg</small></div>
+      <div class="goalline">${s.diff != null ? `先週より <b class="${j.c}">${kgS(s.diff)}kg</b> · ${j.t}` : '1週間続けると先週との差が出ます'}</div>
+      <div class="sub num" style="margin-top:4px">目標ペース（${MODE[S.mode]}）：週 ${S.mode === 'maint' ? '±0' : kgS(s.pace, 2)}kg</div>
+      ${adv}
+      <div class="wtip num" id="wtip"></div>
+      <div id="wchart"></div>
+      <div class="wleg"><span><i class="dot"></i>毎日の体重</span><span><i class="ln"></i>7日平均</span>${S.mode !== 'maint' ? '<span><i class="ln dash"></i>目標ペース</span>' : ''}</div>
+    </div>`;
+  }
+  const maxAbs = Math.max(.3, ...per.filter(p => p.diff != null).map(p => Math.abs(p.diff)));
+  const pp = wUnit === 'week' ? s.pace : s.pace * 30.4 / 7;
+  const label = p => { if (wUnit === 'week') { const e = addDays(p.k, 6), f = x => { const d = parseKey(x); return `${d.getMonth() + 1}/${d.getDate()}`; }; return `${f(p.k)}〜${f(e)}`; } return `${+p.k.slice(0, 4)}年${+p.k.slice(5)}月`; };
+  const list = per.length ? `<div class="group">${per.map(p => { const j = p.diff != null ? wJudge(p.diff, pp) : null, w = p.diff != null ? Math.max(2, Math.abs(p.diff) / maxAbs * 50) : 0;
+    return `<div class="row wrow"><div class="wl"><div class="t num">${label(p)}</div><div class="s num">平均 ${p.avg.toFixed(1)}kg · ${p.n}日</div></div>
+      <div class="wbar"><i class="${p.diff == null ? '' : p.diff > 0 ? 'up' : 'dn'} ${j ? j.c : ''}" style="width:${w}%"></i></div>
+      <span class="kc num ${j && j.c === 'warn' ? 'warn' : ''}">${p.diff == null ? '—' : kgS(p.diff) + 'kg'}</span></div>`; }).join('')}</div>
+    <div class="sub" style="margin:8px 4px 0">前の${wUnit === 'week' ? '週' : '月'}の平均との差。棒は右が増加、左が減少。目標ペースは${wUnit === 'week' ? '週' : '月'} ${S.mode === 'maint' ? '±0' : kgS(pp, 2)}kg</div>` : '';
+  const histAllW = wSorted().reverse(), hist = histAllW.slice(0, wAll ? 400 : 14);
+  $('#tab-log').innerHTML = header('記録') + kindSeg + hero + `
+    <div class="sec"><b>増減</b></div>
+    <div style="margin-bottom:12px">${seg('wunit', [['week', '週ごと'], ['month', '月ごと']], wUnit)}</div>
+    ${list || '<div class="card empty"><div class="muted">記録がたまると、ここに週・月ごとの増減が並びます</div></div>'}
+    ${hist.length ? `<div class="sec"><b>履歴</b></div><div class="group">${hist.map(w => `<div class="row"><button class="grow t num" data-act="weighEdit" data-v="${w.date}" style="text-align:left">${fmtD(w.date)}</button><span class="kc num">${w.kg.toFixed(1)} kg</span><button class="x" data-act="delWeight" data-v="${w.date}" aria-label="削除">${I.x}</button></div>`).join('')}</div>${histAllW.length > 14 ? `<button class="link" style="margin:8px 4px" data-act="wAll">${wAll ? '閉じる' : `すべて表示（${histAllW.length}日）`}</button>` : ''}` : ''}`;
+  if (s.last) drawWeightChart();
+}
+/* 折れ線：毎日の体重（点）＋7日平均（線）＋目標ペース（点線）。タップで値を表示 */
+function drawWeightChart() {
+  const el = $('#wchart'); if (!el) return;
+  const td = today(), days = wUnit === 'week' ? 84 : 365, all = wSorted(), first = all[0].date;
+  const start = first > addDays(td, -days + 1) ? first : addDays(td, -days + 1), N = Math.max(1, diffDays(start, td));
+  const pts = all.filter(w => w.date >= start);
+  const avg = []; for (let i = 0; i <= N; i++) { const k = addDays(start, i); if (!pts.some(w => w.date === k)) continue; const a = wAvg(addDays(k, -6), k); avg.push({ k, i, v: a }); }
+  const a0 = avg[0], pace = wPace() / 7, tgt = S.mode === 'maint' || !a0 ? null : [a0, { i: N, v: a0.v + pace * (N - a0.i) }];
+  const vals = pts.map(w => w.kg).concat(tgt ? tgt.map(t => t.v) : []);
+  let lo = Math.min(...vals), hi = Math.max(...vals); const pd = Math.max(.5, (hi - lo) * .15); lo -= pd; hi += pd;
+  const W = 340, H = 170, L = 4, R = 40, T = 10, B = 22;
+  const x = i => L + (W - L - R) * i / N, y = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
+  const gl = [lo + pd, (lo + hi) / 2, hi - pd];
+  const md = k => { const d = parseKey(k); return `${d.getMonth() + 1}/${d.getDate()}`; };
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" id="wsvg" style="margin-top:4px;touch-action:pan-y">
+    ${gl.map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--sep)" stroke-width=".5"/><text x="${W - R + 6}" y="${y(v) + 4}" style="fill:var(--t2)" font-size="10">${v.toFixed(1)}</text>`).join('')}
+    ${tgt ? `<line x1="${x(tgt[0].i)}" y1="${y(tgt[0].v)}" x2="${x(tgt[1].i)}" y2="${y(tgt[1].v)}" style="stroke:var(--t3)" stroke-width="1.5" stroke-dasharray="4 4"/>` : ''}
+    ${pts.map(w => `<circle cx="${x(diffDays(start, w.date)).toFixed(1)}" cy="${y(w.kg).toFixed(1)}" r="2.5" style="fill:var(--t3)"/>`).join('')}
+    ${avg.length > 1 ? `<polyline points="${avg.map(p => `${x(p.i).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ')}" fill="none" style="stroke:var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>` : ''}
+    <line id="wguide" y1="${T}" y2="${H - B}" style="stroke:var(--t2);display:none" stroke-width="1"/>
+    <circle id="wdot" r="5" style="fill:var(--accent);stroke:var(--s1);display:none" stroke-width="2"/>
+    <text x="${L}" y="${H - 4}" style="fill:var(--t2)" font-size="10">${md(start)}</text>
+    <text x="${W - R}" y="${H - 4}" style="fill:var(--t2)" font-size="10" text-anchor="end">${md(td)}</text>
+  </svg>`;
+  const svg = $('#wsvg'), tip = $('#wtip'), show = p => {
+    const g = $('#wguide'), dt = $('#wdot'), kg = wOn(p.k);
+    g.setAttribute('x1', x(p.i)); g.setAttribute('x2', x(p.i)); g.style.display = ''; dt.setAttribute('cx', x(p.i)); dt.setAttribute('cy', y(p.v)); dt.style.display = '';
+    tip.innerHTML = `${fmtD(p.k)}　<b>${kg.toFixed(1)}kg</b>　<span>7日平均 ${p.v.toFixed(1)}kg</span>`;
+  };
+  const pick = e => { const r = svg.getBoundingClientRect(), i = ((e.clientX - r.left) / r.width * W - L) / (W - L - R) * N;
+    let best = avg[0]; avg.forEach(p => { if (Math.abs(p.i - i) < Math.abs(best.i - i)) best = p; }); show(best); };
+  svg.addEventListener('pointerdown', pick); svg.addEventListener('pointermove', e => { if (e.buttons || e.pointerType === 'mouse') pick(e); });
+  show(avg[avg.length - 1]);
+}
+
 /* ================= CALENDAR ================= */
 let calM = (() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
 let calPart = 'all', calSel = today();
@@ -1597,6 +1872,12 @@ const profileFields = (pre, b) => `
     <div style="margin-top:8px">${seg(pre + 'sex', [['m', '男性'], ['f', '女性']], b.sex)}</div>
     <div class="slbl">日常の活動量（トレーニング以外）</div>${seg(pre + 'act', Object.entries(PAL).map(([k, v]) => [k, v[0]]), b.act)}`;
 function readProfile(pre, b) { ['bw', 'h', 'age'].forEach(k => { const v = num($('#' + pre + k).value); if (v > 0) b[k] = v; }); return b; }
+function ebNote() {
+  const e = EB();
+  return e === 0 ? '運動した分は食べ戻しません。目標摂取だけを守ればOK。減量を少し早めたいとき向け（増量中は不足しやすいので非推奨）。'
+    : e === 1 ? '運動で消費した推定値をすべて「あと食べられる」に足します。増量中や、運動量が多くて空腹がつらいとき向け。推定値は多めに出やすい点に注意。'
+    : 'おすすめ。運動の消費は推定の誤差が大きく、運動した日は他の活動が減りやすいため、半分だけ足します。';
+}
 function settingsSheet() {
   st.b = { ...S.body }; st.mode = S.mode;
   const T = S.targets;
@@ -1608,7 +1889,8 @@ function settingsSheet() {
     <div id="srefs" style="margin-top:16px">${refCards(st.b, st.mode)}</div>
     <div class="slbl">1日の目標摂取（手動で調整もOK）</div>
     <div class="group">${r('sk', 'カロリー', T.kcal, 'kcal')}${r('sp', 'タンパク質', T.p, 'g')}${r('sf', '脂質', T.f, 'g')}${r('sc', '炭水化物', T.c, 'g')}</div>
-    <div class="sub" style="margin:8px 4px 0">筋トレ・有酸素で消費した分は、その日の「あと食べられる」に自動で足されます。</div>
+    <div class="slbl">運動で消費した分を食べる量に足す</div>${seg('seat', [['0', '足さない'], ['0.5', '半分'], ['1', '全部']], String(EB()))}
+    <div class="sub" id="ebNote" style="margin:8px 4px 0">${ebNote()}</div>
     <button class="link" style="margin-left:4px" data-act="calcInfo">計算式と出典を見る ›</button>
     ${S.presets.length ? `<div class="slbl">マイメニュー</div><div class="group">${S.presets.map((p, i) => `<div class="row"><span class="grow t">${esc(p.name)}</span><span class="kc">${Math.round(p.kcal).toLocaleString()}</span><button class="x" data-act="delPreset" data-i="${i}">${I.x}</button></div>`).join('')}</div>` : ''}
     <div class="slbl">食事リマインダー</div>
@@ -1944,12 +2226,15 @@ document.addEventListener('click', e => {
     if (['freq', 'mode'].includes(name)) planPreview();
     if (name === 'clvl') { cdo.lvl = +v; updCardio(); }
     if (name === 'hist') { histAll = v === '1'; renderHist(); }
+    if (name === 'wunit') { wUnit = v; renderLog(); }
     if (name === 'rkind') { recKind = v; renderLog(); }
     if (name === 'shstyle') { sh.style = v; sh.touched = true; if (v === 'photo' && !sh.photo) $('#photoIn').click(); renderShot(); }
     if (name === 'shratio') { sh.ratio = v; renderShot(); }
     if (name === 'fslot') { fs.slot = v; if (fs.item) updFood(); }
     if (name === 'cslot') $('#panel').dataset.slot = v;
     if (name === 'mslot') { const m = mealsToday().find(x => x.id === $('#panel').dataset.mid); if (m) { m.slot = v; save(); renderHome(); } }
+    if (name === 'bview') { balView = v; wkOff = 0; renderHome(); }
+    if (name === 'seat') { S.eatBack = +v; save(); $('#ebNote').innerHTML = ebNote(); }
     if (name === 'stheme' || name === 'ttheme') { S.theme = v; save(); applyTheme(); render(); }
     if (name === 'sact' || name === 'ssex') { st.b[name === 'sact' ? 'act' : 'sex'] = v; readProfile('s', st.b); $('#srefs').innerHTML = refCards(st.b, st.mode); applyRefToInputs(); }
     if (name === 'tact' || name === 'tsex') { tu.b[name === 'tact' ? 'act' : 'sex'] = v; readProfile('t', tu.b); $('#trefs').innerHTML = refCards(tu.b, tu.mode); }
@@ -1959,6 +2244,7 @@ document.addEventListener('click', e => {
   const d = a.dataset;
   switch (d.act) {
     case 'close': closeSheet(); break;
+    case 'wk': wkOff = Math.min(0, wkOff + +d.v); renderHome(); break;
     case 'settings': settingsSheet(); break;
     case 'goPlan': pv = 'form'; editPid = null; initPf(); go('plan'); break;
 
@@ -2093,6 +2379,21 @@ document.addEventListener('click', e => {
       const idx = S.cardio.findIndex(c => c.id === d.id); if (idx < 0) break;
       const [rm] = S.cardio.splice(idx, 1); save(); render();
       toast('削除しました', () => { S.cardio.splice(idx, 0, rm); save(); render(); }); break;
+    }
+    case 'weigh': weighSheet(); break;
+    case 'wAll': wAll = !wAll; renderLog(); break;
+    case 'weighEdit': weighSheet(d.v); break;
+    case 'saveWeight': saveWeight(); break;
+    case 'goWeight': recKind = 'weight'; go('log'); break;
+    case 'delWeight': {
+      const idx = S.weights.findIndex(w => w.date === d.v); if (idx < 0) break;
+      const [rm] = S.weights.splice(idx, 1); save(); render();
+      toast('削除しました', () => { S.weights.push(rm); save(); render(); }); break;
+    }
+    case 'wAdj': {
+      const kc = +d.v, old = { ...S.targets };
+      S.targets.kcal += kc; S.targets.c = Math.max(0, S.targets.c + Math.round(kc / 4)); save(); render();
+      toast(`目標を ${S.targets.kcal.toLocaleString()} kcal にしました`, () => { S.targets = old; save(); render(); }); break;
     }
     case 'setWeeks': $('#fwk').value = d.v; planPreview(); break;
 
