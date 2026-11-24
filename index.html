@@ -346,7 +346,7 @@ details.bd .sub{margin-top:4px}
 .wbar::before{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:var(--t3)}
 .wbar i{position:absolute;top:0;bottom:0;border-radius:3px;background:var(--accent)}
 .wbar i.up{left:50%}.wbar i.dn{right:50%}.wbar i.warn{background:var(--warn)}
-.kc.warn{color:var(--warn)}
+.kc.warn{color:var(--warn)}.kc.accent{color:var(--accent)}
 .vbars{display:flex;gap:6px;margin-top:20px;align-items:flex-end}
 .vb{flex:1;min-width:0;text-align:center}.vb .vz{height:80px;display:flex;align-items:flex-end;justify-content:center}
 .vb .vz i{display:block;width:60%;max-width:28px;border-radius:4px 4px 0 0;background:var(--accent)}
@@ -373,6 +373,17 @@ details.bd .sub{margin-top:4px}
 .svtr{margin-top:8px;font-size:13px;color:var(--t1);line-height:1.45}
 .svgo{margin-top:12px;font-size:13px;font-weight:600}
 .bal3 .v small{font-size:13px;font-weight:500;color:var(--t2);margin-left:1px}
+.alertc{box-shadow:inset 0 0 0 1px var(--warn)}.alertc .svic{background:var(--w15);color:var(--warn)}
+.pgc{margin-top:12px}.pgh{display:flex;align-items:center;gap:8px;width:100%;text-align:left}.pgh .t{font-size:17px;font-weight:600}.pgh .t{display:block}.pgh .cfg{display:block;font-size:13px;color:var(--t2);margin-top:2px}.pgh svg{width:14px;height:14px;color:var(--t3)}
+.pgt{font-size:22px;font-weight:700;margin-top:8px;letter-spacing:-.01em}
+.pgalt{margin-top:8px;font-size:13px;color:var(--t2)}.pgalt .seg{margin-top:8px}
+.pgset{display:flex;align-items:center;gap:6px;padding:6px 0;border-top:.5px solid var(--sep)}
+.pgset .no{width:20px;color:var(--t3);font-size:13px}.pgset input{width:64px;padding:8px;border-radius:10px;background:var(--s2);color:var(--t1);font-size:17px;text-align:right;border:0}
+.pgset .u{font-size:13px;color:var(--t2)}.pgset .tg{flex:1;text-align:right;font-size:13px;color:var(--t3)}
+.pgset .ck{width:36px;height:36px;border-radius:50%;background:var(--s2);display:grid;place-items:center;color:var(--t3)}.pgset .ck svg{width:18px;height:18px}
+.pgset.on .ck{background:var(--accent);color:#fff}.pgset.on input{color:var(--accent)}
+.pgrir{margin-top:8px}.pgrir .seg{margin-top:6px}
+.pgdn{flex:1;font-size:17px;font-weight:600;background:transparent;padding:4px 0}
 .legend3{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;margin-top:12px}
 .legend3 div{font-size:11px;color:var(--t2);line-height:1.35}
 .legend3 span{display:block}
@@ -1005,6 +1016,84 @@ function coAdjust({ est, targetPace, curKcal, curF, bmr }) {
 }
 /* COACH-END */
 
+/* PROG-BEGIN ================= 次回メニュー自動生成（純粋関数：DOM・Sに依存しない。tests/prog.test.mjs で単体テスト） =================
+   ダブルプログレッション（各種目のトップセット＝1セット目で判定）
+     ・トップセットがレンジ上限に到達し、最終セットのRIRが1以上 → 最小刻みで増量、レップは下限付近から
+     ・レンジ内 → 重量据え置き、合計 +1回（最終RIR2以上なら+2回）を前のセットから配分
+     ・下限未満 → 据え置きで再挑戦。2回連続で下限未満なら −7.5%（刻みに丸め）か、その種目だけデロードを提案
+   推定1RM（この機能のみ Epley式：重量 ×（1＋回数÷30））
+   筋力低下：トップセット推定1RMが、直近2セッション連続で「前々回」比 −5%（リーンバルク・リコンプは −7%）を超えて低下、が2種目以上 */
+const PG = { REDUCE: .075, DELOAD_VOL: .6, LITE_VOL: .8, DROP: { cut: .05, maint: .05, lean: .07, recomp: .07 } };
+const pgEpley = (w, r) => r <= 1 ? w : w * (1 + r / 30);
+const pgR = (v, inc) => Math.round(Math.round(v / inc) * inc * 100) / 100;
+/* 器具・刻み・レップレンジの初期値（種目ごとに変更可） */
+function pgDefaultCfg(name) {
+  const db = /ダンベル/.test(name), mc = !db && /(マシン|ケーブル|ラットプル|プルダウン|レッグプレス|スミス|エクステンション|レッグカール|チェストプレス|ペック|ハック|ロウ（マシン）|マシンロウ)/.test(name);
+  const big = /^(ベンチプレス|スクワット|デッドリフト|ショルダープレス|ベントオーバーロウ|インクラインベンチプレス|フロントスクワット|ルーマニアンデッドリフト)$/.test(name);
+  return { type: db ? 'db' : mc ? 'machine' : 'barbell', inc: db ? 2 : mc ? 5 : 2.5, lo: big ? 6 : 8, hi: big ? 10 : 12 };
+}
+/* 記録 → 種目ごとのセッション（日付順）。logs は記録した順。1行＝重量×回数×セット数（同じ内容のセットをまとめた行） */
+function pgSessions(logs, ex) {
+  const by = {};
+  logs.filter(l => l.ex === ex && +l.r > 0).forEach(l => {
+    const s = by[l.date] = by[l.date] || { date: l.date, sets: [] };
+    const n = Math.max(1, Math.round(+l.sets || 1));
+    for (let i = 0; i < n; i++) s.sets.push({ w: +l.w, r: +l.r, rir: i === n - 1 && l.rir != null ? +l.rir : null, tgt: l.tgt != null ? +l.tgt : null, tw: l.tw != null ? +l.tw : null });
+  });
+  return Object.values(by).sort((a, b) => a.date < b.date ? -1 : 1).map(s => ({ ...s, top: s.sets[0], e1: pgEpley(s.sets[0].w, s.sets[0].r) }));
+}
+const pgFmtW = w => (Math.round(w * 100) / 100).toString();
+function pgPrevText(s) {
+  const W = s.sets[0].w, same = s.sets.every(x => x.w === W), last = s.sets[s.sets.length - 1];
+  const body = same ? `${pgFmtW(W)}kg×${s.sets.map(x => x.r).join(',')}` : s.sets.map(x => `${pgFmtW(x.w)}×${x.r}`).join(', ');
+  return `前回 ${body}${last.rir != null ? ` RPE${10 - last.rir}` : ''}`;
+}
+/* 次回の目標。sessions: pgSessions の結果、cfg: {lo,hi,inc}、mod: null | 'deload' | 'lite' */
+function pgNext(sessions, cfg, mod) {
+  const { lo, hi, inc } = cfg, last = sessions[sessions.length - 1];
+  if (!last) return { kind: 'new', w: null, targets: [hi, hi, hi].map(() => lo + Math.floor((hi - lo) / 2)), range: [lo, hi], reason: `初回：${lo}〜${hi}回でRIR2が残る重量から` };
+  const W = last.sets[0].w, n = last.sets.length, reps = last.sets.map(x => x.r), top = reps[0], rir = last.sets[n - 1].rir, prev = pgPrevText(last);
+  let out;
+  if (top >= hi) {
+    const ok = rir != null ? rir >= 1 : reps.every(r => r >= hi);
+    if (ok) {
+      const t = []; for (let i = 0; i < n; i++) t.push(Math.max(lo, Math.min(hi, lo + 2 - i)));
+      out = { kind: 'up', w: pgR(W + inc, inc), targets: t, range: [lo, Math.min(hi, lo + 2)], reason: `${prev} → 上限${hi}回に到達${rir != null ? `・余力${rir}` : ''}なので +${inc}kg、${lo}回付近から` };
+    } else out = { kind: 'hold0', w: W, targets: reps.slice(), range: [lo, hi], reason: `${prev} → 上限到達だが最終セットの余力0。同じ重量で余力を残して${hi}回を` };
+  } else if (top >= lo) {
+    const plus = rir != null && rir >= 2 ? 2 : 1, t = reps.slice();
+    const used = new Set();                         // 前のセットから1回ずつ配分（同じセットに偏らせない）
+    for (let k = 0; k < plus; k++) { let i = t.findIndex((r, j) => r < hi && !used.has(j)); if (i < 0) i = t.findIndex(r => r < hi); if (i < 0) break; t[i]++; used.add(i); }
+    out = { kind: 'add', w: W, targets: t, range: [lo, hi], plus, reason: `${prev} → あと${plus}回を狙う` };
+  } else {
+    const p2 = sessions[sessions.length - 2], twice = p2 && p2.sets[0].w === W && p2.sets[0].r < lo;
+    if (twice) {
+      const w = Math.min(pgR(W - inc, inc), Math.floor(W * (1 - PG.REDUCE) / inc) * inc), t = []; for (let i = 0; i < n; i++) t.push(Math.max(lo, Math.min(hi, lo + 2 - i)));
+      out = { kind: 'reduce', w: Math.round(w * 100) / 100, targets: t, range: [lo, hi], reason: `${prev} → 2回続けて下限${lo}回未満。${Math.round((1 - w / W) * 100)}%下げて立て直す`,
+        alt: { kind: 'deload', w: W, sets: Math.max(1, Math.round(n * PG.DELOAD_VOL)), reason: `またはこの種目だけデロード（${pgFmtW(W)}kgのままセット数を減らす）` } };
+    } else out = { kind: 'retry', w: W, targets: reps.map(() => lo), range: [lo, hi], reason: `${prev} → 下限${lo}回に届かず。同じ重量で再挑戦` };
+  }
+  if (mod === 'deload') {
+    const k = Math.max(1, Math.round(n * PG.DELOAD_VOL));
+    out = { ...out, kind: out.kind, w: W, targets: reps.slice(0, k), mod, reason: `デロード週：重量${pgFmtW(W)}kgは維持、セット数 ${n}→${k}（−40%）` };
+  } else if (mod === 'lite') {
+    const k = Math.max(1, Math.round(n * PG.LITE_VOL));
+    out = { ...out, targets: out.targets.slice(0, k), mod, reason: out.reason + `（ボリューム−20%：${n}→${k}セット）` };
+  }
+  return out;
+}
+/* 筋力低下の判定。e1ByEx: { 種目: [トップセット推定1RM（古い順）] }、phase: 'cut'|'lean'|'recomp'|'maint' */
+function pgDrop(e1ByEx, phase) {
+  const thr = PG.DROP[phase] ?? .05, hits = [];
+  Object.entries(e1ByEx).forEach(([ex, e]) => {
+    if (e.length < 3) return;
+    const base = e[e.length - 3], s1 = e[e.length - 2], s2 = e[e.length - 1];
+    if (s1 < base * (1 - thr) && s2 < base * (1 - thr)) hits.push({ ex, base, s1, s2, d1: s1 / base - 1, d2: s2 / base - 1 });
+  });
+  return { thr, hits, alert: hits.length >= 2 };
+}
+/* PROG-END */
+
 /* ================= State ================= */
 const SLOTS = [['b', '朝食'], ['l', '昼食'], ['d', '夕食'], ['s', '間食']];
 const SLOTN = Object.fromEntries(SLOTS);
@@ -1111,6 +1200,13 @@ S.timer = { sec: 90, auto: true, ...(S.timer || {}) };
 S.solver = { src: 'all', ex: [], ...(S.solver || {}) };
 S.dayDone = S.dayDone || {}; S.weightsPM = S.weightsPM || []; S.phases = S.phases || [];
 S.coach = { phaseId: null, day: 1, handled: null, log: [], ...(S.coach || {}) };
+S.exCfg = S.exCfg || {}; S.sessions = S.sessions || [];
+S.prog = { mod: null, ack: null, choice: {}, kcal: null, ...(S.prog || {}) };
+S.split = S.split || { next: 0, days: [   // 分割テンプレート（初期：上半身／下半身 ×2。編集可）
+  { id: 'd-ua', name: '上半身A', ex: ['ベンチプレス', 'ラットプルダウン', 'ショルダープレス', 'バーベルカール'] },
+  { id: 'd-la', name: '下半身A', ex: ['スクワット', 'ルーマニアンデッドリフト', 'レッグプレス', 'レッグカール'] },
+  { id: 'd-ub', name: '上半身B', ex: ['インクラインダンベルプレス', 'ベントオーバーロウ', 'サイドレイズ', 'ライイングトライセプスエクステンション'] },
+  { id: 'd-lb', name: '下半身B', ex: ['デッドリフト', 'ブルガリアンスクワット', 'レッグエクステンション', 'ヒップスラスト'] }] };
 if ((S.v || 0) < 9) {   // v9：運動の消費を安静時を除いた値に計算し直す
   S.cardio.forEach(c => { const i = CARDIO.findIndex(x => x[0] === c.name); if (i >= 0) c.kcal = metKcal(CARDIO[i][1][c.lvl], c.min); });
   S.v = 9; save();
@@ -1199,6 +1295,7 @@ function renderHome() {
   const since = sinceLastMeal();
   $('#tab-home').innerHTML = header('今日') + coachHomeCards() + balanceHero(sum, pfc) + solverBtn() + weightCard() + `
     <div class="sec"><b>トレーニング</b><button class="share-btn" data-act="share" data-v="train">${I.share}シェア</button></div>
+    ${progHomeCards()}
     ${trainCards()}
     ${exerciseGroup()}
     <div class="sec" style="margin-top:32px"><b style="font-size:22px">食事</b>${since ? `<span class="num ${since.over ? 'warn' : ''}">前の食事から ${since.txt}</span>` : ''}</div>
@@ -1803,7 +1900,7 @@ let histAll = false;
 const bestOf = ex => S.logs.filter(l => l.ex === ex).reduce((m, l) => Math.max(m, l.e1), 0);
 const goalOf = ex => { const P = S.plans.filter(p => p.ex === ex && !isFinished(p))[0]; return P ? P.target : 0; };
 
-let recKind = 'lift';
+let recKind = 'lift', lRir = null;
 function renderLog() {
   const kindSeg = `<div style="margin-bottom:12px">${seg('rkind', [['lift', '筋トレ'], ['cardio', '有酸素'], ['weight', '体重'], ['volume', '総重量']], recKind)}</div>`;
   if (recKind === 'weight') return renderWeight(kindSeg);
@@ -1841,6 +1938,7 @@ function renderLog() {
       <div class="srow"><span>重量</span>${stepper('lw', last ? last.w : 60, 2.5, 'kg')}</div>
       <div class="srow"><span>回数</span>${stepper('lr', last ? last.r : 10, 1, '回')}</div>
       <div class="srow"><span>セット</span>${stepper('ls', last ? last.sets : 3, 1, '')}</div>
+      <div class="pgrir" style="padding:8px 0;border-bottom:.5px solid var(--sep)"><span class="lbl">最終セットの余力（RIR・任意）</span>${seg('lrir', [['', '—'], ['0', '0'], ['1', '1'], ['2', '2'], ['3', '3+']], lRir == null ? '' : String(lRir))}</div>
       <div class="e1"><div class="lbl">推定1RM</div><div class="hero" id="e1v"></div><div class="sub" id="e1m"></div></div>
       <button class="btn" data-act="saveLog">保存</button>
       <div class="rest">
@@ -2597,7 +2695,13 @@ function coachSheet() {
   }
   const from = addDays(today(), -CO.WINDOW), rows = [];
   for (let k = addDays(today(), -1); k >= from; k = addDays(k, -1)) rows.push(k);
-  openSheet(`<div class="sh-h"><button data-act="close">閉じる</button><h3>TDEEコーチ</h3><span style="min-width:64px"></span></div>
+  const kb = S.prog && S.prog.kcal ? (() => { const nk = coMacros(S.targets.kcal + S.prog.kcal.delta, est.ok ? est.avg7 : S.body.bw, S.targets.f);
+    return `<div class="card" style="box-shadow:inset 0 0 0 1px var(--warn);margin-bottom:12px"><div class="lbl">筋力低下アラートから</div>
+      <div class="num" style="font-size:17px;margin-top:4px">目標 <b>${S.targets.kcal.toLocaleString()}</b> → <b class="accent">${nk.kcal.toLocaleString()}</b> kcal（+${S.prog.kcal.delta}）</div>
+      <div class="svdiff num" style="margin-top:12px"><div><span>kcal</span><b>${nk.kcal.toLocaleString()}</b></div><div><span>P</span><b>${nk.p}</b></div><div><span>F</span><b>${nk.f}</b></div><div><span>C</span><b>${nk.c}</b></div></div>
+      ${est.ok ? `<div class="sub">参考：推定TDEE ${Math.round(est.tdee).toLocaleString()}kcal</div>` : ''}
+      <button class="btn" data-act="coKcalOk" style="margin-top:12px">承認して +${S.prog.kcal.delta}kcal</button><button class="btn plain" data-act="coKcalNo">見送る</button></div>`; })() : '';
+  openSheet(`<div class="sh-h"><button data-act="close">閉じる</button><h3>TDEEコーチ</h3><span style="min-width:64px"></span></div>${kb}
     ${P ? `<div class="svmsg"><b>${esc(P.name)}</b>（${PH_TYPE.find(t => t[0] === P.type)[1]}）${fmtMD(P.start)}〜${P.end ? fmtMD(P.end) : ''} · 目標 週${kgS(P.pace, 2)}kg</div>` : ''}
     <div style="margin-top:12px">${body}</div>
     <div class="sec"><b>記録完了の日</b><span>${rows.filter(k => S.dayDone[k]).length}/${rows.length}日</span></div>
@@ -2660,6 +2764,162 @@ function phaseSave(id) {
   S.phases.sort((a, b) => a.start < b.start ? -1 : 1);
   if (id && id === S.coach.phaseId) S.mode = PH_MODE[v.type];
   save(); coachSheet();
+}
+
+/* ================= 次回メニュー（画面側） ================= */
+const PG_TYPE = [['barbell', 'バーベル'], ['db', 'ダンベル'], ['machine', 'マシン']];
+const pgCfg = ex => ({ ...pgDefaultCfg(ex), ...(S.exCfg[ex] || {}) });
+const pgPhase = () => { const P = typeof phaseNow === 'function' && phaseNow(); return P ? P.type : ({ cut: 'cut', bulk: 'lean', maint: 'maint' })[S.mode] || 'maint'; };
+function pgMod() {                                    // アラートで選んだ一時的な調整
+  const m = S.prog.mod; if (!m) return null;
+  if (m.type === 'deload') return today() <= m.until ? 'deload' : null;
+  if (m.type === 'lite') return m.left > 0 ? 'lite' : null;
+  return null;
+}
+const pgDay = () => S.split.days[S.split.next % Math.max(1, S.split.days.length)] || null;
+function pgMenu(day) {
+  const mod = pgMod();
+  return (day ? day.ex : []).map(ex => {
+    const ses = pgSessions(S.logs, ex), cfg = pgCfg(ex), choice = (S.prog.choice || {})[ex];
+    let n = pgNext(ses, cfg, mod);
+    if (n.alt && choice === 'deload') n = { ...n, ...n.alt, targets: ses[ses.length - 1].sets.slice(0, n.alt.sets).map(x => x.r), kind: 'deload1' };
+    return { ex, cfg, ses, next: n };
+  });
+}
+/* 筋力低下アラート */
+function pgDropNow() {
+  const e1 = {}; new Set(S.logs.map(l => l.ex)).forEach(ex => { const s = pgSessions(S.logs, ex); if (s.length >= 3) e1[ex] = s.map(x => x.e1); });
+  const r = pgDrop(e1, pgPhase());
+  r.sig = r.hits.map(h => h.ex + ':' + pgSessions(S.logs, h.ex).slice(-1)[0].date).sort().join('|');
+  r.show = r.alert && S.prog.ack !== r.sig;
+  return r;
+}
+function progHomeCards() {
+  const d = pgDropNow(), day = pgDay(), mod = pgMod();
+  let out = '';
+  if (d.show) out += `<button class="card svbtn alertc" data-act="pgAlert"><span class="svic">${I.bolt}</span><div class="grow"><div class="t">筋力低下アラート</div><div class="s">${d.hits.map(h => esc(h.ex)).join('・')} の推定1RMが2回続けて${Math.round(d.thr * 100)}%超ダウン</div></div>${I.chev}</button>`;
+  if (day) out += `<button class="card svbtn" data-act="pgMenu"><span class="svic">${I.right}</span><div class="grow"><div class="t">次回のメニュー：${esc(day.name)}</div><div class="s">${mod === 'deload' ? 'デロード週 · ' : mod === 'lite' ? 'ボリューム−20% · ' : ''}${day.ex.length}種目 · 重量と回数の目標つき</div></div>${I.chev}</button>`;
+  return out;
+}
+function pgTargetText(it) {
+  const n = it.next;
+  if (n.w == null) return `${n.range[0]}〜${n.range[1]}回 × ${n.targets.length}セット`;
+  const t = n.targets, same = t.every(x => x === t[0]);
+  return `${pgFmtW(n.w)}kg × ${n.kind === 'up' ? `${n.range[0]}〜${n.range[1]}回狙い（${t.join(',')}）` : same ? `${t[0]}回 × ${t.length}セット` : `${t.join(',')}回`}`;
+}
+function pgMenuSheet() {
+  const day = pgDay(), menu = pgMenu(day), mod = pgMod(), last = S.sessions[S.sessions.length - 1];
+  openSheet(`<div class="sh-h"><button data-act="close">閉じる</button><h3>次回のメニュー</h3><button data-act="pgSplit" style="font-weight:600">分割</button></div>
+    ${S.split.days.length ? seg('pgday', S.split.days.map((d, i) => [i, esc(d.name)]), S.split.next % S.split.days.length) : '<div class="svmsg">分割テンプレートがありません。右上の「分割」から作ってください。</div>'}
+    ${mod ? `<div class="svmsg warnbox">${mod === 'deload' ? `デロード週（〜${fmtMD(S.prog.mod.until)}）：重量は維持、ボリューム−40%` : 'ボリューム−20%（次の1回だけ）。そのあと再判定します'} <button class="link" data-act="pgModOff">解除</button></div>` : ''}
+    <div style="margin-top:12px">${menu.map((it, i) => `<div class="card pgc">
+      <button class="pgh" data-act="pgEx" data-v="${esc(it.ex)}"><span class="grow"><span class="t">${esc(it.ex)}</span><span class="cfg">${PG_TYPE.find(t => t[0] === it.cfg.type)[1]} · ${it.cfg.lo}〜${it.cfg.hi}回 · ${it.cfg.inc}kg刻み</span></span>${I.chev}</button>
+      <div class="pgt num">${pgTargetText(it)}</div>
+      <div class="sub" style="margin:4px 0 0">${esc(it.next.reason)}</div>
+      ${it.next.alt ? `<div class="pgalt">${esc(it.next.alt.reason)} ${seg('pgalt-' + i, [['reduce', '−7.5%で続ける'], ['deload', 'この種目をデロード']], (S.prog.choice || {})[it.ex] === 'deload' ? 'deload' : 'reduce')}</div>` : ''}
+    </div>`).join('')}</div>
+    ${menu.length ? '<button class="btn" data-act="pgStart">この内容で記録を開始</button>' : ''}
+    ${last ? pgDiffHtml(last) : ''}
+    <div class="sub" style="margin:8px 4px 0">トップセット（1セット目）でレンジ上限に届き、最終セットに余力（RIR1以上）があれば次回は刻み分だけ増量します。種目名をタップすると、レップレンジ・器具・刻みの変更と推定1RMの推移が見られます。</div>`);
+}
+/* 実施後：目標と実績の差 */
+function pgDiffHtml(s) {
+  const rows = s.items.map(it => {
+    const done = S.logs.filter(l => l.sess === s.id && l.ex === it.ex);
+    const act = done.map(l => l.r), tgt = it.targets, dsum = act.reduce((a, b) => a + b, 0) - tgt.slice(0, Math.max(act.length, tgt.length)).reduce((a, b) => a + b, 0);
+    const wt = done.length ? done[0].w : null;
+    return `<div class="row"><div class="grow"><div class="t">${esc(it.ex)}</div><div class="s num">目標 ${it.w != null ? pgFmtW(it.w) + 'kg × ' : ''}${tgt.join(',')}　→　実績 ${act.length ? `${pgFmtW(wt)}kg × ${act.join(',')}` : 'なし'}</div></div>
+      <span class="kc num ${!act.length ? '' : dsum >= 0 && (it.w == null || wt >= it.w) ? 'accent' : 'warn'}">${act.length ? (dsum > 0 ? '+' : dsum < 0 ? '−' : '±') + Math.abs(dsum) + '回' : '—'}</span></div>`;
+  }).join('');
+  return `<div class="sec"><b>前回の結果</b><span class="num">${fmtMD(s.date)} ${esc(s.dayName)}</span></div><div class="group">${rows}</div>`;
+}
+/* 記録画面（目標をプリフィル）。セットごとに ✓ で完了、最終セットのRIRを入力 */
+let pgRun = null;
+function pgStart() {
+  const day = pgDay(), menu = pgMenu(day);
+  pgRun = { id: uid(), dayId: day.id, dayName: day.name, items: menu.map(it => {
+    const lastW = it.ses.length ? it.ses[it.ses.length - 1].sets[0].w : 20;
+    return { ex: it.ex, w: it.next.w, targets: it.next.targets.slice(), reason: it.next.reason,
+      sets: it.next.targets.map(r => ({ w: it.next.w ?? lastW, r, done: false })), rir: null };
+  }) };
+  pgRunSheet();
+}
+function pgRunSheet() {
+  const R = pgRun; if (!R) return;
+  openSheet(`<div class="sh-h"><button data-act="pgMenu">戻る</button><h3>${esc(R.dayName)}</h3><button data-act="pgSave" style="font-weight:600">保存</button></div>
+    ${R.items.map((it, i) => `<div class="card pgc"><div class="t" style="font-weight:600">${esc(it.ex)}</div><div class="sub" style="margin:2px 0 8px">${esc(it.reason)}</div>
+      ${it.sets.map((s, j) => `<div class="pgset ${s.done ? 'on' : ''}"><span class="no num">${j + 1}</span>
+        <input class="num" type="number" inputmode="decimal" step="any" value="${s.w}" data-pg="w" data-i="${i}" data-j="${j}"><span class="u">kg ×</span>
+        <input class="num" type="number" inputmode="numeric" value="${s.r}" data-pg="r" data-i="${i}" data-j="${j}"><span class="u">回</span>
+        <span class="tg num">目標${it.targets[j] ?? '—'}</span>
+        <button class="ck" data-act="pgDone" data-i="${i}" data-j="${j}" aria-label="完了">${I.check}</button></div>`).join('')}
+      <div class="pgrir"><span class="lbl">最終セットの余力（RIR）</span>${seg('pgrir-' + i, [['', '—'], ['0', '0'], ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4+']], it.rir == null ? '' : String(it.rir))}</div>
+      <button class="link" data-act="pgAddSet" data-i="${i}">＋セットを追加</button></div>`).join('')}
+    <button class="btn" data-act="pgSave">記録を保存</button>
+    <div class="sub" style="text-align:center">✓を付けたセットだけ保存します。RIR＝あと何回できたか（RPE＝10−RIR）。</div>`);
+  document.querySelectorAll('#panel [data-pg]').forEach(el => el.addEventListener('input', e => { const t = e.target, s = R.items[+t.dataset.i].sets[+t.dataset.j]; s[t.dataset.pg] = num(t.value); }));
+}
+function pgSave() {
+  const R = pgRun; if (!R) return;
+  const logs = [];
+  R.items.forEach(it => { const ds = it.sets.filter(s => s.done && s.r > 0);
+    ds.forEach((s, k) => logs.push({ id: uid(), date: today(), ex: it.ex, w: s.w, r: Math.round(s.r), sets: 1, e1: r1(e1rm(s.w, s.r)), sess: R.id, tgt: it.targets[it.sets.indexOf(s)] ?? null, tw: it.w, ...(k === ds.length - 1 && it.rir != null ? { rir: it.rir } : {}) })); });
+  if (!logs.length) { toast('✓を付けたセットがありません'); return; }
+  const prevNext = S.split.next, prevMod = S.prog.mod && { ...S.prog.mod };
+  S.logs.push(...logs);
+  S.sessions.push({ id: R.id, date: today(), dayId: R.dayId, dayName: R.dayName, items: R.items.map(it => ({ ex: it.ex, w: it.w, targets: it.targets })) });
+  S.split.next = (S.split.next + 1) % Math.max(1, S.split.days.length);
+  if (S.prog.mod && S.prog.mod.type === 'lite') S.prog.mod.left--;
+  pgRun = null; save(); closeSheet(); render();
+  toast(`${logs.length}セットを保存しました`, () => { const ids = logs.map(l => l.id); S.logs = S.logs.filter(l => !ids.includes(l.id)); S.sessions = S.sessions.filter(s => s.id !== R.id); S.split.next = prevNext; S.prog.mod = prevMod; save(); render(); });
+}
+/* 種目の設定と推定1RM（Epley）の推移 */
+function pgExSheet(ex) {
+  const c = pgCfg(ex), ses = pgSessions(S.logs, ex);
+  openSheet(`<div class="sh-h"><button data-act="pgMenu">戻る</button><h3>${esc(ex)}</h3><button data-act="pgExSave" data-v="${esc(ex)}" style="font-weight:600">保存</button></div>
+    <div class="card"><div class="lbl">トップセットの推定1RM（Epley）</div><div class="hero m num">${ses.length ? r1(ses[ses.length - 1].e1) : '—'}<small>kg</small></div><div id="pgch"></div></div>
+    <div class="slbl">器具</div>${seg('pgtype', PG_TYPE, c.type)}
+    <div class="card" style="margin-top:12px;padding:8px 16px">
+      <div class="srow"><span>レンジ下限</span>${stepper('pglo', c.lo, 1, '回')}</div>
+      <div class="srow"><span>レンジ上限</span>${stepper('pghi', c.hi, 1, '回')}</div>
+      <div class="srow" style="border:0"><span>最小刻み</span>${stepper('pginc', c.inc, .5, 'kg')}</div></div>
+    ${ses.length ? `<div class="sec"><b>セッション</b></div><div class="group">${ses.slice(-8).reverse().map(s => `<div class="row"><span class="d">${fmtMD(s.date)}</span><span class="grow s num">${esc(pgPrevText(s).replace('前回 ', ''))}</span><span class="kc num">${r1(s.e1)}</span></div>`).join('')}</div>` : ''}`);
+  $('#panel').dataset.pgtype = c.type;
+  const el = $('#pgch'); if (ses.length < 2 || !el) return;
+  const W = el.clientWidth || 320, H = 120, v = ses.map(s => s.e1), lo = Math.min(...v) * .98, hi = Math.max(...v) * 1.02, x = i => 8 + (W - 16) * i / (v.length - 1), y = e => 8 + (H - 24) * (1 - (e - lo) / (hi - lo || 1));
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;margin-top:8px"><polyline points="${v.map((e, i) => `${x(i)},${y(e)}`).join(' ')}" fill="none" style="stroke:var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+    ${v.map((e, i) => `<circle cx="${x(i)}" cy="${y(e)}" r="3.5" style="fill:var(--accent)"/>`).join('')}
+    <text x="8" y="${H - 2}" font-size="11" style="fill:var(--t2)">${fmtMD(ses[0].date)}</text><text x="${W - 8}" y="${H - 2}" font-size="11" text-anchor="end" style="fill:var(--t2)">${fmtMD(ses[ses.length - 1].date)}</text></svg>`;
+}
+/* 分割テンプレートの編集 */
+function pgSplitSheet() {
+  openSheet(`<div class="sh-h"><button data-act="pgMenu">戻る</button><h3>分割テンプレート</h3><span style="min-width:64px"></span></div>
+    ${S.split.days.map((d, i) => `<div class="sec"><input class="in pgdn" value="${esc(d.name)}" data-dn="${i}"><button class="x" data-act="pgDayDel" data-i="${i}" aria-label="削除">${I.x}</button></div>
+      <div class="group">${d.ex.map((ex, j) => `<div class="row"><span class="grow t">${esc(ex)}</span><button class="x" data-act="pgExDel" data-i="${i}" data-j="${j}" aria-label="外す">${I.x}</button></div>`).join('')}
+      <button class="row" data-act="pgExAdd" data-i="${i}"><span class="plus sm">${I.plus}</span><span class="grow accent">種目を追加</span></button></div>`).join('')}
+    <button class="btn ghost" data-act="pgDayAdd" style="margin-top:16px">日を追加</button>
+    <div class="sub" style="margin:8px 4px 0">次回のメニューは、前回やった日の次の日（${S.split.days.length ? esc(pgDay().name) : '—'}）から出します。</div>`);
+  document.querySelectorAll('[data-dn]').forEach(el => el.addEventListener('change', e => { S.split.days[+e.target.dataset.dn].name = e.target.value.trim() || '無題'; save(); }));
+}
+/* 筋力低下アラート：原因候補と対処案を並べ、選んだものだけを実行（何も自動では変えない） */
+function pgAlertSheet() {
+  const d = pgDropNow(), coach = typeof coachSheet === 'function';
+  openSheet(`<div class="sh-h"><button data-act="close">閉じる</button><h3>筋力低下アラート</h3><span style="min-width:64px"></span></div>
+    <div class="svmsg warnbox">${d.hits.length}種目で、トップセットの推定1RMが2回続けて前々回より${Math.round(d.thr * 100)}%以上下がっています（${({ cut: 'カット', lean: 'リーンバルク', recomp: 'リコンプ', maint: '維持' })[pgPhase()]}期の基準）。</div>
+    <div class="group" style="margin-top:12px">${d.hits.map(h => `<div class="row"><div class="grow"><div class="t">${esc(h.ex)}</div><div class="s num">${r1(h.base)} → ${r1(h.s1)}（${Math.round(h.d1 * 100)}%） → ${r1(h.s2)}（${Math.round(h.d2 * 100)}%）kg</div></div></div>`).join('')}</div>
+    <div class="slbl">どれが近そうですか？</div>
+    <button class="card svplan" data-act="pgFix" data-v="deload"><div class="t" style="font-weight:600">① 一時的な疲労</div><div class="s">1週間のデロード：重量は維持してボリューム −40%</div></button>
+    <button class="card svplan" data-act="pgFix" data-v="kcal"><div class="t" style="font-weight:600">② カロリー不足の疑い</div><div class="s">目標カロリー +200kcal の調整案${coach ? '（TDEEコーチで確認してから反映）' : ''}</div></button>
+    <button class="card svplan" data-act="pgFix" data-v="lite"><div class="t" style="font-weight:600">③ 様子見</div><div class="s">次の1回だけボリューム −20%。そのあと再判定</div></button>
+    <div class="sub" style="margin:8px 4px 0">選ぶまで、食事の目標もメニューも変わりません。</div>`);
+}
+function pgFix(v) {
+  const d = pgDropNow(); S.prog.ack = d.sig;
+  if (v === 'deload') { S.prog.mod = { type: 'deload', until: addDays(today(), 6) }; toast('1週間のデロードにしました'); }
+  if (v === 'lite') { S.prog.mod = { type: 'lite', left: 1 }; toast('次回はボリューム−20%にします'); }
+  save();
+  if (v === 'kcal') { S.prog.kcal = { delta: 200, date: today() }; save(); coachSheet(); return; }
+  closeSheet(); render();
 }
 
 /* ================= 総重量（ボリューム） ================= */
@@ -2871,6 +3131,11 @@ document.addEventListener('click', e => {
     if (name === 'shwr') { sh.wrange = v; renderShot(); }
     if (name === 'svsrc') { S.solver.src = v; save(); solverSheet(); }
     if (name === 'wkind') $('#panel').dataset.wkind = v;
+    if (name === 'pgday') { S.split.next = +v; save(); pgMenuSheet(); }
+    if (name.startsWith('pgalt-')) { const it = pgMenu(pgDay())[+name.slice(6)]; if (it) { S.prog.choice[it.ex] = v; save(); const st = $('#panel').scrollTop; pgMenuSheet(); $('#panel').scrollTop = st; } }
+    if (name.startsWith('pgrir-') && pgRun) pgRun.items[+name.slice(6)].rir = v === '' ? null : +v;
+    if (name === 'pgtype') $('#panel').dataset.pgtype = v;
+    if (name === 'lrir') lRir = v === '' ? null : +v;
     if (name === 'coDay') { S.coach.day = +v; save(); render(); }
     if (name === 'phType') $('#panel').dataset.phtype = v;
     if (name === 'rkind') { recKind = v; renderLog(); }
@@ -2990,7 +3255,7 @@ document.addEventListener('click', e => {
     case 'saveLog': {
       const w = num($('#lw').value), r = Math.round(num($('#lr').value)), sets = Math.max(1, Math.round(num($('#ls').value)));
       if (!(r > 0)) { toast('回数を入力してください'); break; }
-      const log = { id: uid(), date: $('#ld').value || today(), ex: S.recEx, w, r, sets, e1: r1(e1rm(w, r)) };
+      const log = { id: uid(), date: $('#ld').value || today(), ex: S.recEx, w, r, sets, e1: r1(e1rm(w, r)), ...(lRir != null ? { rir: lRir } : {}) }; lRir = null;
       if (S.timer.auto) startRest(S.timer.sec);
       const prev = bestOf(S.recEx);
       S.logs.push(log); save(); drawChart(S.recEx); renderHist(); calc();
@@ -3032,6 +3297,27 @@ document.addEventListener('click', e => {
     case 'saveWeight': saveWeight(); break;
     case 'goWeight': recKind = 'weight'; go('log'); break;
     case 'solver': solverSheet(); break;
+    case 'pgMenu': pgMenuSheet(); break;
+    case 'pgStart': pgStart(); break;
+    case 'pgSave': pgSave(); break;
+    case 'pgDone': { const s = pgRun.items[+d.i].sets[+d.j]; s.done = !s.done; if (s.done && S.timer.auto) startRest(S.timer.sec); const st = $('#panel').scrollTop; pgRunSheet(); $('#panel').scrollTop = st; break; }
+    case 'pgAddSet': { const it = pgRun.items[+d.i], l = it.sets[it.sets.length - 1] || { w: it.w || 20, r: 8 }; it.sets.push({ w: l.w, r: l.r, done: false }); const st = $('#panel').scrollTop; pgRunSheet(); $('#panel').scrollTop = st; break; }
+    case 'pgEx': pgExSheet(d.v); break;
+    case 'pgExSave': { const lo = Math.round(num($('#pglo').value)), hi = Math.round(num($('#pghi').value)), inc = num($('#pginc').value);
+      if (!(lo > 0 && hi >= lo && inc > 0)) { toast('レンジと刻みを確認してください'); break; }
+      S.exCfg[d.v] = { type: $('#panel').dataset.pgtype, lo, hi, inc }; save(); pgMenuSheet(); toast('保存しました'); break; }
+    case 'pgSplit': pgSplitSheet(); break;
+    case 'pgDayAdd': S.split.days.push({ id: uid(), name: `Day ${S.split.days.length + 1}`, ex: [] }); save(); pgSplitSheet(); break;
+    case 'pgDayDel': ask('この日を削除しますか？', '削除', () => { S.split.days.splice(+d.i, 1); S.split.next = 0; save(); pgSplitSheet(); }); break;
+    case 'pgExDel': S.split.days[+d.i].ex.splice(+d.j, 1); save(); pgSplitSheet(); break;
+    case 'pgExAdd': { const i = +d.i; openPicker(n => { if (!S.split.days[i].ex.includes(n)) S.split.days[i].ex.push(n); save(); setTimeout(pgSplitSheet, 260); }); break; }
+    case 'pgAlert': pgAlertSheet(); break;
+    case 'pgFix': pgFix(d.v); break;
+    case 'pgModOff': S.prog.mod = null; save(); pgMenuSheet(); render(); break;
+    case 'coKcalOk': { const k = S.prog.kcal; if (!k) break; const old = { ...S.targets }, bw = (coRun().est.avg7) || S.body.bw;
+      S.targets = coMacros(S.targets.kcal + k.delta, bw, S.targets.f); S.prog.kcal = null; save(); closeSheet(); render();
+      toast(`目標を ${S.targets.kcal.toLocaleString()}kcal にしました`, () => { S.targets = old; S.prog.kcal = k; save(); render(); }); break; }
+    case 'coKcalNo': S.prog.kcal = null; save(); coachSheet(); break;
     case 'coach': coachSheet(); break;
     case 'coDone': if (a.type === 'checkbox') { if (a.checked) S.dayDone[d.v] = true; else delete S.dayDone[d.v]; save(); if (cur === 'home' && !$('#sheet').classList.contains('open')) renderHome(); } break;
     case 'coApprove': coApprove(); break;
