@@ -941,6 +941,70 @@ function solvePFC({ target, eaten, room, foods }) {
 }
 /* SOLVER-END */
 
+/* COACH-BEGIN ================= 適応型TDEEコーチ（純粋関数：DOM・Sに依存しない。tests/coach.test.mjs で単体テスト） =================
+   推定TDEE ＝ 期間の平均摂取kcal − 体重の傾き(kg/日) × 7,200
+     ・体重は朝の値だけ。傾きは単純な前後差ではなく、最小二乗の回帰直線から求める
+     ・期間は直近21日（今日は記録途中なので含めない）。フェーズ開始から7日間は使わない
+     ・記録完了の日が10日以上、朝体重が10日以上、期間が14日以上ある時だけ算出する
+   調整量 ＝（目標ペース − 実績ペース）kg/週 × 7,200 ÷ 7。1回の調整は ±150kcal まで */
+const CO = { KCAL_PER_KG: 7200, WINDOW: 21, MIN_SPAN: 14, MIN_DONE: 10, MIN_WEIGHTS: 10, SKIP_START: 7, CAP: 150, FAST: .0075, P_PER_KG: 2.2, F_PER_KG: .6 };
+const coDays = (a, b) => Math.round((Date.UTC(+b.slice(0, 4), +b.slice(5, 7) - 1, +b.slice(8, 10)) - Date.UTC(+a.slice(0, 4), +a.slice(5, 7) - 1, +a.slice(8, 10))) / 864e5);
+const coAdd = (k, n) => { const d = new Date(Date.UTC(+k.slice(0, 4), +k.slice(5, 7) - 1, +k.slice(8, 10) + n)); return d.toISOString().slice(0, 10); };
+/* 最小二乗の回帰直線。points: [{x, y}] → { slope, intercept } */
+function coLinReg(points) {
+  const n = points.length; if (n < 2) return null;
+  const mx = points.reduce((a, p) => a + p.x, 0) / n, my = points.reduce((a, p) => a + p.y, 0) / n;
+  let sxy = 0, sxx = 0; points.forEach(p => { sxy += (p.x - mx) * (p.y - my); sxx += (p.x - mx) ** 2; });
+  if (!sxx) return null;
+  const slope = sxy / sxx; return { slope, intercept: my - slope * mx };
+}
+/* 推定。days: [{date, kcal, done}]、weights: 朝体重 [{date, kg}]、today: 'YYYY-MM-DD'、phaseStart: フェーズ開始日 */
+function coEstimate({ days, weights, today, phaseStart }) {
+  const to = coAdd(today, -1), winFrom = coAdd(today, -CO.WINDOW);
+  const skipTo = phaseStart ? coAdd(phaseStart, CO.SKIP_START) : null;          // この日から使える
+  const from = skipTo && skipTo > winFrom ? skipTo : winFrom;
+  const span = Math.max(0, coDays(from, to) + 1);
+  const done = days.filter(d => d.done && d.date >= from && d.date <= to);
+  const ws = weights.filter(w => w.date >= from && w.date <= to);
+  const out = { from, to, span, doneDays: done.length, weightDays: ws.length, ok: false };
+  if (skipTo && today < skipTo) { out.reason = 'phase'; out.waitDays = coDays(today, skipTo); }
+  const need = Math.max(CO.MIN_DONE - done.length, CO.MIN_WEIGHTS - ws.length, CO.MIN_SPAN - span, 0);
+  if (need > 0) { out.reason = out.reason || 'data'; out.needDays = need; return out; }
+  const avgIntake = done.reduce((a, d) => a + d.kcal, 0) / done.length;
+  const reg = coLinReg(ws.map(w => ({ x: coDays(from, w.date), y: w.kg })));
+  if (!reg) { out.reason = 'data'; out.needDays = 1; return out; }
+  const perDay = reg.slope, tdee = avgIntake - perDay * CO.KCAL_PER_KG;
+  const last7 = weights.filter(w => w.date > coAdd(to, -7) && w.date <= to);
+  return { ...out, ok: true, avgIntake, slopeDay: perDay, paceWeek: perDay * 7, tdee, deficit: perDay * CO.KCAL_PER_KG,
+    avg7: last7.length ? last7.reduce((a, w) => a + w.kg, 0) / last7.length : reg.intercept + reg.slope * coDays(from, to) };
+}
+/* PFC：たんぱく質 体重×2.2g、脂質 体重×0.6g以上（今の脂質を下限まで維持）、残りを炭水化物 */
+function coMacros(kcal, bw, curF) {
+  const p = Math.round(bw * CO.P_PER_KG), fMin = Math.round(bw * CO.F_PER_KG);
+  let f = Math.max(fMin, Math.round(curF || 0));
+  if (kcal - p * 4 - f * 9 < 0) f = fMin;
+  const c = Math.max(0, Math.round((kcal - p * 4 - f * 9) / 4));
+  return { kcal, p, f, c };
+}
+/* 週次の調整案。est: coEstimate の結果、targetPace: 目標ペース(kg/週)、curKcal/curF: 今の目標、bmr: 基礎代謝 */
+function coAdjust({ est, targetPace, curKcal, curF, bmr }) {
+  const actual = est.paceWeek, bw = est.avg7;
+  const raw = (targetPace - actual) * CO.KCAL_PER_KG / 7;                 // 1日あたり
+  const capped = Math.max(-CO.CAP, Math.min(CO.CAP, raw));
+  const delta = Math.round(capped / 10) * 10;
+  const newKcal = Math.round(curKcal + delta);
+  const tooFast = actual < -CO.FAST * bw;                                   // 週 −0.75%体重 より速い減り
+  const warnings = [];
+  if (tooFast) warnings.push(`体重の減りが速すぎます（週 ${actual.toFixed(2)}kg ＝ 体重の${(-actual / bw * 100).toFixed(1)}%）。筋肉を守るため、カロリーを増やす案を優先します。`);
+  if (targetPace < -CO.FAST * bw) warnings.push(`目標ペース（週 ${targetPace}kg）自体が体重の0.75%を超えています。`);
+  if (bmr && newKcal < bmr) warnings.push(`新しい目標 ${newKcal.toLocaleString()}kcal は基礎代謝（約${Math.round(bmr).toLocaleString()}kcal）を下回ります。`);
+  // 速すぎる時は減らす提案を出さず、週 −0.75% に戻すための増量を優先（これも ±150 まで）
+  const finalDelta = tooFast ? Math.max(delta, Math.round(Math.min(CO.CAP, (-CO.FAST * bw - actual) * CO.KCAL_PER_KG / 7) / 10) * 10) : delta;
+  const kcal = curKcal + finalDelta;
+  return { actual, targetPace, gap: actual - targetPace, raw, capped: Math.abs(raw) > CO.CAP, delta: finalDelta, kcal, macros: coMacros(kcal, bw, curF), tooFast, warnings, needed: est.tdee + targetPace * CO.KCAL_PER_KG / 7 };
+}
+/* COACH-END */
+
 /* ================= State ================= */
 const SLOTS = [['b', '朝食'], ['l', '昼食'], ['d', '夕食'], ['s', '間食']];
 const SLOTN = Object.fromEntries(SLOTS);
@@ -1045,11 +1109,24 @@ function refCards(b, sel) {
 let S = load();
 S.timer = { sec: 90, auto: true, ...(S.timer || {}) };
 S.solver = { src: 'all', ex: [], ...(S.solver || {}) };
+S.dayDone = S.dayDone || {}; S.weightsPM = S.weightsPM || []; S.phases = S.phases || [];
+S.coach = { phaseId: null, day: 1, handled: null, log: [], ...(S.coach || {}) };
 if ((S.v || 0) < 9) {   // v9：運動の消費を安静時を除いた値に計算し直す
   S.cardio.forEach(c => { const i = CARDIO.findIndex(x => x[0] === c.name); if (i >= 0) c.kcal = metKcal(CARDIO[i][1][c.lvl], c.min); });
   S.v = 9; save();
 }
 if ((S.v || 0) < 10) { if (S.eatBack == null) S.eatBack = .5; S.v = 10; save(); }   // v10：運動の食べ戻しは既定で半分
+if ((S.v || 0) < 11) {   // v11：フェーズ（登録内容：カット① → リーンバルク → カット②）。カット①の開始日は最初の体重記録の日（なければ今日）
+  if (!S.phases || !S.phases.length) {
+    const first = (S.weights || []).map(w => w.date).sort()[0], st = first && first >= addDays(today(), -90) ? first : today();
+    S.phases = [
+      { id: 'ph-cut1', name: 'カット①', type: 'cut', start: st, end: '2027-01-31', pace: -.4, targets: null },
+      { id: 'ph-lean', name: 'リーンバルク', type: 'lean', start: '2027-02-01', end: '2027-04-15', pace: .2, targets: null },
+      { id: 'ph-cut2', name: 'カット②', type: 'cut', start: '2027-04-16', end: '2027-06-30', pace: -.5, targets: null }];
+    S.coach = { phaseId: 'ph-cut1', day: 1, handled: null, log: [] };
+  }
+  S.v = 11; save();
+}
 const EB = () => (S.eatBack == null ? .5 : +S.eatBack);
 /* 外観：'dark' | 'light' | 'auto'（端末の設定に合わせる） */
 const mqLight = window.matchMedia ? matchMedia('(prefers-color-scheme: light)') : null;
@@ -1120,12 +1197,12 @@ function renderHome() {
       <button class="row" data-act="food" data-slot="${k}"><span class="plus sm">${I.plus}</span><span class="grow accent" style="font-size:17px">追加</span></button></div>`;
   }).join('');
   const since = sinceLastMeal();
-  $('#tab-home').innerHTML = header('今日') + balanceHero(sum, pfc) + solverBtn() + weightCard() + `
+  $('#tab-home').innerHTML = header('今日') + coachHomeCards() + balanceHero(sum, pfc) + solverBtn() + weightCard() + `
     <div class="sec"><b>トレーニング</b><button class="share-btn" data-act="share" data-v="train">${I.share}シェア</button></div>
     ${trainCards()}
     ${exerciseGroup()}
     <div class="sec" style="margin-top:32px"><b style="font-size:22px">食事</b>${since ? `<span class="num ${since.over ? 'warn' : ''}">前の食事から ${since.txt}</span>` : ''}</div>
-    ${slots}`;
+    ${slots}${dayDoneRow()}`;
 }
 
 function balanceTone(bal) {
@@ -1853,7 +1930,7 @@ function wAvg(from, to) {                                     // from〜to（両
   const xs = S.weights.filter(w => w.date >= from && w.date <= to);
   return xs.length ? xs.reduce((a, w) => a + w.kg, 0) / xs.length : null;
 }
-const wPace = () => S.mode === 'cut' ? -S.body.bw * .005 : S.mode === 'bulk' ? S.body.bw * .0025 : 0;   // 目標の週あたり変化(kg)
+const wPace = () => { const P = typeof phaseNow === 'function' && phaseNow(); if (P) return P.pace; return S.mode === 'cut' ? -S.body.bw * .005 : S.mode === 'bulk' ? S.body.bw * .0025 : 0; };   // 目標の週あたり変化(kg)
 const kgS = (n, d = 1) => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).toFixed(d);
 /* 増減の良し悪し：減量は増加/速すぎ、増量は減少/速すぎ、維持は±0.2kg超を注意 */
 function wJudge(diff, pace) {
@@ -1896,12 +1973,18 @@ function weighSheet(date) {
   const k = date || today(), v = wOn(k) ?? (wSorted().slice(-1)[0] || {}).kg ?? S.body.bw;
   openSheet(`<div class="sh-h"><button data-act="close">キャンセル</button><h3>体重を記録</h3><button data-act="saveWeight" style="font-weight:600">保存</button></div>
     <div class="group"><label class="row"><span class="grow">日付</span><input type="date" id="wdt" value="${k}" max="${today()}" style="background:transparent;color:var(--t2);font-size:17px;padding:4px 0;text-align:right"></label></div>
+    <div style="margin-top:12px">${seg('wkind', [['am', '朝'], ['pm', '夜・InBodyなど']], 'am')}</div>
     <div class="card" style="margin-top:12px"><div class="srow" style="border:0"><span>体重</span>${stepper('wkg', Number(v).toFixed(1), .1, 'kg')}</div></div>
-    <div class="sub" style="margin:8px 4px 0">毎朝、起きてトイレのあと・食べる前に測ると、日々のブレが小さくなります。最新の体重はカロリー計算にも使われます。</div>`);
+    <div class="sub" style="margin:8px 4px 0">毎朝、起きてトイレのあと・食べる前に測ると、日々のブレが小さくなります。グラフ・カロリー計算・TDEEコーチには朝の値だけを使い、夜の値は別に保存します。</div>`);
+  $('#panel').dataset.wkind = 'am';
 }
 function saveWeight() {
   const k = $('#wdt').value || today(), kg = r1(num($('#wkg').value));
   if (!(kg > 20 && kg < 300)) { toast('体重を入力してください'); return; }
+  if ($('#panel').dataset.wkind === 'pm') {      // 夜の値は朝のデータと混ぜない
+    const o = S.weightsPM.find(w => w.date === k); if (o) o.kg = kg; else S.weightsPM.push({ date: k, kg });
+    save(); closeSheet(); render(); toast(`夜 ${kg.toFixed(1)}kg を記録しました（計算には使いません）`); return;
+  }
   const old = S.weights.find(w => w.date === k), prevKg = old ? old.kg : null, prevBw = S.body.bw;
   if (old) old.kg = kg; else S.weights.push({ date: k, kg });
   const latest = wSorted().slice(-1)[0]; if (latest) S.body.bw = latest.kg;
@@ -1916,16 +1999,7 @@ function renderWeight(kindSeg) {
   if (!s.last) hero = `<div class="card empty"><div class="muted">まだ記録がありません。<br>毎日記録すると、週・月ごとの増減が見えるようになります</div><button class="btn" data-act="weigh">今日の体重を記録</button></div>`;
   else {
     const j = s.diff != null ? wJudge(s.diff, s.pace) : null;
-    let adv = '';
-    if (j && !j.ok) {
-      if (s.span >= 14) {
-        const kc = Math.max(-300, Math.min(300, r10((s.pace - s.diff) * 7700 / 7)));
-        if (Math.abs(kc) >= 50) adv = `<div class="wkadj"><div class="lbl">カロリーの見直し</div>
-          <div class="num">目標摂取を 1日 <b class="accent">${kc > 0 ? '+' : '−'}${Math.abs(kc)} kcal</b>（${S.targets.kcal.toLocaleString()} → ${(S.targets.kcal + kc).toLocaleString()}）</div>
-          <div class="sub">2週続けてズレているときに調整するのがおすすめ。一度に動かすのは±300kcalまで。</div>
-          <button class="wbtn" style="margin-top:12px" data-act="wAdj" data-v="${kc}">目標に反映する</button></div>`;
-      } else adv = `<div class="sub" style="margin-top:12px">記録が2週間たまると、カロリーの調整量を提案します</div>`;
-    }
+    const adv = `<button class="wkadj svbtn" style="margin-top:16px" data-act="coach"><span class="svic">${I.bolt}</span><div class="grow"><div class="t" style="font-size:15px">TDEEコーチ</div><div class="s">摂取と朝体重から本当の維持カロリーを出して、毎週調整案を出します</div></div>${I.chev}</button>`;
     hero = `<div class="card">
       <div class="card-top"><span class="lbl">7日平均</span><span style="display:flex;gap:8px;align-items:center"><button class="share-btn" data-act="share" data-v="weight">${I.share}シェア</button><button class="wbtn" data-act="weigh">${wOn(today()) == null ? '今日の体重を記録' : `今日 ${wOn(today()).toFixed(1)}kg`}</button></span></div>
       <div class="hero" style="margin-top:4px">${(s.cur ?? s.last.kg).toFixed(1)}<small>kg</small></div>
@@ -2448,6 +2522,146 @@ function svExSheet() {
 }
 function svExAdd(w) { w = String(w || '').trim(); if (!w) return; if (!S.solver.ex.includes(w)) S.solver.ex.push(w); save(); svExSheet(); }
 
+/* ================= TDEEコーチ（画面側） ================= */
+const PH_TYPE = [['cut', 'カット'], ['lean', 'リーンバルク'], ['recomp', 'リコンプ'], ['maint', '維持']];
+const PH_MODE = { cut: 'cut', lean: 'bulk', recomp: 'maint', maint: 'maint' };
+const DOW_JA = ['日', '月', '火', '水', '木', '金', '土'];
+const phaseNow = () => S.phases.find(p => p.id === S.coach.phaseId) || null;
+const phaseNext = P => { const i = S.phases.indexOf(P); return i >= 0 ? S.phases[i + 1] || null : null; };
+const fmtMD = k => { const d = parseKey(k); return `${d.getMonth() + 1}/${d.getDate()}`; };
+function coData() {
+  const days = Object.keys(S.dayDone || {}).filter(k => S.dayDone[k]).map(k => ({ date: k, done: true, kcal: sumOf(S.meals[k] || []).kcal }));
+  return { days, weights: S.weights.map(w => ({ date: w.date, kg: w.kg })), today: today(), phaseStart: (phaseNow() || {}).start };
+}
+function coRun() {
+  const est = coEstimate(coData()), P = phaseNow();
+  const adj = est.ok && P ? coAdjust({ est, targetPace: P.pace, curKcal: S.targets.kcal, curF: S.targets.f, bmr: bmrOf({ ...S.body, bw: est.avg7 }) }) : null;
+  return { est, adj, P };
+}
+/* チェックイン日：直近の「設定した曜日」。その日以降、承認か見送りをするまでホームにカードを出す */
+const coLastCheckin = () => { let k = today(); while (parseKey(k).getDay() !== S.coach.day) k = addDays(k, -1); return k; };
+const coDue = () => !S.coach.handled || S.coach.handled < coLastCheckin();
+function coachHomeCards() {
+  let out = '';
+  const P = phaseNow(), N = P && phaseNext(P);
+  if (P && P.end && today() > P.end) out += `<button class="card svbtn" data-act="phaseSwitch" data-id="${N ? N.id : ''}"><span class="svic">${I.right}</span><div class="grow"><div class="t">${esc(P.name)}の期間が終わりました</div><div class="s">${N ? `${esc(N.name)}への切り替えを確認する` : '次のフェーズを登録してください'}</div></div>${I.chev}</button>`;
+  if (P && coDue()) {
+    const { est, adj } = coRun();
+    const sub = !est.ok ? (est.reason === 'phase' ? `フェーズ開始から7日間は判定しません（あと${est.waitDays}日）` : `あと${est.needDays}日分の記録が必要です`)
+      : `${adj.delta ? `調整案 ${signed(adj.delta)}kcal · ` : 'ペースどおり · '}実績 ${kgS(est.paceWeek, 2)} / 目標 ${kgS(P.pace, 2)}kg/週`;
+    out += `<button class="card svbtn" data-act="coach"><span class="svic">${I.bolt}</span><div class="grow"><div class="t">今週の判定</div><div class="s num">${sub}</div></div>${I.chev}</button>`;
+  }
+  return out;
+}
+function dayDoneRow() {
+  const on = !!(S.dayDone || {})[today()];
+  return `<div class="group" style="margin-top:12px"><label class="row"><span class="grow">今日の食事記録は完了<div class="s" style="white-space:normal">オンにした日だけ、TDEEの計算に使います</div></span><span class="switch"><input type="checkbox" data-act="coDone" data-v="${today()}" ${on ? 'checked' : ''}><span></span></span></label></div>`;
+}
+function coachSheet() {
+  const { est, adj, P } = coRun(), L = n => n.toLocaleString();
+  let body;
+  if (!P) body = `<div class="svmsg">フェーズが登録されていません。下の「フェーズ」から登録してください。</div>`;
+  else if (!est.ok) {
+    body = `<div class="card"><div class="lbl">推定TDEE</div><div class="hero m" style="color:var(--t3)">—</div>
+      <div class="goalline">${est.reason === 'phase' ? `フェーズ開始から7日間は水分の変動が大きいので判定しません。あと${est.waitDays}日です。` : `あと${est.needDays}日分の記録が必要です`}</div>
+      <div class="bal3"><div><div class="lbl">記録完了の日</div><div class="v num">${est.doneDays}<small>/${CO.MIN_DONE}</small></div></div>
+        <div><div class="lbl">朝の体重</div><div class="v num">${est.weightDays}<small>/${CO.MIN_WEIGHTS}</small></div></div>
+        <div><div class="lbl">使える期間</div><div class="v num">${est.span}<small>日</small></div><div class="u">${CO.MIN_SPAN}日以上</div></div></div>
+      <div class="sub" style="margin-top:12px">期間 ${fmtMD(est.from)}〜${fmtMD(est.to)}。足りない間は推定値を出しません。</div></div>`;
+  } else {
+    const a = adj, M = a.macros, T = S.targets;
+    body = `<div class="card"><div class="lbl">推定TDEE（本当の維持カロリー）</div>
+      <div class="hero m num">${L(Math.round(est.tdee))}<small>kcal</small></div>
+      <div class="sub num" style="margin-top:4px">これまでの固定推定 ${L(maintOf())}kcal との差 ${signed(Math.round(est.tdee) - maintOf())}</div>
+      <div class="bal3"><div><div class="lbl">平均摂取</div><div class="v num">${L(Math.round(est.avgIntake))}</div><div class="u">${est.doneDays}日分</div></div>
+        <div><div class="lbl">体重の傾き</div><div class="v num">${kgS(est.paceWeek, 2)}</div><div class="u">kg/週（${est.weightDays}日分）</div></div>
+        <div><div class="lbl">7日平均</div><div class="v num">${est.avg7.toFixed(1)}</div><div class="u">kg</div></div></div>
+      <details class="bd"><summary>計算のしくみ</summary><div class="sub num">期間 ${fmtMD(est.from)}〜${fmtMD(est.to)}（朝の体重だけ・今日は除く）<br>
+        体重の傾き ＝ 回帰直線 ${est.slopeDay.toFixed(4)}kg/日（＝週 ${kgS(est.paceWeek, 2)}kg）<br>
+        推定TDEE ＝ 平均摂取 ${L(Math.round(est.avgIntake))} −（${est.slopeDay.toFixed(4)} × 7,200）＝ ${L(Math.round(est.avgIntake))} ${est.deficit <= 0 ? '+' : '−'} ${Math.abs(Math.round(est.deficit))} ＝ ${L(Math.round(est.tdee))}kcal<br>
+        目標ペースに必要な摂取 ＝ ${L(Math.round(est.tdee))} ${P.pace < 0 ? '−' : '+'} ${Math.abs(Math.round(P.pace * CO.KCAL_PER_KG / 7))} ＝ ${L(Math.round(a.needed))}kcal</div></details></div>
+    <div class="sec"><b>今週の判定</b><span class="num">${fmtMD(coLastCheckin())}（${DOW_JA[S.coach.day]}）</span></div>
+    <div class="card"><div class="bal3" style="margin-top:0"><div><div class="lbl">実績ペース</div><div class="v num">${kgS(a.actual, 2)}</div><div class="u">kg/週</div></div>
+        <div><div class="lbl">目標ペース</div><div class="v num">${kgS(P.pace, 2)}</div><div class="u">kg/週</div></div>
+        <div><div class="lbl">差</div><div class="v num ${Math.abs(a.gap) > .1 ? 'warn' : 'accent'}">${kgS(a.gap, 2)}</div><div class="u">kg/週</div></div></div>
+      ${a.warnings.map(w => `<div class="svmsg warnbox">${esc(w)}</div>`).join('')}
+      ${a.delta ? `<div class="wkadj"><div class="lbl">調整案</div>
+        <div class="num" style="font-size:17px">目標 <b>${L(T.kcal)}</b> → <b class="accent">${L(a.kcal)}</b> kcal（${signed(a.delta)}）</div>
+        <div class="sub num">${a.capped ? `計算上は ${signed(Math.round(a.raw))}kcal/日 ですが、1回の調整は±${CO.CAP}kcalまでにしています。` : `（目標ペース − 実績ペース）× 7,200 ÷ 7 ＝ ${signed(Math.round(a.raw))}kcal/日`}</div>
+        <div class="svdiff num" style="margin-top:12px"><div><span>kcal</span><b>${L(M.kcal)}</b></div><div><span>P</span><b>${M.p}</b></div><div><span>F</span><b>${M.f}</b></div><div><span>C</span><b>${M.c}</b></div></div>
+        <div class="sub">P＝体重×2.2g、F＝体重×0.6g以上、残りを炭水化物。今：P${T.p} F${T.f} C${T.c}</div>
+        <button class="btn" data-act="coApprove" style="margin-top:12px">承認して目標に反映</button>
+        <button class="btn plain" data-act="coSkip">今週は見送る</button></div>`
+      : `<div class="wkadj"><div class="num">目標ペースどおりです。今の目標（${L(T.kcal)}kcal）のままでOK</div><button class="btn plain" data-act="coSkip">確認した</button></div>`}
+      <div class="sub" style="margin-top:8px">承認するまで目標は変わりません。</div></div>`;
+  }
+  const from = addDays(today(), -CO.WINDOW), rows = [];
+  for (let k = addDays(today(), -1); k >= from; k = addDays(k, -1)) rows.push(k);
+  openSheet(`<div class="sh-h"><button data-act="close">閉じる</button><h3>TDEEコーチ</h3><span style="min-width:64px"></span></div>
+    ${P ? `<div class="svmsg"><b>${esc(P.name)}</b>（${PH_TYPE.find(t => t[0] === P.type)[1]}）${fmtMD(P.start)}〜${P.end ? fmtMD(P.end) : ''} · 目標 週${kgS(P.pace, 2)}kg</div>` : ''}
+    <div style="margin-top:12px">${body}</div>
+    <div class="sec"><b>記録完了の日</b><span>${rows.filter(k => S.dayDone[k]).length}/${rows.length}日</span></div>
+    <div class="sub" style="margin:0 4px 8px">食事をすべて記録できた日だけオンに。つけ忘れのある日を入れると、TDEEが低く出ます。</div>
+    <div class="group">${rows.map(k => { const kc = Math.round(sumOf(S.meals[k] || []).kcal), w = wOn(k);
+      return `<label class="row"><span class="grow num">${fmtD(k)}<div class="s">${kc ? kc.toLocaleString() + ' kcal' : '記録なし'}${w != null ? ` · 朝 ${w.toFixed(1)}kg` : ''}</div></span><span class="switch"><input type="checkbox" data-act="coDone" data-v="${k}" ${S.dayDone[k] ? 'checked' : ''}><span></span></span></label>`; }).join('')}</div>
+    <div class="sec"><b>フェーズ</b><button class="link" data-act="phEdit" data-id="">＋追加</button></div>
+    <div class="group">${S.phases.map(ph => `<button class="row" data-act="phEdit" data-id="${ph.id}"><div class="grow"><div class="t">${esc(ph.name)}${ph.id === S.coach.phaseId ? ' <span class="pill a">いま</span>' : ''}</div><div class="s num">${PH_TYPE.find(t => t[0] === ph.type)[1]} · ${fmtMD(ph.start)}〜${ph.end ? fmtMD(ph.end) : ''} · 週${kgS(ph.pace, 2)}kg</div></div>${I.chev}</button>`).join('')}</div>
+    <div class="slbl">チェックインの曜日</div>${seg('coDay', DOW_JA.map((d, i) => [i, d]), S.coach.day)}
+    <div class="sub" style="margin:8px 4px 0">脂肪1kg＝7,200kcalで計算。体重は朝の値だけを使い、夜（InBodyなど）の値は混ぜません。</div>`);
+}
+function coApprove() {
+  const { adj } = coRun(); if (!adj || !adj.delta) return;
+  const old = { ...S.targets }, h = S.coach.handled;
+  S.targets = { ...adj.macros }; S.coach.handled = today();
+  S.coach.log.push({ date: today(), from: old.kcal, to: adj.kcal }); save(); closeSheet(); render();
+  toast(`目標を ${adj.kcal.toLocaleString()}kcal にしました`, () => { S.targets = old; S.coach.handled = h; S.coach.log.pop(); save(); render(); });
+}
+/* フェーズの切り替え：内容を見せてから、ボタンで承認 */
+function phaseTargets(N) {
+  if (N.targets) return { ...N.targets };
+  const { est } = coRun();
+  if (!est.ok) return null;
+  return coMacros(r10(est.tdee + N.pace * CO.KCAL_PER_KG / 7), est.avg7, S.targets.f);
+}
+function phaseSwitchSheet(id) {
+  const P = phaseNow(), N = S.phases.find(p => p.id === id);
+  if (!N) { coachSheet(); return; }
+  const T = phaseTargets(N);
+  openSheet(`<div class="sh-h"><button data-act="coach">戻る</button><h3>フェーズの切り替え</h3><span style="min-width:64px"></span></div>
+    <div class="card"><div class="lbl">${P ? esc(P.name) + ' →' : ''}</div><div class="hero m" style="font-size:28px">${esc(N.name)}</div>
+      <div class="sub num">${PH_TYPE.find(t => t[0] === N.type)[1]} · ${fmtMD(N.start)}〜${N.end ? fmtMD(N.end) : ''} · 目標 週${kgS(N.pace, 2)}kg</div>
+      ${T ? `<div class="svdiff num" style="margin-top:12px"><div><span>kcal</span><b>${T.kcal.toLocaleString()}</b></div><div><span>P</span><b>${T.p}</b></div><div><span>F</span><b>${T.f}</b></div><div><span>C</span><b>${T.c}</b></div></div>
+        <div class="sub">${N.targets ? 'このフェーズに登録した目標' : '推定TDEE ＋ 目標ペース分で計算した目標'}。今：${S.targets.kcal.toLocaleString()}kcal</div>`
+        : `<div class="svmsg">推定TDEEがまだ出ていないので、目標カロリーは今のまま切り替えます。</div>`}</div>
+    <button class="btn" data-act="phaseGo" data-id="${N.id}">${esc(N.name)}に切り替える</button>
+    <div class="sub" style="text-align:center">自動では切り替わりません。押したときだけ変わります。</div>`);
+}
+function phaseGo(id) {
+  const N = S.phases.find(p => p.id === id); if (!N) return;
+  const old = { t: { ...S.targets }, m: S.mode, ph: S.coach.phaseId }, T = phaseTargets(N);
+  S.coach.phaseId = N.id; S.mode = PH_MODE[N.type]; if (T) S.targets = T; save(); closeSheet(); render();
+  toast(`${N.name}に切り替えました`, () => { S.targets = old.t; S.mode = old.m; S.coach.phaseId = old.ph; save(); render(); });
+}
+function phaseEditSheet(id) {
+  const ph = S.phases.find(p => p.id === id) || { id: '', name: '', type: 'cut', start: today(), end: addDays(today(), 56), pace: -.4 };
+  openSheet(`<div class="sh-h"><button data-act="coach">戻る</button><h3>${id ? 'フェーズを編集' : 'フェーズを追加'}</h3><button data-act="phSave" data-id="${ph.id}" style="font-weight:600">保存</button></div>
+    <input class="in" id="phn" value="${esc(ph.name)}" placeholder="名前（例：カット②）">
+    <div style="margin-top:12px">${seg('phType', PH_TYPE, ph.type)}</div>
+    <div class="group" style="margin-top:12px"><label class="row trow"><span class="grow">開始日</span><input type="date" id="phs" value="${ph.start}"></label><label class="row trow"><span class="grow">終了日</span><input type="date" id="phe" value="${ph.end || ''}"></label></div>
+    <div class="card" style="margin-top:12px"><div class="srow" style="border:0"><span>目標ペース（週）</span>${stepper('php', ph.pace, .05, 'kg')}</div></div>
+    ${ph.id && ph.id !== S.coach.phaseId ? `<button class="btn ghost" data-act="phaseSwitch" data-id="${ph.id}">このフェーズに切り替える</button>` : ''}
+    ${ph.id ? `<button class="btn danger" data-act="phDel" data-id="${ph.id}">削除</button>` : ''}`);
+  $('#panel').dataset.phtype = ph.type;
+}
+function phaseSave(id) {
+  const v = { name: $('#phn').value.trim() || '新しいフェーズ', type: $('#panel').dataset.phtype || 'cut', start: $('#phs').value || today(), end: $('#phe').value || '', pace: r1(num($('#php').value) * 100) / 100 };
+  v.pace = Math.round(num($('#php').value) * 100) / 100;
+  if (id) Object.assign(S.phases.find(p => p.id === id), v); else S.phases.push({ id: uid(), targets: null, ...v });
+  S.phases.sort((a, b) => a.start < b.start ? -1 : 1);
+  if (id && id === S.coach.phaseId) S.mode = PH_MODE[v.type];
+  save(); coachSheet();
+}
+
 /* ================= 総重量（ボリューム） ================= */
 /* 総重量 ＝ 重量 × 回数 × セット数 の合計。自重種目（0kg）は含まれない */
 let volUnit = 'month', volOff = 0;
@@ -2656,6 +2870,9 @@ document.addEventListener('click', e => {
     if (name === 'shvu') { sh.vunit = v === 'lastm' ? 'month' : v; sh.voff = v === 'lastm' ? -1 : 0; renderShot(); }
     if (name === 'shwr') { sh.wrange = v; renderShot(); }
     if (name === 'svsrc') { S.solver.src = v; save(); solverSheet(); }
+    if (name === 'wkind') $('#panel').dataset.wkind = v;
+    if (name === 'coDay') { S.coach.day = +v; save(); render(); }
+    if (name === 'phType') $('#panel').dataset.phtype = v;
     if (name === 'rkind') { recKind = v; renderLog(); }
     if (name === 'shstyle') { sh.style = v; sh.touched = true; if (v === 'photo' && !sh.photo) $('#photoIn').click(); renderShot(); }
     if (name === 'shratio') { sh.ratio = v; renderShot(); }
@@ -2815,6 +3032,15 @@ document.addEventListener('click', e => {
     case 'saveWeight': saveWeight(); break;
     case 'goWeight': recKind = 'weight'; go('log'); break;
     case 'solver': solverSheet(); break;
+    case 'coach': coachSheet(); break;
+    case 'coDone': if (a.type === 'checkbox') { if (a.checked) S.dayDone[d.v] = true; else delete S.dayDone[d.v]; save(); if (cur === 'home' && !$('#sheet').classList.contains('open')) renderHome(); } break;
+    case 'coApprove': coApprove(); break;
+    case 'coSkip': S.coach.handled = today(); save(); closeSheet(); render(); toast('今週は見送りました'); break;
+    case 'phaseSwitch': if (d.id) phaseSwitchSheet(d.id); else coachSheet(); break;
+    case 'phaseGo': phaseGo(d.id); break;
+    case 'phEdit': phaseEditSheet(d.id); break;
+    case 'phSave': phaseSave(d.id); break;
+    case 'phDel': ask('このフェーズを削除しますか？', '削除', () => { S.phases = S.phases.filter(p => p.id !== d.id); if (S.coach.phaseId === d.id) S.coach.phaseId = null; save(); coachSheet(); }); break;
     case 'svAdd': svAddPlan(+d.i); break;
     case 'svEx': svExSheet(); break;
     case 'svExAdd': svExAdd($('#svexq').value); break;
