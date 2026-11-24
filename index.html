@@ -347,6 +347,16 @@ details.bd .sub{margin-top:4px}
 .wbar i{position:absolute;top:0;bottom:0;border-radius:3px;background:var(--accent)}
 .wbar i.up{left:50%}.wbar i.dn{right:50%}.wbar i.warn{background:var(--warn)}
 .kc.warn{color:var(--warn)}
+.vbars{display:flex;gap:6px;margin-top:20px;align-items:flex-end}
+.vb{flex:1;min-width:0;text-align:center}.vb .vz{height:80px;display:flex;align-items:flex-end;justify-content:center}
+.vb .vz i{display:block;width:60%;max-width:28px;border-radius:4px 4px 0 0;background:var(--accent)}
+.vb.fut{opacity:.35}.vb .vl{font-size:11px;color:var(--t2);margin-top:4px;white-space:nowrap;overflow:hidden}
+.wkavg .v small{font-size:13px;font-weight:500;color:var(--t2);margin-left:2px}
+.vrow{gap:12px}.vrow .vp{flex:0 0 48px;font-size:15px}
+.vtrack{flex:1;height:8px;border-radius:4px;background:var(--s2);overflow:hidden}.vtrack i{display:block;height:100%;border-radius:4px;background:var(--accent)}
+.vrow .kc{flex:0 0 auto;min-width:96px;text-align:right}.vrow .kc em{display:block;font-style:normal;font-size:11px;color:var(--t3)}
+.prban{display:flex;align-items:center;gap:12px;width:100%;margin-top:8px;padding:12px;border-radius:12px;background:var(--s2);text-align:left;font-size:15px;color:var(--t1);line-height:1.4}
+.prban svg{width:16px;height:16px;color:var(--t3)}
 .legend3{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;margin-top:12px}
 .legend3 div{font-size:11px;color:var(--t2);line-height:1.35}
 .legend3 span{display:block}
@@ -1071,7 +1081,8 @@ function weekBars(w, md) {
 function exerciseGroup() {
   const td = today(), logs = S.logs.filter(l => l.date === td), cs = S.cardio.filter(c => c.date === td);
   const byEx = {}; logs.forEach(l => (byEx[l.ex] = byEx[l.ex] || []).push(l));
-  const rows = Object.entries(byEx).map(([ex, ls]) => `<div class="row"><div class="grow"><div class="t">${esc(ex)}</div><div class="s num">${setsSummary(ls)}</div></div><span class="kc">${ls.reduce((a, l) => a + strengthKcal(l), 0)} kcal</span></div>`).join('')
+  const prs = new Set(trainRows(td).rows.filter(r => r.pr).map(r => r.n));
+  const rows = Object.entries(byEx).map(([ex, ls]) => `<div class="row"><div class="grow"><div class="t">${esc(ex)}${prs.has(ex) ? ' <span class="pill a">1RM更新</span>' : ''}</div><div class="s num">${setsSummary(ls)}</div></div><span class="kc">${ls.reduce((a, l) => a + strengthKcal(l), 0)} kcal</span></div>`).join('')
     + cs.map(c => `<div class="row"><div class="grow"><div class="t">${esc(c.name)}</div><div class="s num">有酸素 · ${LVL[c.lvl]} · ${c.min}分</div></div><span class="kc">${c.kcal.toLocaleString()} kcal</span></div>`).join('');
   const b = burnOf(td);
   return `<div class="sec"><span>今日の記録</span><span class="num">${(b.strength + b.cardio).toLocaleString()} kcal</span></div><div class="group">${rows}
@@ -1566,8 +1577,9 @@ const goalOf = ex => { const P = S.plans.filter(p => p.ex === ex && !isFinished(
 
 let recKind = 'lift';
 function renderLog() {
-  const kindSeg = `<div style="margin-bottom:12px">${seg('rkind', [['lift', '筋トレ'], ['cardio', '有酸素'], ['weight', '体重']], recKind)}</div>`;
+  const kindSeg = `<div style="margin-bottom:12px">${seg('rkind', [['lift', '筋トレ'], ['cardio', '有酸素'], ['weight', '体重'], ['volume', '総重量']], recKind)}</div>`;
   if (recKind === 'weight') return renderWeight(kindSeg);
+  if (recKind === 'volume') return renderVolume(kindSeg);
   const dateRow = `<label class="row"><span class="grow">日付</span><input type="date" id="ld" value="${today()}" style="background:transparent;color:var(--t2);font-size:17px;padding:4px 0;text-align:right"></label>`;
   if (recKind === 'cardio') {
     const last = S.cardio.slice(-1)[0];
@@ -1764,7 +1776,7 @@ function renderWeight(kindSeg) {
       } else adv = `<div class="sub" style="margin-top:12px">記録が2週間たまると、カロリーの調整量を提案します</div>`;
     }
     hero = `<div class="card">
-      <div class="card-top"><span class="lbl">7日平均</span><button class="wbtn" data-act="weigh">${wOn(today()) == null ? '今日の体重を記録' : `今日 ${wOn(today()).toFixed(1)}kg · 修正`}</button></div>
+      <div class="card-top"><span class="lbl">7日平均</span><span style="display:flex;gap:8px;align-items:center"><button class="share-btn" data-act="share" data-v="weight">${I.share}シェア</button><button class="wbtn" data-act="weigh">${wOn(today()) == null ? '今日の体重を記録' : `今日 ${wOn(today()).toFixed(1)}kg`}</button></span></div>
       <div class="hero" style="margin-top:4px">${(s.cur ?? s.last.kg).toFixed(1)}<small>kg</small></div>
       <div class="goalline">${s.diff != null ? `先週より <b class="${j.c}">${kgS(s.diff)}kg</b> · ${j.t}` : '1週間続けると先週との差が出ます'}</div>
       <div class="sub num" style="margin-top:4px">目標ペース（${MODE[S.mode]}）：週 ${S.mode === 'maint' ? '±0' : kgS(s.pace, 2)}kg</div>
@@ -2091,7 +2103,13 @@ function trainNeedH(W) {                               // 全部を入れるの�
 function trainRows(date = today()) {
   const logs = S.logs.filter(l => l.date === date), cs = S.cardio.filter(v => v.date === date);
   const byEx = {}; logs.forEach(l => (byEx[l.ex] = byEx[l.ex] || []).push(l));
-  let rows = Object.entries(byEx).map(([ex, ls]) => ({ n: ex, part: partOf(ex), lines: setGroups(ls) }))
+  let rows = Object.entries(byEx).map(([ex, ls]) => {
+    const before = S.logs.filter(l => l.ex === ex && l.date < date);
+    const e1 = Math.max(...ls.map(l => l.e1 || e1rm(l.w, l.r)));
+    const prevE1 = before.length ? Math.max(...before.map(l => l.e1 || e1rm(l.w, l.r))) : 0;
+    const prevW = before.length ? Math.max(...before.map(l => +l.w)) : 0;
+    return { n: ex, part: partOf(ex), lines: setGroups(ls), e1, prevE1, prevW, pr: prevE1 > 0 && e1 > prevE1 + .05 };
+  })
     .concat(cs.map(v => ({ n: v.name, part: '有酸素', lines: [{ min: v.min, lvl: LVL[v.lvl] }] })));
   let planned = false;
   if (!rows.length && date >= today()) {
@@ -2112,18 +2130,41 @@ function TN(x, str, right, y, size, o = {}) {
   });
   return right - px;
 }
-function drawSetLine(x, ln, y) {
+/* 塗りの角丸ラベル（記録更新の印）。right を右端に置き、幅を返す */
+function pill(x, s, right, y, size = 20) {
+  x.font = `700 ${size}px ${DISP}`; if ('letterSpacing' in x) x.letterSpacing = '2px';
+  const tw = x.measureText(s).width, ph = size + 16, pw = tw + 28, lx = right - pw, ty = y - size * .86 - 8, r = ph / 2;
+  x.beginPath(); x.moveTo(lx + r, ty); x.lineTo(lx + pw - r, ty); x.arc(lx + pw - r, ty + r, r, -Math.PI / 2, Math.PI / 2); x.lineTo(lx + r, ty + ph); x.arc(lx + r, ty + r, r, Math.PI / 2, Math.PI * 1.5); x.closePath();
+  x.fillStyle = C.acc; x.fill();
+  x.fillStyle = '#ffffff'; x.textAlign = 'left'; x.textBaseline = 'alphabetic'; x.fillText(s, lx + 14, y);
+  if ('letterSpacing' in x) x.letterSpacing = '0px';
+  return pw;
+}
+/* 種目名の行の右側：推定1RM（画像では「RM 77kg」と短く表記）。自己ベストを更新したら青＋「PR +2.5kg」 */
+function drawE1(x, r, y, W) {
+  if (!r.e1) return 0;
+  const v = r1(r.e1), right = W - M;
+  const wu = T(x, 'kg', right, y, 24, { w: 600, c: C.dim, a: 'right' });
+  const wv = T(x, fmtN(v), right - wu - 6, y, 32, { w: 700, c: r.pr ? C.acc : C.w, a: 'right' });
+  const wl = T(x, 'RM', right - wu - wv - 12, y, 22, { w: 700, ls: 2, c: C.dim, a: 'right' });
+  let used = wu + wv + wl + 18;
+  if (r.pr) used += 16 + pill(x, `PR +${fmtN(r1(r.e1 - r.prevE1))}kg`, right - used - 16, y, 20);
+  return used;
+}
+function drawSetLine(x, ln, y, rec) {
   const U = { w: 600, c: C.dim }, N = { w: 700, a: 'right' };
   if (ln.min != null) {
     TN(x, String(ln.min), COLX.w, y, IMG.sub); T(x, '分', COLX.w + 8, y, 24, U);
     T(x, ln.lvl, COLX.w + 96, y, 28, { w: 600, c: C.dim });
     return;
   }
-  TN(x, fmtN(+ln.w), COLX.w, y, IMG.sub); T(x, 'kg', COLX.w + 8, y, 24, U);
+  const up = rec && rec.prevW > 0 && +ln.w > rec.prevW;             // これまでで一番重い重量
+  TN(x, fmtN(+ln.w), COLX.w, y, IMG.sub, up ? { c: C.acc } : {}); T(x, 'kg', COLX.w + 8, y, 24, up ? { w: 600, c: C.acc } : U);
   T(x, '×', COLX.w + 76, y, 28, { w: 500, c: C.dim });
   TN(x, String(ln.r), COLX.r, y, IMG.sub); T(x, '回', COLX.r + 8, y, 24, U);
   T(x, '×', COLX.r + 60, y, 28, { w: 500, c: C.dim });
   TN(x, String(ln.sets), COLX.s, y, IMG.sub); T(x, 'セット', COLX.s + 8, y, 24, U);
+  if (up) pill(x, `WEIGHT PR +${fmtN(r1(+ln.w - rec.prevW))}kg`, 1080 - M, y - 4, 20);
 }
 function sceneTrain(x, W, H) {
   const d = sh.date || today(), isToday = d === today();
@@ -2134,14 +2175,15 @@ function sceneTrain(x, W, H) {
   let y0 = top;
   rows.forEach((r, i) => {
     if (i) rule(x, W, y0);
-    T(x, r.n, M, y0 + NAME_B, 28, { w: 600, c: C.dim, max: CW });
-    r.lines.forEach((ln, k) => drawSetLine(x, ln, y0 + NAME_B + (k + 1) * SET_LH));
+    const eW = planned ? 0 : drawE1(x, r, y0 + NAME_B, W);
+    T(x, r.n, M, y0 + NAME_B, 28, { w: 600, c: C.dim, max: CW - (eW ? eW + 24 : 0) });
+    r.lines.forEach((ln, k) => drawSetLine(x, ln, y0 + NAME_B + (k + 1) * SET_LH, planned ? null : r));
     y0 += blockH(r);
   });
   const ts = titleSpec(x, rows, CW), lh = Math.round(ts.z * 1.05);
   const tY = top - 56;                                           // 見出しと種目名の間を広めに
   ts.lines.forEach((ln, i) => T(x, ln, M - 4, tY - (ts.lines.length - 1 - i) * lh, ts.z, { w: 800 }));
-  const lY = tY - titleH(ts) - 48; label(x, planned ? "TODAY'S PLAN" : isToday ? "TODAY'S SESSION" : 'SESSION', lY);
+  const lY = tY - titleH(ts) - 48; label(x, (planned ? "TODAY'S PLAN" : isToday ? "TODAY'S SESSION" : 'SESSION') + (!planned && rows.some(r => r.pr || r.lines.some(ln => r.prevW > 0 && +ln.w > r.prevW)) ? ' · NEW RECORD' : ''), lY);
   return lY - 32;
 }
 function sceneBalance(x, W, H) {
@@ -2172,6 +2214,102 @@ function scenePR(x, W, H, pr) {
   label(x, pr.goal ? `GOAL ACHIEVED · ${fmtN(pr.goal)}KG` : 'NEW PERSONAL RECORD', top - 112); return top - 144;
 }
 
+/* ================= 総重量（ボリューム） ================= */
+/* 総重量 ＝ 重量 × 回数 × セット数 の合計。自重種目（0kg）は含まれない */
+let volUnit = 'month', volOff = 0;
+const MON_EN = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+const volOf = l => (+l.w || 0) * (+l.r || 0) * (+l.sets || 1);
+function volRange(unit, off) {
+  const td = parseKey(today());
+  if (unit === 'week') { const s = addDays(monday(today()), off * 7); return { s, e: addDays(s, 6) }; }
+  const a = new Date(td.getFullYear(), td.getMonth() + off, 1), b = new Date(td.getFullYear(), td.getMonth() + off + 1, 0);
+  return { s: key(a), e: key(b) };
+}
+function volStats(unit, off) {
+  const { s, e } = volRange(unit, off), p = volRange(unit, off - 1);
+  const logs = S.logs.filter(l => l.date >= s && l.date <= e), prevLogs = S.logs.filter(l => l.date >= p.s && l.date <= p.e);
+  const total = logs.reduce((a, l) => a + volOf(l), 0), prev = prevLogs.reduce((a, l) => a + volOf(l), 0);
+  const parts = {}, exs = {};
+  logs.forEach(l => { const v = volOf(l), pt = partOf(l.ex); parts[pt] = (parts[pt] || 0) + v; exs[l.ex] = (exs[l.ex] || 0) + v; });
+  const partList = Object.entries(parts).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  const exList = Object.entries(exs).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  // 期間内の内訳：週なら日ごと、月なら週ごと
+  const buckets = [];
+  if (unit === 'week') for (let i = 0; i < 7; i++) { const k = addDays(s, i); buckets.push({ l: ['月', '火', '水', '木', '金', '土', '日'][i], v: logs.filter(x => x.date === k).reduce((a, x) => a + volOf(x), 0), fut: k > today() }); }
+  else { let k = monday(s); while (k <= e) { const k2 = addDays(k, 6), d = parseKey(k < s ? s : k); buckets.push({ l: `${d.getMonth() + 1}/${d.getDate()}〜`, v: logs.filter(x => x.date >= k && x.date <= k2).reduce((a, x) => a + volOf(x), 0), fut: k > today() }); k = addDays(k, 7); } }
+  return { s, e, total, prev, partList, exList, buckets, days: new Set(logs.map(l => l.date)).size, sets: logs.reduce((a, l) => a + (+l.sets || 1), 0), chg: prev > 0 ? (total - prev) / prev : null };
+}
+const volLabel = (v, unit) => { const d = parseKey(v.s), f = k => { const x = parseKey(k); return `${x.getMonth() + 1}/${x.getDate()}`; };
+  return unit === 'week' ? `${f(v.s)} 〜 ${f(v.e)}` : `${d.getFullYear()}年${d.getMonth() + 1}月`; };
+const fmtVol = v => Math.round(v).toLocaleString();
+function renderVolume(kindSeg) {
+  const v = volStats(volUnit, volOff), cur = volOff === 0, un = volUnit === 'week' ? '週' : '月';
+  const mxP = Math.max(1, ...v.partList.map(p => p[1])), mxB = Math.max(1, ...v.buckets.map(b => b.v));
+  $('#tab-log').innerHTML = header('記録') + kindSeg + `
+    <div style="margin-bottom:12px">${seg('vunit', [['week', '週ごと'], ['month', '月ごと']], volUnit)}</div>
+    <div class="card">
+      <div class="wknav" style="margin-top:0"><button class="icon-btn sm" data-act="volNav" data-v="-1" aria-label="前へ">${I.left}</button>
+        <span class="num">${volLabel(v, volUnit)}${cur ? (volUnit === 'week' ? ' · 今週' : ' · 今月') : ''}</span>
+        <button class="icon-btn sm flip" data-act="volNav" data-v="1" aria-label="次へ" ${cur ? 'disabled' : ''}>${I.left}</button></div>
+      <div class="card-top" style="margin-top:16px"><span class="lbl">総重量</span>${v.total > 0 ? `<button class="share-btn" data-act="share" data-v="volume">${I.share}シェア</button>` : ''}</div>
+      <div class="hero" style="margin-top:4px">${fmtVol(v.total)}<small>kg</small></div>
+      <div class="goalline">${v.chg == null ? (v.total ? `前の${un}の記録なし` : 'この期間の筋トレ記録はありません') : `前の${un}より <b class="${v.chg >= 0 ? 'accent' : ''}">${v.chg >= 0 ? '+' : '−'}${Math.abs(Math.round(v.chg * 100))}%</b>${cur ? '（途中）' : ''}`}</div>
+      <div class="vbars">${v.buckets.map(b => `<div class="vb ${b.fut ? 'fut' : ''}"><div class="vz"><i style="height:${b.v ? Math.max(3, b.v / mxB * 80) : 0}px"></i></div><div class="vl">${b.l}</div></div>`).join('')}</div>
+      <div class="wkavg num"><div><div class="lbl">トレ日数</div><div class="v">${v.days}<small>日</small></div></div><div><div class="lbl">セット</div><div class="v">${v.sets}</div></div><div><div class="lbl">1日平均</div><div class="v">${v.days ? fmtVol(v.total / v.days) : '—'}<small>kg</small></div></div></div>
+    </div>
+    ${v.partList.length ? `<div class="sec"><b>部位ごと</b></div><div class="group">${v.partList.map(([p, kg]) => `<div class="row vrow"><span class="vp">${esc(p)}</span>
+      <div class="vtrack"><i style="width:${kg / mxP * 100}%"></i></div><span class="kc num">${fmtVol(kg)} kg<em>${Math.round(kg / v.total * 100)}%</em></span></div>`).join('')}</div>` : ''}
+    ${v.exList.length ? `<div class="sec"><b>種目ごと</b></div><div class="group">${v.exList.slice(0, 8).map(([ex, kg]) => `<div class="row"><span class="grow t">${esc(ex)}</span><span class="kc num">${fmtVol(kg)} kg</span></div>`).join('')}</div>` : ''}
+    <div class="sub" style="margin:8px 4px 0">総重量 ＝ 重量 × 回数 × セット数 の合計。自重の種目（0kg）は含みません。</div>`;
+}
+
+/* シェア：総重量 */
+function sceneVolume(x, W, H) {
+  const v = volStats(sh.vunit || 'month', sh.voff || 0), yB = Y_STATS(H), d = parseKey(v.s);
+  const pl = (sh.vunit || 'month') === 'week' ? `WEEK ${dot2(v.s)} – ${dot2(v.e)}` : `${MON_EN[d.getMonth()]} ${d.getFullYear()}`;
+  stats(x, W, [{ l: 'DAYS', v: String(v.days) }, { l: 'SETS', v: String(v.sets) }, { l: 'VS LAST', v: v.chg == null ? '—' : `${v.chg >= 0 ? '+' : '−'}${Math.abs(Math.round(v.chg * 100))}`, u: v.chg == null ? '' : '%', c: v.chg != null && v.chg >= 0 ? C.acc : C.w }], yB);
+  const y = yB - 104; rule(x, W, y);
+  const parts = v.partList.slice(0, 6), mx = Math.max(1, ...parts.map(p => p[1])), RH = 72, CW = W - M * 2;
+  let yy = y - 40 - (parts.length - 1) * RH;
+  parts.forEach(([p, kg]) => {
+    T(x, PART_EN[p] || p, M, yy - 20, IMG.cap, { w: 700, ls: 4, c: C.dim });
+    TN(x, fmtVol(kg), W - M - 44, yy - 20, 28, { w: 700 }); T(x, 'kg', W - M, yy - 20, IMG.cap, { w: 600, c: C.dim, a: 'right' });
+    x.fillStyle = C.faint; x.fillRect(M, yy - 4, CW, 8);
+    x.fillStyle = C.acc; x.fillRect(M, yy - 4, Math.max(8, CW * kg / mx), 8);
+    yy += RH;
+  });
+  const topParts = y - 40 - (parts.length - 1) * RH - 64;
+  const hz = fitSize(x, fmtVol(v.total), IMG.hero - 40, W - M * 2 - 100, 800, 96);
+  const top = hero(x, fmtVol(v.total), 'KG', topParts - 48, hz, 'TOTAL VOLUME');
+  label(x, pl, top - 48); return top - 80;
+}
+
+/* シェア：体重 */
+function sceneWeight(x, W, H) {
+  const yB = Y_STATS(H), td = today(), s = wSummary(), all = wSorted();
+  const avgAt = k => wAvg(addDays(k, -6), k);
+  const m30 = avgAt(addDays(td, -30)), first = all.length ? avgAt(all[0].date) : null, cur = s.cur ?? (s.last ? s.last.kg : null);
+  const ch = (a, b) => a != null && b != null ? kgS(a - b) : '—';
+  stats(x, W, [{ l: 'WEEK', v: s.diff != null ? kgS(s.diff) : '—', u: s.diff != null ? 'KG' : '' }, { l: '30 DAYS', v: ch(cur, m30), u: m30 != null ? 'KG' : '' }, { l: 'SINCE START', v: ch(cur, first), u: first != null ? 'KG' : '', c: C.acc }], yB);
+  const y = yB - 104; rule(x, W, y);
+  // グラフ：期間内の7日平均の線＋毎日の点
+  const days = sh.wrange === 'all' ? Math.max(14, all.length ? diffDays(all[0].date, td) : 14) : sh.wrange === '3m' ? 90 : 30;
+  const st = addDays(td, -days), pts = all.filter(w => w.date >= st), avg = [];
+  pts.forEach(w => avg.push({ i: diffDays(st, w.date), v: avgAt(w.date) }));
+  const GH = 280, gy = y - 56, gx = M, gw = W - M * 2;
+  if (pts.length > 1) {
+    const vals = pts.map(w => w.kg).concat(avg.map(a => a.v)); let lo = Math.min(...vals), hi = Math.max(...vals); const pd = Math.max(.4, (hi - lo) * .12); lo -= pd; hi += pd;
+    const px = i => gx + gw * i / days, py = v => gy - GH * (v - lo) / (hi - lo);
+    x.fillStyle = C.faint; pts.forEach(w => { x.beginPath(); x.arc(px(diffDays(st, w.date)), py(w.kg), 5, 0, Math.PI * 2); x.fill(); });
+    x.strokeStyle = C.acc; x.lineWidth = 6; x.lineJoin = 'round'; x.lineCap = 'round'; x.beginPath();
+    avg.forEach((a, i) => i ? x.lineTo(px(a.i), py(a.v)) : x.moveTo(px(a.i), py(a.v))); x.stroke();
+    const la = avg[avg.length - 1]; x.beginPath(); x.arc(px(la.i), py(la.v), 10, 0, Math.PI * 2); x.fillStyle = C.acc; x.fill();
+    T(x, dot2(st), M, gy + 40, IMG.cap - 2, { w: 600, c: C.dim }); T(x, dot2(td), W - M, gy + 40, IMG.cap - 2, { w: 600, c: C.dim, a: 'right' });
+  }
+  const top = hero(x, cur != null ? cur.toFixed(1) : '—', 'KG', gy - GH - 64, IMG.hero, '7-DAY AVG');
+  label(x, `BODY WEIGHT · ${({ cut: 'CUT', maint: 'MAINTAIN', bulk: 'BULK' })[S.mode]}`, top - 48); return top - 80;
+}
+
 function renderShot() {
   C = sh.style === 'white' ? PAL_LIGHT : PAL_DARK;
   const W = 1080, H0 = sh.ratio === 'story' ? 1920 : 1350;
@@ -2181,7 +2319,7 @@ function renderShot() {
   paintBg(x, W, H);
   if (!solidBg()) { x.shadowColor = 'rgba(0,0,0,0.35)'; x.shadowBlur = 16; }
   chrome(x, W);
-  const scene = xx => sh.kind === 'train' ? sceneTrain(xx, W, H) : sh.kind === 'balance' ? sceneBalance(xx, W, H) : sh.kind === 'plan' ? scenePlan(xx, W, H, findPlan(sh.arg)) : scenePR(xx, W, H, sh.arg);
+  const scene = xx => sh.kind === 'train' ? sceneTrain(xx, W, H) : sh.kind === 'balance' ? sceneBalance(xx, W, H) : sh.kind === 'plan' ? scenePlan(xx, W, H, findPlan(sh.arg)) : sh.kind === 'weight' ? sceneWeight(xx, W, H) : sh.kind === 'volume' ? sceneVolume(xx, W, H) : scenePR(xx, W, H, sh.arg);
   if (solidBg()) {
     // 黒・白背景：内容ブロックをやや上寄りの中央へ（8pxに丸める）
     const probe = document.createElement('canvas').getContext('2d');
@@ -2194,6 +2332,10 @@ function renderShot() {
   sh.blob = null; c.toBlob(b => sh.blob = b, 'image/png');
   sh.name = `workout-${sh.kind}-${sh.date || today()}.png`;
   const img = $('#shotImg'); if (img) img.src = c.toDataURL('image/png');
+  if ($('#shPR')) {
+    const pr = sh.kind === 'train' ? trainRows(sh.date).rows.filter(r => r.pr) : [];
+    $('#shPR').innerHTML = pr.length ? `<button class="prban" data-act="shPR"><span class="pill a">PR</span><span class="grow">${esc(pr[0].n)} の1RMを更新。<br>1RM更新の画像にする</span>${I.chev}</button>` : '';
+  }
   $('#shotWrap').classList.toggle('clear', sh.style === 'clear');
   $('#shotWrap').classList.toggle('white', sh.style === 'white');
   $('#photoPick').classList.toggle('hidden', sh.style !== 'photo');
@@ -2202,6 +2344,8 @@ function renderShot() {
 async function shareShow(kind, arg) {
   if (kind === 'plan' && !findPlan(arg)) return;
   sh.kind = kind; sh.arg = arg; sh.date = today();
+  if (kind === 'volume') { sh.vunit = volUnit; sh.voff = volOff; }
+  if (kind === 'weight') sh.wrange = sh.wrange || '1m';
   if (!sh.touched && (sh.style === 'black' || sh.style === 'white')) sh.style = isLight() ? 'white' : 'black';
   try { await Promise.race([document.fonts.load(`800 100px "Inter Tight"`), new Promise(r => setTimeout(r, 1200))]); } catch (e) {}
   const canShare = !!(navigator.canShare && navigator.share);
@@ -2210,6 +2354,9 @@ async function shareShow(kind, arg) {
     <div style="margin-top:8px">${seg('shratio', [['post', '投稿 4:5'], ['story', 'ストーリー 9:16']], sh.ratio)}</div>
     ${kind === 'train' || kind === 'balance' ? `<div class="group" style="margin-top:8px"><label class="row trow"><span class="grow">日付</span><input type="date" id="shd" value="${sh.date}" max="${today()}"></label></div>
       <div class="daychips">${[['0', '今日'], ['1', '昨日'], ['2', 'おととい']].map(([k, l]) => `<button data-act="shDay" data-v="${k}" class="${k === '0' ? 'on' : ''}">${l}</button>`).join('')}</div>` : ''}
+    ${kind === 'volume' ? `<div style="margin-top:8px">${seg('shvu', [['week', '今週'], ['month', '今月'], ['lastm', '先月']], sh.voff === -1 ? 'lastm' : sh.vunit)}</div>` : ''}
+    ${kind === 'weight' ? `<div style="margin-top:8px">${seg('shwr', [['1m', '1か月'], ['3m', '3か月'], ['all', '全期間']], sh.wrange)}</div>` : ''}
+    <div id="shPR"></div>
     <div class="shotwrap" id="shotWrap"><img class="shot" id="shotImg" alt="シェア用画像"></div>
     <button class="btn ghost hidden" id="photoPick" data-act="photoPick">写真を選ぶ</button>
     <input type="file" id="photoIn" accept="image/*" class="hidden">
@@ -2271,6 +2418,9 @@ document.addEventListener('click', e => {
     if (name === 'clvl') { cdo.lvl = +v; updCardio(); }
     if (name === 'hist') { histAll = v === '1'; renderHist(); }
     if (name === 'wunit') { wUnit = v; renderLog(); }
+    if (name === 'vunit') { volUnit = v; volOff = 0; renderLog(); }
+    if (name === 'shvu') { sh.vunit = v === 'lastm' ? 'month' : v; sh.voff = v === 'lastm' ? -1 : 0; renderShot(); }
+    if (name === 'shwr') { sh.wrange = v; renderShot(); }
     if (name === 'rkind') { recKind = v; renderLog(); }
     if (name === 'shstyle') { sh.style = v; sh.touched = true; if (v === 'photo' && !sh.photo) $('#photoIn').click(); renderShot(); }
     if (name === 'shratio') { sh.ratio = v; renderShot(); }
@@ -2429,6 +2579,10 @@ document.addEventListener('click', e => {
     case 'weighEdit': weighSheet(d.v); break;
     case 'saveWeight': saveWeight(); break;
     case 'goWeight': recKind = 'weight'; go('log'); break;
+    case 'volNav': volOff = Math.min(0, volOff + +d.v); renderLog(); break;
+    case 'shPR': { const r = trainRows(sh.date).rows.filter(r => r.pr).sort((a, b) => (b.e1 - b.prevE1) - (a.e1 - a.prevE1))[0]; if (!r) break;
+      const l = S.logs.filter(l => l.ex === r.n && l.date === sh.date).sort((a, b) => (b.e1 || e1rm(b.w, b.r)) - (a.e1 || e1rm(a.w, a.r)))[0];
+      closeSheet(); setTimeout(() => shareShow('pr', { ex: r.n, w: +l.w, r: +l.r, e1: r1(r.e1), prev: r1(r.prevE1), goal: 0, date: sh.date }), 250); break; }
     case 'delWeight': {
       const idx = S.weights.findIndex(w => w.date === d.v); if (idx < 0) break;
       const [rm] = S.weights.splice(idx, 1); save(); render();
