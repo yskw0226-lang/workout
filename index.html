@@ -357,6 +357,22 @@ details.bd .sub{margin-top:4px}
 .vrow .kc{flex:0 0 auto;min-width:96px;text-align:right}.vrow .kc em{display:block;font-style:normal;font-size:11px;color:var(--t3)}
 .prban{display:flex;align-items:center;gap:12px;width:100%;margin-top:8px;padding:12px;border-radius:12px;background:var(--s2);text-align:left;font-size:15px;color:var(--t1);line-height:1.4}
 .prban svg{width:16px;height:16px;color:var(--t3)}
+.svbtn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin-top:12px}
+.svbtn .t{font-size:17px;font-weight:600}.svbtn .s{font-size:13px;color:var(--t2);margin-top:2px}.svbtn>svg{width:16px;height:16px;color:var(--t3)}
+.svic{flex:0 0 40px;height:40px;border-radius:12px;background:var(--a15);display:grid;place-items:center;color:var(--accent)}.svic svg{width:20px;height:20px}
+.svmsg{margin-top:12px;padding:12px;border-radius:12px;background:var(--s1);font-size:15px;line-height:1.5;color:var(--t1)}
+.svmsg.warnbox{box-shadow:inset 0 0 0 1px var(--warn)}
+.svplan{display:block;width:100%;text-align:left;margin-top:12px}
+.svplan .card-top .t{font-size:17px;font-weight:600}
+
+.svit{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:.5px solid var(--sep)}
+.svit .n{font-size:15px;font-weight:600}.svit .s{font-size:13px;color:var(--t2);margin-top:2px}.svit .kc{font-size:15px;color:var(--t1)}
+.svsum{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--t2)}.svsum b{font-size:17px;color:var(--t1)}
+.svdiff{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:8px;padding:8px;border-radius:12px;background:var(--s2);text-align:center}
+.svdiff span{display:block;font-size:11px;color:var(--t2)}.svdiff b{font-size:15px;font-weight:600}.svdiff b.warn{color:var(--warn)}.svdiff b.accent{color:var(--accent)}
+.svtr{margin-top:8px;font-size:13px;color:var(--t1);line-height:1.45}
+.svgo{margin-top:12px;font-size:13px;font-weight:600}
+.bal3 .v small{font-size:13px;font-weight:500;color:var(--t2);margin-left:1px}
 .legend3{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px;margin-top:12px}
 .legend3 div{font-size:11px;color:var(--t2);line-height:1.35}
 .legend3 span{display:block}
@@ -791,6 +807,140 @@ EAA|いーえーえー あみのさん|1杯|36|9.0|0|0
 干し芋|ほしいも いも おかし おやつ|1枚(30g)|83|0.9|0.2|21.6
 `.trim().split('\n').map(l => { const [n, k, u, kc, p, f, c] = l.split('|'); return { name: n, key: norm(n + k), unit: u, kcal: +kc, p: +p, f: +f, c: +c }; });
 
+/* SOLVER-BEGIN ================= 残りPFCソルバー（純粋関数：DOM・Sに依存しない。tests/solver.test.mjs で単体テスト） =================
+   目的：残り枠（目標−摂取済み）に、食品と量（10g単位／0.5個単位）の組み合わせを最大3案。
+   重み（コストは kcal 換算。P=4, F=9, C=4 kcal/g）：
+     ① 残りkcalの超過   … 厳守案・手軽案は禁止。栄養優先案は 0.3/kcal ＋ 二次項で数十kcalに抑える
+     ② 目標を超えている F・C … その栄養素がエネルギーの25%超を占める食品は候補から除外し、
+                             残る微量の増加にも 1.5/kcal の重いペナルティ
+     ③ 不足している栄養素  … 足りない分 1.0/kcal（＋不足が大きいほど重くなる二次項）
+     ④ たんぱく質の超過    … 0.3/kcal の軽いペナルティで許容 */
+const SV = {
+  K: { p: 4, f: 9, c: 4 },
+  TOL: 3,                       // ±3g 以内は「ほぼ目標どおり」
+  OVER_FC: 1.5, OVER_P: .3, FILL_OVER: .5, UNDER: 1, UNDER_Q: 1 / 600,
+  KCAL_OVER_A: .3, KCAL_OVER_B: .004, KCAL_OVER_CAP: 150,
+  PER_ITEM: 10,                 // 品数が増えるごとのコスト（手間）
+  COOK: 25,                     // 調理が必要な食材（生肉など）を1品使うごとのコスト
+  SHARE_MAX: .25,               // 超過済みF・Cがこの割合を超える食品は除外
+  NAMES: ['p', 'f', 'c'],
+  LABEL: { p: 'たんぱく質', f: '脂質', c: '炭水化物' },
+};
+/* 量の候補：「25g」「200ml」のような単位は10g刻み、「1個(50g)」などは0.5個刻み */
+function svAmounts(food) {
+  const gm = /^(\d+)(g|ml)$/.exec(food.unit || ''), out = [];
+  if (gm) {
+    const base = +gm[1], u = gm[2], max = Math.min(400, Math.max(base * 3, 100));
+    for (let g = 10; g <= max; g += 10) if (food.kcal * g / base <= 900) out.push({ k: g / base, label: `${g}${u}` });
+  } else {
+    for (let k = .5; k <= 3; k += .5) if (food.kcal * k <= 900) out.push({ k, label: k === 1 ? (food.unit || '1食') : `${food.unit || '1食'}×${k}` });
+  }
+  return out;
+}
+/* 現状：各栄養素の残り（＋は不足、−は超過）と、解けるかどうか */
+function svStatus(target, eaten, room) {
+  const rem = {}, def = [], over = [];
+  SV.NAMES.forEach(n => { rem[n] = Math.round((target[n] - eaten[n]) * 10) / 10; if (rem[n] > SV.TOL) def.push(n); else if (rem[n] < -SV.TOL) over.push(n); });
+  const defKcal = Math.round(def.reduce((a, n) => a + rem[n] * SV.K[n], 0));
+  return { rem, def, over, room: Math.round(room), defKcal, done: !def.length, feasible: defKcal <= Math.max(0, room) + 10 };
+}
+/* 候補の絞り込み：超過済みの F・C が主体の食品、エネルギーのない食品を外す */
+function svCandidates(foods, st) {
+  return foods.filter(f => {
+    if (!(f.kcal > 0)) return false;
+    const pfcK = f.p * 4 + f.f * 9 + f.c * 4; if (pfcK < f.kcal * .5) return false;   // アルコールなどPFC以外が主のもの
+    return st.over.filter(n => n !== 'p').every(n => f[n] * SV.K[n] / Math.max(f.kcal, 1) <= SV.SHARE_MAX);
+  });
+}
+/* コスト関数。mode: 'strict'（kcal超過禁止） / 'prio'（少し超過を許す） */
+function svCost(sum, st, mode, nItems, nCook = 0) {
+  const over = sum.kcal - Math.max(0, st.room);
+  if (mode === 'strict' && over > .5) return Infinity;
+  if (mode === 'prio' && over > SV.KCAL_OVER_CAP) return Infinity;
+  let c = nItems * SV.PER_ITEM + nCook * SV.COOK;
+  if (over > 0) c += SV.KCAL_OVER_A * over + SV.KCAL_OVER_B * over * over;
+  SV.NAMES.forEach(n => {
+    const r = st.rem[n], add = sum[n], k = SV.K[n];
+    if (st.def.includes(n)) {
+      const under = Math.max(0, r - add) * k, fillOver = Math.max(0, add - r) * k;
+      c += SV.UNDER * under + SV.UNDER_Q * under * under + (n === 'p' ? SV.OVER_P : SV.FILL_OVER) * fillOver;
+    } else {
+      const extra = Math.max(0, add - Math.max(0, r)) * k;   // 目標まで残りがわずかでも、越えた分からペナルティ
+      c += (n === 'p' ? SV.OVER_P : SV.OVER_FC) * extra;
+    }
+  });
+  return c;
+}
+const ncook = parts => parts.filter(x => x.food.cook).length;
+const svSum = parts => parts.reduce((a, x) => { a.kcal += x.food.kcal * x.k; SV.NAMES.forEach(n => a[n] += x.food[n] * x.k); return a; }, { kcal: 0, p: 0, f: 0, c: 0 });
+/* 組み合わせ探索：1品は全候補、2品は上位16品、3品は上位7品の総当たり */
+function svSearch(cands, st, mode, maxItems = 3) {
+  const grid = cands.map(f => ({ f, a: svAmounts(f) }));
+  const singles = grid.map(g => { let best = null; g.a.forEach(a => { const p = [{ food: g.f, k: a.k, label: a.label }], c = svCost(svSum(p), st, mode, 1, ncook(p)); if (!best || c < best.c) best = { c, parts: p }; }); return best; })
+    .filter(x => x && isFinite(x.c)).sort((a, b) => a.c - b.c);
+  let best = singles[0] || null;
+  const rank = singles.map(s => s.parts[0].food);
+  const gridOf = f => grid.find(g => g.f === f).a;
+  if (maxItems >= 2) {
+    const top = rank.slice(0, 16);
+    for (let i = 0; i < top.length; i++) for (let j = i + 1; j < top.length; j++) {
+      const A = gridOf(top[i]), B = gridOf(top[j]);
+      A.forEach(a => B.forEach(b => {
+        const p = [{ food: top[i], k: a.k, label: a.label }, { food: top[j], k: b.k, label: b.label }], c = svCost(svSum(p), st, mode, 2, ncook(p));
+        if (c < best.c) best = { c, parts: p };
+      }));
+    }
+  }
+  if (maxItems >= 3) {
+    const top = rank.slice(0, 7), cap = g => g.length > 16 ? g.filter((_, i) => i % 2 === 0 || i === g.length - 1) : g;
+    for (let i = 0; i < top.length; i++) for (let j = i + 1; j < top.length; j++) for (let l = j + 1; l < top.length; l++) {
+      const A = cap(gridOf(top[i])), B = cap(gridOf(top[j])), D = cap(gridOf(top[l]));
+      A.forEach(a => B.forEach(b => D.forEach(d => {
+        const p = [{ food: top[i], k: a.k, label: a.label }, { food: top[j], k: b.k, label: b.label }, { food: top[l], k: d.k, label: d.label }], c = svCost(svSum(p), st, mode, 3, ncook(p));
+        if (c < best.c) best = { c, parts: p };
+      })));
+    }
+  }
+  return { best, singles };
+}
+function svPlan(id, title, parts, st, target, eaten) {
+  const add = svSum(parts), after = {}, diff = {};
+  ['kcal', ...SV.NAMES].forEach(n => { after[n] = eaten[n] + add[n]; });
+  diff.kcal = Math.round(add.kcal - st.room);
+  SV.NAMES.forEach(n => { diff[n] = Math.round((after[n] - target[n]) * 10) / 10; });
+  return { id, title, items: parts.map(x => ({ name: x.food.name, unit: x.food.unit, k: x.k, label: x.label, kcal: x.food.kcal * x.k, p: x.food.p * x.k, f: x.food.f * x.k, c: x.food.c * x.k })), add, after, diff, overKcal: Math.max(0, diff.kcal) };
+}
+const svKey = pl => pl.items.map(i => i.name + '@' + i.k).sort().join('|');
+/* 本体。target/eaten は {kcal,p,f,c}、room は残りkcal、foods は候補（除外済み） */
+function solvePFC({ target, eaten, room, foods }) {
+  const st = svStatus(target, eaten, room), res = { status: st, plans: [], messages: [] };
+  const L = SV.LABEL, g = n => Math.abs(Math.round(st.rem[n]));
+  if (st.over.length) res.messages.push(`${st.over.map(n => `${L[n]}は目標より${g(n)}g多い`).join('、')}ので、これ以上増やさない食品だけを選びます${st.over.includes('p') ? '（たんぱく質の少しの増加は許容）' : ''}。`);
+  if (st.done) { res.messages.push('PFCはほぼ目標どおりです。今日はこれ以上食べなくてOKです。'); return res; }
+  if (!st.feasible) {
+    res.messages.push(`${st.def.map(n => `${L[n]}があと${g(n)}g`).join('、')}（約${st.defKcal}kcal）足りませんが、残りは${Math.max(0, st.room)}kcalしかありません。`
+      + `カロリーを守ると${st.def.map(n => L[n]).join('・')}は目標まで届かず、全部を埋めると約${st.defKcal - Math.max(0, st.room)}kcalオーバーします。下の2案から選んでください。`);
+  }
+  const cands = svCandidates(foods, st);
+  if (!cands.length) { res.messages.push('条件に合う食品が候補の中にありません。食品の出どころを「全食品」に切り替えてください。'); return res; }
+  const A = st.room > 0 ? svSearch(cands, st, 'strict') : { best: null, singles: [] };
+  const B = svSearch(cands, st, 'prio');
+  if (A.best) res.plans.push(svPlan('strict', 'カロリー厳守案', A.best.parts, st, target, eaten));
+  else res.messages.push('残りカロリーがないため、カロリーを守るなら今日はこれ以上食べない、が正解です。');
+  if (B.best) {
+    const pb = svPlan('prio', `${st.def.map(n => L[n]).join('・')}優先案`, B.best.parts, st, target, eaten);
+    if (!res.plans.length || svKey(pb) !== svKey(res.plans[0])) {
+      const base = res.plans[0];
+      pb.trade = { kcal: Math.round(pb.add.kcal - (base ? base.add.kcal : 0)), gain: st.def.map(n => ({ n, g: Math.round((pb.add[n] - (base ? base.add[n] : 0)) * 10) / 10 })) };
+      res.plans.push(pb);
+    }
+  }
+  const pool = (A.singles.length ? A.singles : []).filter(s => !res.plans.some(p => p.items.length === 1 && p.items[0].name === s.parts[0].food.name));
+  if (pool[0]) res.plans.push(svPlan('easy', '一番手軽な案', pool[0].parts, st, target, eaten));
+  return res;
+}
+/* SOLVER-END */
+
 /* ================= State ================= */
 const SLOTS = [['b', '朝食'], ['l', '昼食'], ['d', '夕食'], ['s', '間食']];
 const SLOTN = Object.fromEntries(SLOTS);
@@ -894,6 +1044,7 @@ function refCards(b, sel) {
 
 let S = load();
 S.timer = { sec: 90, auto: true, ...(S.timer || {}) };
+S.solver = { src: 'all', ex: [], ...(S.solver || {}) };
 if ((S.v || 0) < 9) {   // v9：運動の消費を安静時を除いた値に計算し直す
   S.cardio.forEach(c => { const i = CARDIO.findIndex(x => x[0] === c.name); if (i >= 0) c.kcal = metKcal(CARDIO[i][1][c.lvl], c.min); });
   S.v = 9; save();
@@ -969,7 +1120,7 @@ function renderHome() {
       <button class="row" data-act="food" data-slot="${k}"><span class="plus sm">${I.plus}</span><span class="grow accent" style="font-size:17px">追加</span></button></div>`;
   }).join('');
   const since = sinceLastMeal();
-  $('#tab-home').innerHTML = header('今日') + balanceHero(sum, pfc) + weightCard() + `
+  $('#tab-home').innerHTML = header('今日') + balanceHero(sum, pfc) + solverBtn() + weightCard() + `
     <div class="sec"><b>トレーニング</b><button class="share-btn" data-act="share" data-v="train">${I.share}シェア</button></div>
     ${trainCards()}
     ${exerciseGroup()}
@@ -2214,6 +2365,89 @@ function scenePR(x, W, H, pr) {
   label(x, pr.goal ? `GOAL ACHIEVED · ${fmtN(pr.goal)}KG` : 'NEW PERSONAL RECORD', top - 112); return top - 144;
 }
 
+/* ================= あと何食べる？（ソルバーの画面側） ================= */
+/* 候補にしない：単体で食べない調味料・油、サプリ、お酒 */
+const SV_NG = /(オイル|マヨネーズ|ドレッシング|バター|はちみつ|きな粉|EAA|クレアチン|ビール|ハイボール|日本酒|ワイン)/;
+/* 調理が必要な食材（少しだけ選ばれにくくする） */
+const SV_COOK = /^(鶏むね肉|鶏もも肉|ささみ|鶏ひき肉|豚(?!汁|骨)|牛(?!丼|乳)|合いびき肉|ステーキ|ベーコン|ウインナー|卵$|卵白|えび$|いか$|パスタ（乾麺）|そうめん（乾麺）|オートミール|じゃがいも)/;
+/* コンビニで買えるもの */
+const SV_CB = /(サラダチキン|ゆで卵|おにぎり|むすび|天むす|サンドイッチ|ヨーグルト|プロセスチーズ|スライスチーズ|プロテインバー|ミックスナッツ|アーモンド|納豆|絹豆腐|牛乳|低脂肪乳|豆乳|バナナ|サラダ（生野菜）|唐揚げ|焼き鳥|つくね|鶏皮|カップ麺|味噌汁|さば缶|ツナ缶|かにかま|ちくわ|チョコレート|ポテトチップス|アイスクリーム|プリン|シュークリーム|エクレア|ロールケーキ|どら焼き|大福|ドーナツ|枝豆|カフェラテ|缶コーヒー|オレンジジュース|スポーツドリンク|コーラ|フライドポテト)/;
+const SV_SRC = [['home', '自宅にあるもの'], ['cb', 'コンビニ'], ['all', '全食品']];
+let svRes = null;
+function svPool(src) {
+  const ex = (S.solver.ex || []).map(norm).filter(Boolean);
+  const ok = f => !SV_NG.test(f.name) && !ex.some(e => norm(f.name).includes(e) || (f.key || '').includes(e));
+  const mk = f => ({ name: f.name, unit: f.unit, kcal: f.kcal, p: f.p, f: f.f, c: f.c, cook: SV_COOK.test(f.name) });
+  if (src === 'cb') return FOOD.filter(f => SV_CB.test(f.name) && ok(f)).map(mk);
+  if (src === 'home') {                        // マイメニュー＋30日以内に食べたもの
+    const from = addDays(today(), -30), seen = new Set(), out = [];
+    const push = f => { if (!seen.has(f.name) && ok(f)) { seen.add(f.name); out.push(f); } };
+    S.presets.forEach(p => push({ name: p.name, unit: '1食', kcal: +p.kcal, p: +p.p, f: +p.f, c: +p.c }));
+    Object.keys(S.meals).filter(d => d >= from).sort().reverse().forEach(d => S.meals[d].forEach(m => {
+      const db = FOOD.find(f => m.name === f.name || m.name.startsWith(f.name + ' '));
+      push(db ? mk(db) : { name: m.name, unit: '1食', kcal: +m.kcal, p: +m.p, f: +m.f, c: +m.c });
+    }));
+    return out;
+  }
+  return FOOD.filter(ok).map(mk);
+}
+function svInput() {
+  const eaten = sumOf(mealsToday()), b = burnOf(today()), ex = b.strength + b.cardio;
+  const room = Math.round(S.targets.kcal) + Math.round(ex * EB()) - Math.round(eaten.kcal);   // ホームの「あと◯kcal」と同じ
+  return { target: { kcal: S.targets.kcal, p: S.targets.p, f: S.targets.f, c: S.targets.c }, eaten, room };
+}
+function solverBtn() {
+  const inp = svInput(), st = svStatus(inp.target, inp.eaten, inp.room), L = SV.LABEL;
+  const sub = st.done ? 'PFCはほぼ目標どおり' : `残り${Math.max(0, st.room).toLocaleString()}kcal · ${st.def.map(n => `${L[n]}あと${Math.round(st.rem[n])}g`).join(' · ')}`;
+  return `<button class="card svbtn" data-act="solver"><span class="svic">${I.search}</span><div class="grow"><div class="t">あと何食べる？</div><div class="s num">${sub}</div></div>${I.chev}</button>`;
+}
+const pm = v => (v > 0 ? '+' : v < 0 ? '−' : '±') + fmtN(Math.abs(Math.round(v * 10) / 10));
+function solverSheet() {
+  const inp = svInput(), src = S.solver.src;
+  svRes = solvePFC({ ...inp, foods: svPool(src) });
+  const st = svRes.status, L = SV.LABEL;
+  const cell = n => { const r = st.rem[n]; return `<div><div class="lbl">${L[n]}</div><div class="v num ${r > SV.TOL ? 'accent' : r < -SV.TOL ? 'warn' : ''}">${r > SV.TOL ? `あと${Math.round(r)}` : r < -SV.TOL ? `+${Math.round(-r)}` : '±0'}<small>g</small></div><div class="u">${r > SV.TOL ? '不足' : r < -SV.TOL ? '超過' : 'ほぼ目標'}</div></div>`; };
+  const trade = !st.feasible && svRes.plans.length >= 2;
+  const card = (pl, i) => {
+    const ok = pl.overKcal <= 0;
+    return `${trade && i === 0 ? '<div class="slbl">全部は満たせません。どちらかを選んでください</div><div class="svtrade">' : ''}
+    <button class="card svplan" data-act="svAdd" data-i="${i}">
+      <div class="card-top"><span class="t">${trade && i < 2 ? (i ? 'B ' : 'A ') : ''}${esc(pl.title)}</span><span class="pill ${ok ? 'a' : 'w'}">${ok ? 'カロリー内' : `${pl.overKcal}kcal超過`}</span></div>
+      ${pl.items.map(it => `<div class="svit"><div class="grow"><div class="n">${esc(it.name)}</div><div class="s num">${esc(it.label)} · P ${fmtN(r1(it.p))} F ${fmtN(r1(it.f))} C ${fmtN(r1(it.c))}</div></div><span class="kc num">${Math.round(it.kcal)} kcal</span></div>`).join('')}
+      <div class="svsum num"><span>合計</span><b>${Math.round(pl.add.kcal)} kcal</b><span>P ${fmtN(r1(pl.add.p))} · F ${fmtN(r1(pl.add.f))} · C ${fmtN(r1(pl.add.c))}</span></div>
+      <div class="svdiff num"><div><span>kcal</span><b class="${pl.diff.kcal > 0 ? 'warn' : ''}">${pm(pl.diff.kcal)}</b></div>${SV.NAMES.map(n => `<div><span>${n.toUpperCase()}</span><b class="${Math.abs(pl.diff[n]) <= SV.TOL ? 'accent' : ''}">${pm(pl.diff[n])}</b></div>`).join('')}</div>
+      <div class="sub" style="margin:4px 0 0">食べたあとの目標との差（kcalは残り枠との差）</div>
+      ${pl.trade ? `<div class="svtr num">${svRes.plans[0].id === 'strict' ? '厳守案より' : ''} ${pl.trade.kcal >= 0 ? '+' : '−'}${Math.abs(pl.trade.kcal)}kcal と引き換えに ${pl.trade.gain.map(g => `${L[g.n]} ${pm(g.g)}g`).join('・')}（${SV.NAMES.filter(n => st.def.includes(n)).map(n => `${L[n]} ${fmtN(r1(pl.after[n]))}/${S.targets[n]}g`).join('・')}）</div>` : ''}
+      <div class="svgo accent">タップで今日の記録に追加</div>
+    </button>${trade && i === 1 ? '</div>' : ''}`;
+  };
+  openSheet(`<div class="sh-h"><button data-act="close">閉じる</button><h3>あと何食べる？</h3><span style="min-width:64px"></span></div>
+    <div class="card"><div class="lbl">残りのカロリー</div><div class="hero m num">${st.room.toLocaleString()}<small>kcal</small></div>
+      <div class="bal3">${SV.NAMES.map(cell).join('')}</div></div>
+    ${svRes.messages.map((m, i) => `<div class="svmsg ${!st.feasible && /足りません/.test(m) ? 'warnbox' : ''}">${esc(m)}</div>`).join('')}
+    <div class="slbl">食品の出どころ</div>${seg('svsrc', SV_SRC, src)}
+    ${src === 'home' && !svPool('home').length ? '<div class="svmsg">まだ食事の記録やマイメニューがありません。記録がたまると「自宅にあるもの」から提案できます。</div>' : ''}
+    <div style="margin-top:12px">${svRes.plans.map(card).join('')}</div>
+    <div class="group" style="margin-top:12px"><button class="row" data-act="svEx"><span class="grow">除外する食品</span><span class="val">${(S.solver.ex || []).length ? esc(S.solver.ex.join('、')) : 'なし'}</span>${I.chev}</button></div>
+    <div class="sub" style="margin:8px 4px 0">量は10g・0.5個単位。カロリー厳守案と手軽な案は残りカロリーを超えません。目標を超えている脂質・炭水化物が主体の食品は選びません（たんぱく質は少し超えても許容）。値は推定です。</div>`);
+}
+function svAddPlan(i) {
+  const pl = svRes && svRes.plans[i]; if (!pl) return;
+  const t = nowHM(), slot = autoSlot(t), ids = pl.items.map(it => addMeal({ name: `${it.name} ${it.label}`, kcal: it.kcal, p: it.p, f: it.f, c: it.c }, slot, t, true).id);
+  closeSheet(); render();
+  toast(`${SLOTN[slot]}に${ids.length}品 +${Math.round(pl.add.kcal)} kcal`, () => { S.meals[today()] = mealsToday().filter(m => !ids.includes(m.id)); save(); render(); });
+}
+function svExSheet() {
+  const ex = S.solver.ex || [], sug = ['えび', 'かに', '卵', '乳', '小麦', 'そば', 'ナッツ', 'ピーナッツ', 'いか', 'さば'];
+  openSheet(`<div class="sh-h"><button data-act="solver">戻る</button><h3>除外する食品</h3><span style="min-width:64px"></span></div>
+    <div class="sub" style="margin:0 4px 12px">ここに入れた言葉を名前に含む食品は提案しません（例：「えび」→ えび・にぎり えび・天むす など）。食品DBに原材料の情報はないので、加工品に含まれるアレルゲンまでは判定できません。</div>
+    <div class="search">${I.search}<input class="in" id="svexq" placeholder="例：えび、卵、ナッツ" autocomplete="off"></div>
+    <button class="btn" data-act="svExAdd" style="margin-top:8px">追加</button>
+    ${ex.length ? `<div class="slbl">除外中</div><div class="group">${ex.map((w, i) => `<div class="row"><span class="grow t">${esc(w)}</span><span class="kc">${FOOD.filter(f => norm(f.name).includes(norm(w)) || f.key.includes(norm(w))).length}品</span><button class="x" data-act="svExDel" data-i="${i}" aria-label="削除">${I.x}</button></div>`).join('')}</div>` : ''}
+    <div class="slbl">よく使う</div><div class="chips wrap">${sug.filter(w => !ex.includes(w)).map(w => `<button data-act="svExQuick" data-v="${w}">${w}</button>`).join('')}</div>`);
+}
+function svExAdd(w) { w = String(w || '').trim(); if (!w) return; if (!S.solver.ex.includes(w)) S.solver.ex.push(w); save(); svExSheet(); }
+
 /* ================= 総重量（ボリューム） ================= */
 /* 総重量 ＝ 重量 × 回数 × セット数 の合計。自重種目（0kg）は含まれない */
 let volUnit = 'month', volOff = 0;
@@ -2421,6 +2655,7 @@ document.addEventListener('click', e => {
     if (name === 'vunit') { volUnit = v; volOff = 0; renderLog(); }
     if (name === 'shvu') { sh.vunit = v === 'lastm' ? 'month' : v; sh.voff = v === 'lastm' ? -1 : 0; renderShot(); }
     if (name === 'shwr') { sh.wrange = v; renderShot(); }
+    if (name === 'svsrc') { S.solver.src = v; save(); solverSheet(); }
     if (name === 'rkind') { recKind = v; renderLog(); }
     if (name === 'shstyle') { sh.style = v; sh.touched = true; if (v === 'photo' && !sh.photo) $('#photoIn').click(); renderShot(); }
     if (name === 'shratio') { sh.ratio = v; renderShot(); }
@@ -2579,6 +2814,12 @@ document.addEventListener('click', e => {
     case 'weighEdit': weighSheet(d.v); break;
     case 'saveWeight': saveWeight(); break;
     case 'goWeight': recKind = 'weight'; go('log'); break;
+    case 'solver': solverSheet(); break;
+    case 'svAdd': svAddPlan(+d.i); break;
+    case 'svEx': svExSheet(); break;
+    case 'svExAdd': svExAdd($('#svexq').value); break;
+    case 'svExQuick': svExAdd(d.v); break;
+    case 'svExDel': S.solver.ex.splice(+d.i, 1); save(); svExSheet(); break;
     case 'volNav': volOff = Math.min(0, volOff + +d.v); renderLog(); break;
     case 'shPR': { const r = trainRows(sh.date).rows.filter(r => r.pr).sort((a, b) => (b.e1 - b.prevE1) - (a.e1 - a.prevE1))[0]; if (!r) break;
       const l = S.logs.filter(l => l.ex === r.n && l.date === sh.date).sort((a, b) => (b.e1 || e1rm(b.w, b.r)) - (a.e1 || e1rm(a.w, a.r)))[0];
